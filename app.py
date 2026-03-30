@@ -63,3 +63,42 @@ def dashboard():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+
+
+
+# --- إضافة الحقول الجديدة لجدول الموردين ---
+class Vendor(db.Model):
+    __tablename__ = 'vendors'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    owner_name = db.Column(db.String(100), nullable=False)
+    brand_name = db.Column(db.String(100), nullable=False)
+    phone_number = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    # --- حقول الهوية واللامركزية الجديدة ---
+    wallet_address = db.Column(db.String(100), unique=True) # المحفظة الرقمية التلقائية
+    brand_color = db.Column(db.String(10), default='#6A0DAD') # اللون الملكي افتراضياً
+    is_verified = db.Column(db.Boolean, default=True)
+
+# --- دالة تفعيل الحساب مع المحفظة التلقائية ---
+def activate_vendor_identity():
+    with app.app_context():
+        try:
+            db.create_all()
+            if not Vendor.query.filter_by(username='ali').first():
+                # توليد محفظة تجريبية مرتبطة بالهوية
+                new_wallet = "MQ-" + os.urandom(8).hex().upper() 
+                admin = Vendor(
+                    username='ali',
+                    password='123',
+                    owner_name='علي محجوب',
+                    brand_name='محجوب ستور',
+                    phone_number='777777777',
+                    email='admin@mahjoub.online',
+                    wallet_address=new_wallet # تفعيل المحفظة فوراً
+                )
+                db.session.add(admin)
+                db.session.commit()
+        except Exception as e:
+            print(f"Error: {e}")
