@@ -1,4 +1,5 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 
 def home(request):
-    return HttpResponse("<h1>[ Mahjoub Online ] Smart Market</h1><p>المنصة اللامركزية الأولى لحوكمة سلاسل التوريد الرقمية تعمل بنجاح!</p>")
+    # هنا يتم استدعاء بيانات سلاسل التوريد مستقبلاً
+    return render(request, 'home.html')
