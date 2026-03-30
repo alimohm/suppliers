@@ -5,12 +5,11 @@ from django.dispatch import receiver
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="المورد")
-    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="الرصيد (YER)")
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="الرصيد اللامركزي (YER)")
 
     def __str__(self):
         return f"محفظة {self.user.username}"
 
-# إشارة (Signal) لإنشاء المحفظة تلقائياً
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, created, **kwargs):
     if created:
