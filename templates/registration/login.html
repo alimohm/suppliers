@@ -4,24 +4,23 @@
     <meta charset="UTF-8">
     <title>دخول الموردين | محجوب أونلاين</title>
     <style>
-        body { background: radial-gradient(circle, #240046 0%, #000000 100%); height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; font-family: sans-serif; }
-        .login-card { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; border: 1px solid #7b2cbf; width: 350px; text-align: center; backdrop-filter: blur(10px); }
-        h2 { color: #9d4edd; margin-bottom: 5px; }
-        .input-group { text-align: right; margin-bottom: 15px; }
-        label { color: #fff; display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: rgba(0,0,0,0.5); color: #fff; box-sizing: border-box; }
-        .btn { background: #7b2cbf; color: #fff; border: none; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        body { font-family: sans-serif; background: #0a0a0a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: #151515; padding: 40px; border-radius: 15px; border: 1px solid #7b2cbf; width: 320px; text-align: center; }
+        h2 { color: #9d4edd; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #333; background: #000; color: white; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background: #7b2cbf; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn:hover { background: #9d4edd; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h2>محجوب أونلاين</h2>
-        <p style="color: #888;">سوقك الذكي - المنصة اللامركزية</p>
+    <div class="login-box">
+        <h2>[ Mahjoub Online ]</h2>
+        <p style="font-size: 13px; color: #888;">المنصة اللامركزية - دخول الموردين</p>
         <form method="post">
             {% csrf_token %}
-            <div class="input-group"><label>اسم المستخدم</label><input type="text" name="username"></div>
-            <div class="input-group"><label>كلمة المرور</label><input type="password" name="password"></div>
-            <button type="submit" class="btn">دخول المنصة</button>
+            <input type="text" name="username" placeholder="اسم المستخدم" required>
+            <input type="password" name="password" placeholder="كلمة المرور" required>
+            <button type="submit" class="btn">دخول</button>
         </form>
     </div>
 </body>
