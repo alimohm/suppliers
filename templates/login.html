@@ -3,25 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دخول الموردين | محجوب أونلاين</title>
+    <title>تسجيل الدخول | محجوب أونلاين</title>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
     <style>
-        body { background: #0a0a0c; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #141417; padding: 40px; border-radius: 25px; border: 1px solid #8a2be2; width: 320px; text-align: center; box-shadow: 0 0 20px rgba(138, 43, 226, 0.2); }
-        .logo { font-size: 22px; font-weight: bold; color: #bc13fe; margin-bottom: 25px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 14px; background: #8a2be2; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .btn:hover { background: #bc13fe; }
+        :root {
+            --royal-purple: #7b2cbf; /* البنفسجي الملكي */
+            --beige-soft: #f9f7f2; /* بيج ملكي مريح جداً للعين */
+            --white-pure: #ffffff;
+            --text-main: #2d3436;
+        }
+
+        body {
+            background-color: var(--beige-soft);
+            background-image: radial-gradient(circle at 2px 2px, rgba(123, 44, 191, 0.05) 1px, transparent 0);
+            background-size: 40px 40px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .login-container {
+            background: var(--white-pure);
+            padding: 50px 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            border: 1px solid rgba(123, 44, 191, 0.1);
+            position: relative;
+        }
+
+        /* لمسة التاج البنفسجي في الأعلى */
+        .login-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--royal-purple);
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .brand-logo h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--royal-purple);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .brand-description {
+            font-size: 14px;
+            color: #777;
+            margin-top: 10px;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--royal-purple);
+            padding-right: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 15px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--royal-purple);
+            outline: none;
+            box-shadow: 0 0 10px rgba(123, 44, 191, 0.1);
+            background: #fff;
+        }
+
+        .btn-royal {
+            width: 100%;
+            padding: 16px;
+            background: var(--royal-purple);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-royal:hover {
+            background: #5a189a;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(123, 44, 191, 0.2);
+        }
+
+        .footer-text {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .highlight {
+            color: var(--royal-purple);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="logo">MAHJOUB ONLINE</div>
-        <form method="POST">
-            <input type="text" name="username" placeholder="معرف المورد" required>
-            <input type="password" name="password" placeholder="كلمة المرور" required>
-            <button type="submit" class="btn">دخول المنصة</button>
+
+    <div class="login-container">
+        <div class="brand-logo">
+            <h1>محجوب أونلاين | سوقك الذكي</h1>
+        </div>
+        
+        <div class="brand-description">
+            المنصة الأولى لحوكمة <span class="highlight">سلاسل التوريد الرقمية</span> بنظام <span class="highlight">اللامركزية</span> الذكي والآمن.
+        </div>
+
+        <form method="POST" action="/login">
+            <div class="input-group">
+                <label>اسم المستخدم (المورد)</label>
+                <input type="text" name="username" placeholder="أدخل معرفك الرقمي" required>
+            </div>
+
+            <div class="input-group">
+                <label>كلمة المرور</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-royal">دخول المنصة الملكية</button>
         </form>
+
+        <div class="footer-text">
+            © 2026 [ Mahjoub Online ] - التقنية في خدمة التجارة
+        </div>
     </div>
+
 </body>
 </html>
