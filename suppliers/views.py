@@ -1,10 +1,9 @@
 import requests
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
-# بيانات الربط من واجهة GraphQL الخاصة بك
 URL = "https://mahjoub.online/admin/graphql"
-# انسخ الكود من زر "إنشاء مفتاح ربط" وضعه هنا
+# ضع الـ Token الذي ستنشئه من قمرة هنا
 HEADERS = {"Authorization": "Bearer YOUR_ACCESS_TOKEN"}
 
 @login_required
@@ -13,7 +12,7 @@ def dashboard(request):
         p_name = request.POST.get('product_name')
         p_price = float(request.POST.get('price'))
         
-        # إضافة نسبة الـ 40% تلقائياً
+        # إضافة 40% آلياً
         final_price = p_price * 1.40 
         
         mutation = """
