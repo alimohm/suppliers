@@ -1,3 +1,4 @@
+app = Flask(__name__) # بدون إضافة مسارات ثابتة يدوية، فلاسك سيتعرف على مجلد static تلقائياً
 from flask import Flask, render_template, request, redirect, url_for, session
 import os
 
