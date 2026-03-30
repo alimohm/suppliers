@@ -1,1 +1,37 @@
+:root {
+    --primary: #8a2be2;
+    --bg: #050505;
+}
 
+body {
+    background: radial-gradient(circle at center, #1a0b2e 0%, var(--bg) 100%);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh; margin: 0;
+    animation: pulse 10s infinite alternate;
+}
+
+@keyframes pulse {
+    0% { background-color: #050505; }
+    100% { background-color: #0d0216; }
+}
+
+.ai-card {
+    background: rgba(20, 20, 20, 0.9);
+    padding: 40px; border-radius: 25px;
+    border: 1px solid var(--primary);
+    width: 350px; text-align: center;
+    box-shadow: 0 0 30px rgba(138, 43, 226, 0.2);
+}
+
+.login-btn {
+    width: 100%; padding: 15px; background: var(--primary);
+    color: white; border: none; border-radius: 12px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
+}
+
+.login-btn:hover {
+    box-shadow: 0 0 20px var(--primary);
+    transform: translateY(-2px);
+}
