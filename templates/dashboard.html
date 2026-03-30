@@ -1,13 +1,32 @@
-<div style="display: flex; height: 100vh; background: #0f0f0f; color: white;">
-    <div style="width: 250px; background: #151515; border-left: 2px solid #7b2cbf; padding: 20px;">
-        <h3 style="color: #9d4edd;">لوحة التحكم</h3>
-        <p>📦 إدارة المنتجات</p>
-        <p>💰 المحفظة الرقمية</p>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم | رفع المنتجات</title>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: sans-serif; padding: 30px; }
+        .container { max-width: 600px; margin: auto; background: #151515; padding: 30px; border-radius: 20px; border: 1px solid #7b2cbf; }
+        .header { color: #9d4edd; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
+        label { display: block; margin: 15px 0 5px; color: #aaa; }
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; }
+        .note { font-size: 12px; color: #7b2cbf; margin-top: 10px; }
+        .btn-send { background: #7b2cbf; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">اهلا بك في بوابة التوريد الذكية</div>
+        <form method="post">
+            {% csrf_token %}
+            <label>اسم المنتج (مثل: معوز صبري درجة أولى)</label>
+            <input type="text" name="product_name" required>
+            
+            <label>سعر التوريد الخاص بك (بالعملة المحلية)</label>
+            <input type="number" name="price" required>
+            <div class="note">سيتم إضافة 40% عمولة المنصة آلياً قبل النشر.</div>
+            
+            <button type="submit" class="btn-send">إرسال المنتج للمراجعة</button>
+        </form>
     </div>
-    <div style="flex: 1; padding: 40px;">
-        <h1>مرحباً بك في جسر الإدارة</h1>
-        <div style="background: #1a1a1a; padding: 20px; border-radius: 10px;">
-            <p>حالة الربط مع قمرة: <span style="color: #4caf50;">متصل ●</span></p>
-        </div>
-    </div>
-</div>
+</body>
+</html>
