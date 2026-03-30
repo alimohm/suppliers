@@ -1,7 +1,4 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.http import HttpResponse
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('suppliers.urls')), # توجيه الصفحة الرئيسية لتطبيق الموردين
-]
+def home(request):
+    return HttpResponse("<h1>[ Mahjoub Online ] Smart Market</h1><p>المنصة اللامركزية الأولى لحوكمة سلاسل التوريد الرقمية تعمل بنجاح!</p>")
