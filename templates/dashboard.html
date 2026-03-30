@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم | سوقك الذكي</title>
+    <style>
+        body { margin: 0; background: #0f0f0f; color: white; font-family: sans-serif; display: flex; }
+        .sidebar {
+            width: 260px; background: #1a1a1a; height: 100vh; padding: 25px;
+            border-left: 2px solid #7b2cbf; box-sizing: border-box;
+        }
+        .main { flex-grow: 1; padding: 40px; }
+        .nav-item {
+            padding: 15px; margin-bottom: 10px; border-radius: 12px;
+            cursor: pointer; transition: 0.3s; background: rgba(123, 44, 191, 0.05);
+        }
+        .nav-item:hover { background: #7b2cbf; }
+        .card-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .card {
+            background: #1e1e1e; padding: 25px; border-radius: 20px;
+            border-bottom: 5px solid #7b2cbf; text-align: center;
+        }
+        .card h3 { color: #888; font-size: 15px; }
+        .card .amount { font-size: 28px; font-weight: bold; color: #9d4edd; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2 style="color: #9d4edd;">Mahjoub Online</h2>
+        <p style="font-size: 12px; color: #666;">حوكمة سلاسل التوريد الرقمية</p>
+        <div style="margin-top: 40px;">
+            <div class="nav-item">🏠 الرئيسية</div>
+            <div class="nav-item">💰 المحفظة اللامركزية</div>
+            <div class="nav-item">📦 إدارة المعاوز</div>
+            <div class="nav-item">🚪 تسجيل الخروج</div>
+        </div>
+    </div>
+    <div class="main">
+        <h1>مرحباً بك في سوقك الذكي</h1>
+        <div class="card-container">
+            <div class="card">
+                <h3>رصيد المحفظة الرقمية</h3>
+                <div class="amount">0.00 YER</div>
+                <span style="color: #4caf50;">● متصل (لامركزي)</span>
+            </div>
+            <div class="card">
+                <h3>إجمالي المبيعات</h3>
+                <div class="amount">0</div>
+                <span>قطعة</span>
+            </div>
+            <div class="card">
+                <h3>حالة النظام</h3>
+                <div class="amount" style="color: #4caf50;">مستقر</div>
+                <span>Blockchain Active</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
