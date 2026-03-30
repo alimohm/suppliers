@@ -2,41 +2,17 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دخول الموردين | محجوب أونلاين</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4.0">
-    <style>
-        body {
-            background: #050505; color: white; font-family: sans-serif;
-            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
-            background-image: radial-gradient(circle at center, #1a0b2e 0%, #050505 100%);
-        }
-        .ai-card {
-            background: rgba(20, 20, 20, 0.95); padding: 40px; border-radius: 20px;
-            border: 1px solid #7b2cbf; width: 340px; text-align: center;
-            box-shadow: 0 0 30px rgba(123, 44, 191, 0.3);
-        }
-        .logo { font-size: 24px; font-weight: bold; color: #9d4edd; margin-bottom: 20px; }
-        input {
-            width: 100%; padding: 12px; margin: 10px 0; background: #000;
-            border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box;
-        }
-        .btn {
-            width: 100%; padding: 14px; background: #7b2cbf; border: none;
-            color: white; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;
-        }
-        .btn:hover { background: #9d4edd; box-shadow: 0 0 15px #9d4edd; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="ai-card">
         <div class="logo">MAHJOUB ONLINE</div>
+        <p>Smart Market - نظام الموردين</p>
         <form method="post">
-            {% csrf_token %}
             <input type="text" name="username" placeholder="معرف المورد" required>
-            <input type="password" name="password" placeholder="كلمة المرور" required>
-            <button type="submit" class="btn">دخول ذكي</button>
+            <input type="password" name="password" placeholder="••••••••" required>
+            <button type="submit" class="btn-glow">دخول النظام</button>
         </form>
     </div>
 </body>
