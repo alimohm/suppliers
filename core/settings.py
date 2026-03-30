@@ -2,11 +2,15 @@ import os
 from pathlib import Path
 import dj_database_url
 
+# المسار الأساسي للمشروع
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'django-insecure-mahjoub-ai-platform-2026'
-DEBUG = False
-ALLOWED_HOSTS = ['*']
 
+# إعدادات الأمان
+SECRET_KEY = 'django-insecure-mahjoub-smart-market-ai-2026'
+DEBUG = False # تعطيل وضع التصحيح للإنتاج
+ALLOWED_HOSTS = ['*'] # السماح لجميع النطاقات (Railway)
+
+# التطبيقات المثبتة
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -14,12 +18,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'suppliers',
+    'suppliers', # تطبيق الموردين الخاص بك
 ]
 
+# الميدل وير (الطبقات الوسيطة)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ضروري لظهور الألوان والتصميم
+    'whitenoise.middleware.WhiteNoiseMiddleware', # الحل السحري لظهور الألوان والتنسيقات
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -28,24 +33,28 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# الربط بقاعدة البيانات (الرابط الذي استخرجناه)
+ROOT_URLCONF = 'core.urls'
+
+# إعدادات القوالب (Templates)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], # مسار مجلد الواجهات
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'core.wsgi.application'
+
+# قاعدة البيانات (الرابط الذي أرسلته من Railway)
 DATABASES = {
-    'default': dj_database_url.config(default='postgresql://postgres:aNAkUjEswZOHdTaWPQdjUlmPCwIaKtWG@hopper.proxy.rlwy.net:26413/railway')
-}
-
-TEMPLATES = [{
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [os.path.join(BASE_DIR, 'templates')],
-    'APP_DIRS': True,
-    'OPTIONS': {'context_processors': [
-        'django.template.context_processors.request',
-        'django.contrib.auth.context_processors.auth',
-        'django.contrib.messages.context_processors.messages',
-    ]},
-}]
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# التوجيه الذكي: إذا لم يسجل الدخول يذهب لصفحة الدخول فوراً
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
+    'default': dj_database_url.config(
+        default='postgresql://postgres:aNAkUjEswZOHdTaWPQdjUlmPCwIaKtWG@hopper.proxy.rlwy.net:26
