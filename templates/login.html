@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل الدخول | محجوب أونلاين</title>
     <style>
-        /* إعدادات الألوان المستوحاة من التصميم الجديد */
+        /* إعدادات الألوان الملكية المحدثة */
         :root {
-            --primary-purple: #7b2cbf;
+            --primary-purple: #6A0DAD; /* الأرجواني الملكي */
+            --royal-gold: #D4AF37;    /* الذهبي الملكي */
             --bg-white: #ffffff;
             --soft-gray: #f8f9fa;
-            --text-dark: #333333;
+            --text-dark: #1a1a1a;
             --error-red: #e74c3c;
         }
 
@@ -26,47 +27,46 @@
             box-sizing: border-box;
         }
 
-        /* حاوية البطاقة البيضاء النظيفة */
+        /* حاوية البطاقة مع لمسة ذهبية ناعمة */
         .login-card {
             background: var(--bg-white);
             padding: 45px 35px;
             border-radius: 35px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 15px 50px rgba(106, 13, 173, 0.05);
             width: 100%;
             max-width: 420px;
             text-align: center;
             border: 1px solid #f0f0f0;
             position: relative;
+            overflow: hidden;
         }
 
-        /* لمسة الخط العلوي البنفسجي */
+        /* الخط العلوي يجمع بين الأرجواني والذهبي */
         .login-card::before {
             content: "";
             position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 5px;
-            background: var(--primary-purple);
-            border-radius: 0 0 10px 10px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--royal-gold));
         }
 
         .brand-title {
             font-size: 26px;
             font-weight: 800;
             color: var(--primary-purple);
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
         }
 
         .brand-slogan {
             font-size: 14px;
-            color: #888;
+            color: #666;
             margin-bottom: 35px;
             line-height: 1.6;
         }
 
-        /* نظام التنبيهات المنقى */
+        /* تنبيهات الخطأ بتصميم متناسق */
         .alert {
             background: #fff5f5;
             color: var(--error-red);
@@ -80,13 +80,13 @@
 
         .input-group {
             text-align: right;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .input-group label {
             display: block;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary-purple);
             margin-bottom: 8px;
             padding-right: 5px;
@@ -101,15 +101,16 @@
             box-sizing: border-box;
             font-size: 15px;
             transition: 0.3s ease;
+            text-align: right;
         }
 
         input:focus {
-            border-color: var(--primary-purple);
+            border-color: var(--royal-gold);
             outline: none;
-            box-shadow: 0 0 10px rgba(123, 44, 191, 0.05);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.1);
         }
 
-        /* الزر البنفسجي الاحترافي */
+        /* زر الدخول الملكي */
         .btn-login {
             width: 100%;
             padding: 16px;
@@ -120,25 +121,28 @@
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.4s;
             margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
         }
 
         .btn-login:hover {
-            background: #5a189a;
+            background: var(--text-dark);
+            color: var(--royal-gold);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(123, 44, 191, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
         .footer-copyright {
             margin-top: 35px;
             font-size: 11px;
-            color: #bbb;
+            color: #aaa;
+            letter-spacing: 0.5px;
         }
 
         /* التوافق مع الجوال */
         @media (max-width: 480px) {
-            .login-card { padding: 35px 25px; }
+            .login-card { padding: 40px 25px; }
             .brand-title { font-size: 22px; }
         }
     </style>
@@ -146,14 +150,16 @@
 <body>
 
     <div class="login-card">
-        <div class="brand-title">محجوب أونلاين | سوقك الذكي</div>
+        <div class="brand-title">محجوب أونلاين</div>
+        <div style="color: var(--royal-gold); font-weight: bold; margin-bottom: 10px;">سوقك الذكي</div>
         <div class="brand-slogan">
-            المنصة الأولى لحوكمة سلاسل التوريد الرقمية <span style="color:var(--primary-purple)">بأسلوب ذكي</span> وآمن تماماً.
+            المنصة اللامركزية لحوكمة سلاسل التوريد الرقمية <br>
+            <span style="color:var(--primary-purple); font-weight: 600;">بأسلوب ذكي وآمن تماماً.</span>
         </div>
 
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            {% for message in messages %}
+            {% for category, message in messages %}
               <div class="alert">{{ message }}</div>
             {% endfor %}
           {% endif %}
@@ -162,19 +168,20 @@
         <form method="POST">
             <div class="input-group">
                 <label>اسم المستخدم (المورد)</label>
-                <input type="text" name="username" placeholder="أدخل معرفك الرقمي" required>
+                <input type="text" name="username" placeholder="أدخل معرفك الرقمي" required autocomplete="username">
             </div>
 
             <div class="input-group">
                 <label>كلمة المرور</label>
-                <input type="password" name="password" placeholder="••••••••" required>
+                <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
             </div>
 
-            <button type="submit" class="btn-login">دخول المنصة آمن</button>
+            <button type="submit" class="btn-login">دخول آمن للمنصة</button>
         </form>
 
         <div class="footer-copyright">
-            © 2026 [ Mahjoub Online ] - التقنية في خدمة التجارة
+            © 2026 <strong>MAHJOUB ONLINE</strong><br>
+            التقنية في خدمة التجارة اللامركزية
         </div>
     </div>
 
