@@ -2,71 +2,64 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة تحكم المورد | المنصة اللامركزية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم محجوب ستور - المنصة اللامركزية</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; border: 1px solid #D4AF37; padding: 20px; border-radius: 15px; background: #0a0a0a; }
-        h1, h2 { color: #D4AF37; text-align: center; }
-        .wallet-bar { background: #6A0DAD; color: #fff; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #D4AF37; }
+        :root { --royal-purple: #6A0DAD; --gold: #D4AF37; --deep-black: #0a0a0a; }
+        body { background-color: #000; color: #fff; font-family: 'Cairo', sans-serif; margin: 0; display: flex; }
         
-        /* نموذج الرفع */
-        .upload-section { border: 1px dashed #6A0DAD; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
-        input { width: 95%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #D4AF37; background: #1a1a1a; color: #fff; }
-        button { width: 100%; padding: 12px; background: #6A0DAD; color: gold; border: 1px solid #D4AF37; cursor: pointer; font-weight: bold; border-radius: 5px; }
-        button:hover { background: #8A2BE2; }
+        /* القائمة الجانبية (Sidebar) */
+        .sidebar { width: 250px; background: var(--deep-black); border-left: 2px solid var(--gold); height: 100vh; padding: 20px; }
+        .sidebar h2 { color: var(--gold); font-size: 1.2rem; border-bottom: 1px solid var(--royal-purple); padding-bottom: 10px; }
+        .nav-link { display: block; color: #ccc; padding: 12px; text-decoration: none; border-radius: 5px; margin: 5px 0; }
+        .nav-link:hover { background: var(--royal-purple); color: #fff; }
+        .active { background: var(--royal-purple); color: gold; font-weight: bold; }
 
-        /* جدول المنتجات */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #333; padding: 12px; text-align: center; }
-        th { background: #1a1a1a; color: #D4AF37; }
-        .status-draft { color: #FFA500; font-weight: bold; } /* مسودة بالبرتقالي */
-        .status-published { color: #00FF00; } /* منشور بالأخضر */
-        .status-hidden { color: #FF0000; } /* غير منشور بالأحمر */
+        /* المحتوى الرئيسي */
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .header-card { background: linear-gradient(135deg, #1a1a1a, #000); border: 1px solid var(--gold); padding: 20px; border-radius: 15px; margin-bottom: 30px; }
+        
+        /* نوافذ المنتجات */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .product-card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 10px; transition: 0.3s; }
+        .product-card:hover { border-color: var(--royal-purple); transform: translateY(-5px); }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; background: var(--gold); color: #000; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>سوقك الذكي - اللامركزي</h1>
-        <div class="wallet-bar">المحفظة الرقمية: {{ session['wallet'] }}</div>
-        
-        <h2>رفع منتج جديد</h2>
-        <div class="upload-section">
-            <form action="/upload_product" method="POST">
-                <input type="text" name="name" placeholder="اسم المنتج" required>
-                <input type="number" name="price" placeholder="السعر بالجملة" required>
-                <button type="submit">إرسال للمراجعة (حالة مسودة)</button>
-            </form>
+
+    <div class="sidebar">
+        <h2>سوقك الذكي</h2>
+        <a href="#" class="nav-link active">🏠 الرئيسية</a>
+        <a href="#" class="nav-link">📦 منتجاتي</a>
+        <a href="#" class="nav-link">💰 المحفظة الرقمية</a>
+        <a href="#" class="nav-link">⚙️ الإعدادات</a>
+        <hr style="border-color: #333;">
+        <a href="/logout" class="nav-link" style="color: #ff4444;">🚪 تسجيل الخروج</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header-card">
+            <h1 style="color: var(--gold); margin: 0;">مرحباً، {{ session['vendor_name'] }} 👋</h1>
+            <p>المحفظة: <span style="color: var(--royal-purple);">{{ session['wallet'] }}</span></p>
+            <p>الحالة اللامركزية: <span class="status-badge">عضو نشط</span></p>
         </div>
 
-        <h2>منتجاتك الحالية</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>المنتج</th>
-                    <th>السعر</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in products %}
-                <tr>
-                    <td>{{ p.name }}</td>
-                    <td>{{ p.price }}</td>
-                    <td>
-                        {% if p.status == 'draft' %}
-                            <span class="status-draft">مسودة (قيد المراجعة)</span>
-                        {% elif p.status == 'published' %}
-                            <span class="status-published">منشور</span>
-                        {% else %}
-                            <span class="status-hidden">غير منشور</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <br>
-        <a href="/logout" style="color: #6A0DAD; text-decoration: none;">تسجيل الخروج</a>
+        <h2>📦 حالة المنتجات المرفوعة</h2>
+        <div class="grid-container">
+            {% for p in products %}
+            <div class="product-card">
+                <h3>{{ p.name }}</h3>
+                <p>السعر: {{ p.price }} $</p>
+                <span class="status-badge" style="background: {% if p.status == 'draft' %}#555{% else %}var(--gold){% endif %};">
+                    {{ 'مسودة (قيد المراجعة)' if p.status == 'draft' else 'منشور' }}
+                </span>
+            </div>
+            {% else %}
+            <p style="color: #666;">لا توجد منتجات مرفوعة حالياً. ابدأ برفع أول منتج!</p>
+            {% endfor %}
+        </div>
     </div>
+
 </body>
 </html>
