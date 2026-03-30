@@ -1,6 +1,3 @@
-django
+flask
 gunicorn
-whitenoise
-dj-database-url
 requests
-psycopg2-binary
