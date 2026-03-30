@@ -2,36 +2,55 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم | سوقك الذكي</title>
+    <title>إدارة الموردين | محجوب أونلاين</title>
     <style>
-        body { margin: 0; background: #0f0f0f; color: white; font-family: sans-serif; display: flex; }
-        .sidebar { width: 260px; background: #1a1a1a; height: 100vh; padding: 25px; border-left: 2px solid #7b2cbf; box-sizing: border-box; }
-        .main { flex-grow: 1; padding: 40px; }
-        .nav-item { padding: 15px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; transition: 0.3s; background: rgba(123, 44, 191, 0.05); }
-        .nav-item:hover { background: #7b2cbf; }
-        .card-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .card { background: #1e1e1e; padding: 25px; border-radius: 20px; border-bottom: 5px solid #7b2cbf; text-align: center; }
-        .card h3 { color: #888; font-size: 15px; }
-        .card .amount { font-size: 28px; font-weight: bold; color: #9d4edd; margin: 15px 0; }
+        :root { --purple: #7b2cbf; --black: #0a0a0a; }
+        body { font-family: sans-serif; background: var(--black); color: white; margin: 0; }
+        .top-bar { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--purple); display: flex; justify-content: space-between; }
+        .container { padding: 20px; max-width: 1200px; margin: auto; }
+        .card { background: #151515; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
+        .btn { background: var(--purple); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #222; padding: 10px; text-align: right; }
+        td { padding: 10px; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2 style="color: #9d4edd;">Mahjoub Online</h2>
-        <div style="margin-top: 40px;">
-            <div class="nav-item">🏠 الرئيسية</div>
-            <div class="nav-item">💰 المحفظة اللامركزية</div>
-            <div class="nav-item">🚪 تسجيل الخروج</div>
-        </div>
+    <div class="top-bar">
+        <span>[ Mahjoub Online ] Smart Market</span>
+        <span>مرحباً، المورد رقم #1</span>
     </div>
-    <div class="main">
-        <h1>أهلاً بك في منصتك اللامركزية</h1>
-        <div class="card-container">
-            <div class="card">
-                <h3>رصيد المحفظة</h3>
-                <div class="amount">0.00 YER</div>
-                <span style="color: #4caf50;">● نشط الآن</span>
-            </div>
+
+    <div class="container">
+        <div class="card">
+            <h3>المحفظة اللامركزية</h3>
+            <h2 style="color: var(--purple);">0.00 YER</h2>
+            <p style="font-size: 12px; color: #888;">الرصيد مربوط تلقائياً بطلبات قُمرة</p>
+        </div>
+
+        <div class="card">
+            <h3>إضافة منتج جديد للمتجر</h3>
+            <button class="btn" onclick="alert('فتح نموذج الإضافة')">+ إضافة منتج جديد</button>
+        </div>
+
+        <div class="card">
+            <h3>حالة المنتجات على قُمرة</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>المنتج</th>
+                        <th>المخزون</th>
+                        <th>الحالة على المتجر</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>معوز بيضاني</td>
+                        <td>15</td>
+                        <td style="color: #4caf50;">منشور (Live)</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </body>
