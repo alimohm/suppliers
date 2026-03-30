@@ -2,10 +2,8 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = 'django-insecure-your-secret-key-here' # يفضل حمايته لاحقاً
-DEBUG = True # اجعلها False عند التأكد من عمل الموقع
-
+SECRET_KEY = 'django-insecure-key-for-mahjoub-online'
+DEBUG = True # غيرها لـ False بعد أن يعمل الموقع بنجاح
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -15,12 +13,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'suppliers', # تطبيق الموردين
+    'suppliers',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ضروري للنشر السحابي
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ضروري جداً هنا
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -30,23 +28,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'core.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
 WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
@@ -56,10 +37,9 @@ DATABASES = {
     }
 }
 
+# إعدادات الملفات الساكنة للنشر
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
