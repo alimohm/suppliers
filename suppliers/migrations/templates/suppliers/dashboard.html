@@ -1,1 +1,61 @@
 
+{% extends "base.html" %} {% block content %}
+<div class="min-h-screen bg-gray-50 pb-12">
+    <div class="bg-purple-900 pb-32 pt-10 px-6">
+        <header class="max-w-7xl mx-auto flex justify-between items-center text-white">
+            <h1 class="text-2xl font-bold">لوحة تحكم المورد</h1>
+            <div class="flex items-center gap-4">
+                <span>أهلاً، {{ request.user.supplier.store_name }}</span>
+                <a href="{% url 'logout' %}" class="bg-purple-700 px-4 py-2 rounded-lg text-sm hover:bg-purple-600">خروج</a>
+            </div>
+        </header>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">رصيد المحفظة المتاح</p>
+                        <p class="text-2xl font-bold text-gray-900">${{ request.user.supplier.digitalwallet.balance }}</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-wallet text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-yellow-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">منتجات قيد المراجعة (مسودة)</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ draft_count }}</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 font-medium">إجمالي المبيعات</p>
+                        <p class="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10 flex flex-wrap gap-4">
+            <a href="{% url 'suppliers:add_product' %}" class="bg-purple-800 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-purple-700 transition flex items-center gap-2">
+                <i class="fas fa-plus"></i> إضافة منتج جديد (مسودة)
+            </a>
+        </div>
+    </main>
+</div>
+{% endblock %}
