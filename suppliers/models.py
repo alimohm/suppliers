@@ -1,10 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-class SupplierWallet(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    store_name = models.CharField(max_length=100)
-    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    verified = models.BooleanField(default=False)
+# نموذج المحفظة الرقمية
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="المورد")
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="الرصيد")
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self): return self.store_name
+    def __str__(self):
+        return f"محفظة: {self.user.username}"
+
+# البرمجة التلقائية: إنشاء المحفظة فور إنشاء الحساب
+@receiver(post_save, sender=User)
+def create_supplier_wallet(sender, instance, created, **kwargs):
+    if created:
+        Wallet.objects.create(user=instance)
