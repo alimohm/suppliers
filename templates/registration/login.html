@@ -1,10 +1,26 @@
-<div style="background: #1a1a1a; padding: 40px; border-radius: 20px; border: 1px solid #7b2cbf; text-align: center;">
-    <h2 style="color: #9d4edd;">[ Mahjoub Online ]</h2>
-    <p style="color: #888;">دخول الموردين - المنصة اللامركزية</p>
-    <form method="post">
-        {% csrf_token %}
-        <input type="text" name="username" placeholder="اسم المورد" style="width: 100%; margin-bottom: 15px;">
-        <input type="password" name="password" placeholder="كلمة المرور" style="width: 100%;">
-        <button type="submit" style="background: #7b2cbf; color: white; width: 100%; padding: 10px; margin-top: 20px;">دخول</button>
-    </form>
-</div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دخول الموردين | محجوب أونلاين</title>
+    <style>
+        body { background: #050505; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: #111; padding: 45px; border-radius: 20px; border: 1px solid #7b2cbf; width: 340px; text-align: center; box-shadow: 0 0 25px rgba(123, 44, 191, 0.2); }
+        .logo { color: #9d4edd; font-size: 26px; font-weight: bold; margin-bottom: 30px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 14px; background: #7b2cbf; border: none; color: white; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .btn:hover { background: #9d4edd; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">[ Mahjoub Online ]</div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="اسم المستخدم" required>
+            <input type="password" name="password" placeholder="كلمة المرور" required>
+            <button type="submit" class="btn">دخول النظام</button>
+        </form>
+    </div>
+</body>
+</html>
