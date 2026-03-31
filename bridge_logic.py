@@ -3,52 +3,51 @@ import io
 import json
 from PIL import Image
 
-# الإعدادات المحدثة بناءً على اختبارات Apollo Sandbox الناجحة
-# تم استخدام الرابط المباشر لتجاوز مشاكل الـ Admin والـ Cookies
+# الإعدادات المحدثة بناءً على صور Sandbox وعنوان الـ API المباشر
 GRAPHQL_URL = "https://api.qumra.cloud/graphql"
 ACCESS_TOKEN = "qmr_6efc3577-9287-4588-8c87-667e449d5397"
 
 def calculate_final_price(original_price, currency):
-    """تحويل العملة وإضافة نسبة الربح 30% (نظام الحوكمة الرقمية)"""
+    """تحويل العملة وإضافة نسبة الربح 30% لتعزيز نمو منصة محجوب أونلاين"""
     try:
         price = float(original_price)
-        # التحويل من دولار إلى ريال سعودي بمعدل ثابت
+        # التحويل من دولار إلى ريال سعودي بمعدل ثابت (3.8)
         if str(currency).upper() == 'USD':
             price = price * 3.8
         
-        # إضافة هامش الربح (30%) والتقريب لخانتبن عشريتين
+        # إضافة هامش الربح 30% والتقريب
         final_price = price * 1.30
         return round(final_price, 2)
     except (ValueError, TypeError):
         return 0.0
 
 def process_product_image(uploaded_file):
-    """تحويل الصورة المرفوعة إلى تنسيق WebP لضمان سرعة التحميل و SEO المتجر"""
+    """تحويل ومعالجة الصور إلى WebP لرفع أداء المتجر وتحسين الـ SEO"""
     try:
         img = Image.open(uploaded_file)
-        # التأكد من توافق الألوان عند التحويل من PNG أو صيغ شفافة
+        # معالجة القنوات اللونية للصور الشفافة (PNG) لتجنب أخطاء التحويل
         if img.mode in ("RGBA", "P"):
             img = img.convert("RGB")
         
         buffer = io.BytesIO()
-        # حفظ الصورة بصيغة WebP المضغوطة
+        # حفظ الصورة بصيغة WebP بجودة 80 توازن بين الحجم والوضوح
         img.save(buffer, format="WebP", quality=80)
         buffer.seek(0)
         return buffer
     except Exception as e:
-        print(f"Error processing image: {e}")
+        print(f"Error processing image (Check if Pillow is installed): {e}")
         return None
 
 def push_to_qmr_store(name, description, final_price, image_buffer):
-    """إرسال بيانات المنتج كمسودة (Draft) إلى متجر قمرة عبر GraphQL"""
+    """إرسال المنتج كمسودة (Draft) عبر جسر GraphQL إلى متجر قمرة"""
     
-    # ترويسات المصادقة كما ظهرت في Apollo Sandbox
+    # ترويسات المصادقة (Authorization) كما تم تأكيدها في اختبار Apollo
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
         "Accept": "application/json",
     }
 
-    # استعلام الـ Mutation المتوافق مع بروتوكول Apollo لرفع الملفات
+    # الاستعلام (Mutation) المحدث والمطابق لـ Schema قمرة لرفع الملفات
     query = """
     mutation CreateProduct($input: ProductInput!, $image: Upload) {
       createProduct(input: $input, image: $image) {
@@ -59,45 +58,45 @@ def push_to_qmr_store(name, description, final_price, image_buffer):
     }
     """
     
-    # تجهيز كائن العمليات (Operations)
+    # تجهيز العمليات (Operations) - تأكدنا من إرسال السعر كـ Float
     operations = {
         'query': query,
         'variables': {
             'input': {
                 'name': name,
-                'description': description or "", # تجنب إرسال None في الوصف
+                'description': description if description else "منتج من منصة محجوب أونلاين",
                 'price': float(final_price),
                 'status': 'DRAFT',
                 'currency': 'SAR'
             },
-            'image': None  # سيتم استبداله عبر خريطة الملفات (Map)
+            'image': None  # يتم ربطه برمجياً عبر الـ Map
         }
     }
     
-    # خريطة الربط لإخبار خادم قمرة بربط الصورة بالمتغير البرمجي
+    # خريطة الربط (Mapping) لرفع الملف
     map_data = {'0': ['variables.image']}
     
     try:
-        # تشكيل طلب Multipart المخصص لرفع الصور في GraphQL
+        # بناء الطلب المتعدد (Multipart) لإرسال الصورة والبيانات معاً
         files = {
             'operations': (None, json.dumps(operations), 'application/json'),
             'map': (None, json.dumps(map_data), 'application/json'),
             '0': ('product_image.webp', image_buffer, 'image/webp')
         }
         
-        # إرسال الطلب الفعلي للسيرفر
         response = requests.post(GRAPHQL_URL, headers=headers, files=files)
         
-        # تسجيل النتيجة في سجلات ريلوي للمراقبة التقنية
+        # متابعة الحالة في سجلات Railway
         print(f"Qumra Response Status: {response.status_code}")
         
         if response.status_code == 200 and "errors" not in response.text:
-            print("Product successfully pushed to Qumra.")
+            print(f"✅ تم رفع المنتج '{name}' بنجاح.")
             return True
         else:
-            print(f"Qumra API Error: {response.text}")
+            # طباعة الخطأ القادم من قمرة في السجلات للتحليل
+            print(f"❌ خطأ من API قمرة: {response.text}")
             return False
             
     except Exception as e:
-        print(f"Critical Connection Error: {e}")
+        print(f"⚠️ فشل الاتصال بالجسر التقني: {e}")
         return False
