@@ -3,30 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}محجوب أونلاين{% endblock %}</title>
+    <title>محجوب أونلاين - لوحة المورد</title>
     <style>
         :root { --royal-purple: #4b0082; --gold: #ffd700; }
-        body { font-family: sans-serif; background-color: #f8f9fa; margin: 0; display: flex; }
-        .sidebar { width: 250px; background: #222; color: white; height: 100vh; padding: 20px; position: fixed; }
-        .main-content { margin-right: 250px; padding: 30px; width: 100%; }
-        .nav-item { display: block; color: white; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
-        .nav-item:hover { background: var(--royal-purple); }
-        .btn-logout { color: #ff4444; margin-top: 50px; display: block; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; background-color: #f4f7f6; }
+        .sidebar { width: 260px; background: #1a1a1a; color: white; height: 100vh; position: fixed; right: 0; padding-top: 20px; }
+        .sidebar h2 { text-align: center; color: var(--gold); font-size: 1.2rem; margin-bottom: 30px; }
+        .nav-link { display: block; padding: 15px 25px; color: #bbb; text-decoration: none; transition: 0.3s; border-right: 4px solid transparent; }
+        .nav-link:hover { background: #2d2d2d; color: white; border-right-color: var(--royal-purple); }
+        .main-content { margin-right: 260px; width: calc(100% - 260px); padding: 40px; }
+        .header { background: white; padding: 20px; margin-bottom: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
-    <nav class="sidebar">
+    <div class="sidebar">
         <h2>سوقك الذكي</h2>
-        <hr>
-        <a href="/dashboard" class="nav-item">الرئيسية</a>
-        <a href="#" class="nav-item">الطلبات</a>
-        <a href="#" class="nav-item">الإعدادات</a>
-        <a href="/logout" class="btn-logout">تسجيل الخروج</a>
-    </nav>
+        <a href="/dashboard" class="nav-link">🏠 الرئيسية</a>
+        <a href="#" class="nav-link">📦 المنتجات</a>
+        <a href="#" class="nav-link">📊 التقارير</a>
+        <a href="/logout" class="nav-link" style="color: #ff4d4d; margin-top: 50px;">🚪 تسجيل الخروج</a>
+    </div>
 
-    <main class="main-content">
+    <div class="main-content">
+        <div class="header">
+            <h3>لوحة تحكم المورد</h3>
+            <span style="color: var(--royal-purple); font-weight: bold;">مرحباً بك في محجوب أونلاين</span>
+        </div>
+        
         {% block content %}
         {% endblock %}
-    </main>
+    </div>
 </body>
 </html>
