@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محجوب أونلاين | حوكمة رقمية</title>
+    <title>محجوب أونلاين | الإدارة الملكية</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
     <style>
-        :root { --royal-purple: #632C8F; --dark-bg: #0d001a; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #fff; }
+        :root { --royal-purple: #632C8F; --gold: #ffd700; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8f9fa; }
     </style>
 </head>
 <body>
-    <div class="main-wrapper">
-        {% block content %}{% endblock %}
-    </div>
+    {% block content %}{% endblock %}
 </body>
 </html>
