@@ -1,14 +1,15 @@
 from database import Vendor
 
 def perform_login(username, password):
-    # مطابقة بيانات تسجيل الدخول
-    vendor = Vendor.query.filter_by(username=username, password=password).first()
-    if vendor:
-        return vendor, "نجاح"
-    return None, "خطأ في البيانات"
-
-def get_current_vendor(vendor_id):
-    if vendor_id:
-        # استرجاع كائن المورد كاملاً من Postgres
-        return Vendor.query.get(int(vendor_id))
-    return None
+    # 1. البحث عن اسم المستخدم في القاعدة
+    vendor = Vendor.query.filter_by(username=username).first()
+    
+    if not vendor:
+        return None, "عذراً، هذا المستخدم غير مسجل في المنصة."
+    
+    # 2. مطابقة كلمة المرور بعد التأكد من وجود المستخدم
+    if vendor.password != password:
+        return None, "كلمة المرور التي أدخلتها غير صحيحة."
+    
+    # 3. نجاح العملية
+    return vendor, "تم تسجيل الدخول بنجاح."
