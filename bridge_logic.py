@@ -4,11 +4,11 @@ import json
 from PIL import Image
 
 # 1. الإعدادات السيادية لمنصة محجوب أونلاين
-# نستخدم الرابط الخاص بك مباشرة كما يظهر في إعدادات متجرك
+# نقطة الاتصال الخاصة بمتجرك مباشرة
 GRAPHQL_URL = "https://mahjoub.online/admin/graphql"
 
-# المفتاح السري الخاص بك المستخرج من لوحة التحكم
-ACCESS_TOKEN = "qmr_6efc3577-9287-4588-8c87-667e449d5397"
+# المفتاح الجديد ذو الصلاحيات الكاملة (Write/Read)
+ACCESS_TOKEN = "qmr_e235dd03-f398-473f-aa12-79029f05e147"
 
 def calculate_final_price(original_price, currency):
     """تحويل العملة وإضافة نسبة الربح 30% (نظام الحوكمة الرقمية)"""
@@ -27,7 +27,7 @@ def calculate_final_price(original_price, currency):
 def process_product_image(uploaded_file):
     """تحويل الصورة إلى WebP لضمان أعلى سرعة وتحسين SEO المتجر"""
     try:
-        # هذه الدالة تتطلب وجود مكتبة Pillow في requirements.txt
+        # ملاحظة: تتطلب مكتبة Pillow في ملف requirements.txt
         img = Image.open(uploaded_file)
         
         # التأكد من توافق الألوان عند التحويل من صيغ شفافة مثل PNG
@@ -35,7 +35,7 @@ def process_product_image(uploaded_file):
             img = img.convert("RGB")
         
         buffer = io.BytesIO()
-        # حفظ الصورة بصيغة WebP المضغوطة بجودة 80
+        # حفظ الصورة بصيغة WebP المضغوطة لرفع أداء المتجر
         img.save(buffer, format="WebP", quality=80)
         buffer.seek(0)
         return buffer
@@ -46,13 +46,13 @@ def process_product_image(uploaded_file):
 def push_to_qmr_store(name, description, final_price, image_buffer):
     """إرسال بيانات المنتج مباشرة إلى نقطة اتصال mahjoub.online"""
     
-    # ترويسات المصادقة باستخدام Bearer Token
+    # ترويسات المصادقة باستخدام Bearer Token الجديد
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
         "Accept": "application/json",
     }
 
-    # استعلام الـ Mutation المتوافق مع بروتوكول رفع الملفات في GraphQL
+    # استعلام الـ Mutation المعتمد لرفع المنتجات في قمرة
     query = """
     mutation CreateProduct($input: ProductInput!, $image: Upload) {
       createProduct(input: $input, image: $image) {
@@ -71,37 +71,37 @@ def push_to_qmr_store(name, description, final_price, image_buffer):
                 'name': name,
                 'description': description or "منتج من منصة محجوب أونلاين",
                 'price': float(final_price),
-                'status': 'DRAFT', # يظهر كمسودة للمراجعة أولاً
+                'status': 'DRAFT', # يظهر كمسودة للمراجعة والتدقيق
                 'currency': 'SAR'
             },
-            'image': None  # سيتم ربطه عبر خريطة الملفات (Map)
+            'image': None  # يتم ربطه عبر خريطة الملفات (Map)
         }
     }
     
-    # خريطة الربط لإخبار السيرفر بربط الصورة بالمتغير image
+    # خريطة الربط (Mapping) لرفع الملف البرمجي
     map_data = {'0': ['variables.image']}
     
     try:
-        # تشكيل طلب Multipart المخصص لرفع الصور
+        # تشكيل طلب Multipart المخصص لرفع الصور والبيانات
         files = {
             'operations': (None, json.dumps(operations), 'application/json'),
             'map': (None, json.dumps(map_data), 'application/json'),
             '0': ('product_image.webp', image_buffer, 'image/webp')
         }
         
-        # إرسال الطلب الفعلي لنقطة الاتصال الخاصة بك
+        # إرسال الطلب الفعلي لنقطة الاتصال السيادية
         response = requests.post(GRAPHQL_URL, headers=headers, files=files)
         
         # طباعة النتيجة في سجلات Railway للمراقبة
         print(f"Server Response Status: {response.status_code}")
         
         if response.status_code == 200 and "errors" not in response.text:
-            print(f"✅ تم رفع المنتج '{name}' بنجاح إلى متجر محجوب أونلاين.")
+            print(f"✅ نجاح: تم دفع المنتج '{name}' إلى المتجر بنجاح.")
             return True
         else:
-            print(f"❌ خطأ في API: {response.text}")
+            print(f"❌ فشل: رد السيرفر يحتوي على أخطاء: {response.text}")
             return False
             
     except Exception as e:
-        print(f"⚠️ فشل اتصال الجسر: {e}")
+        print(f"⚠️ خطأ فادح في اتصال الجسر: {e}")
         return False
