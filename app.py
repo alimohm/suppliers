@@ -1,60 +1,70 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from database import db, init_db, Vendor
+from werkzeug.utils import secure_filename
+from database import db, init_db, Vendor, Product
 import logic, finance, bridge_logic
 from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# إعداد مجلد رفع الصور
+UPLOAD_FOLDER = 'static/uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 init_db(app)
-
-@app.route('/')
-def index():
-    return redirect(url_for('dashboard')) if 'vendor_id' in session else redirect(url_for('login'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        u, p = request.form.get('username'), request.form.get('password')
-        vendor, msg = logic.perform_login(u, p)
-        if vendor:
-            session['vendor_id'] = vendor.id
-            return redirect(url_for('dashboard'))
-        flash(msg)
-    return render_template('login.html')
-
-@app.route('/dashboard')
-def dashboard():
-    v_id = session.get('vendor_id')
-    if not v_id: return redirect(url_for('login'))
-    vendor = Vendor.query.get(v_id)
-    return render_template('dashboard.html', vendor=vendor)
 
 @app.route('/add_product', methods=['POST'])
 def add_product():
     v_id = session.get('vendor_id')
-    if not v_id: return redirect(url_for('login'))
-    
     vendor = Vendor.query.get(v_id)
-    final_price = finance.calculate_final_price(request.form.get('price'), request.form.get('currency'))
     
+    # 1. معالجة الصورة المرفوعة
+    file = request.files.get('image')
+    image_url = ""
+    if file and file.filename != '':
+        filename = secure_filename(f"{vendor.id}_{file.filename}")
+        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        # رابط الصورة (يجب أن يكون متاحاً للعموم ليراه المتجر)
+        image_url = f"https://your-app-name.up.railway.app/static/uploads/{filename}"
+
+    # 2. الحساب المالي (30% + تحويل العملة)
+    final_price = finance.calculate_final_price(
+        request.form.get('price'), 
+        request.form.get('currency')
+    )
+    
+    # 3. الحفظ في قاعدة بيانات قمرة أولاً
+    new_p = Product(
+        name=request.form.get('name'),
+        description=request.form.get('description'),
+        cost_price=float(request.form.get('price')),
+        final_price=final_price,
+        image_url=image_url,
+        currency=request.form.get('currency'),
+        vendor_id=v_id
+    )
+    db.session.add(new_p)
+    db.session.commit()
+
+    # 4. النشر عبر الويب هوك لمتجر محجوب أونلاين
     data = {
-        "name": request.form.get('name'),
+        "name": new_p.name,
         "final_price": final_price,
-        "description": request.form.get('description'),
+        "description": new_p.description,
+        "image_url": image_url,
         "wallet": vendor.wallet_address
     }
     
     if bridge_logic.push_to_store(data):
-        flash(f"تم النشر كمسودة! السعر النهائي بعد زيادة 30%: {final_price} ر.س")
+        flash(f"تم الحفظ والنشر كمسودة بنجاح! السعر النهائي: {final_price} ر.س")
     else:
-        flash("فشل الربط مع متجر محجوب أونلاين.")
+        flash("تم الحفظ في قمرة ولكن فشل إرسال الويب هوك للمتجر.")
+        
     return redirect(url_for('dashboard'))
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
+# ... بقية المسارات (login, logout, dashboard) ...
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
