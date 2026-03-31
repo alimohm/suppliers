@@ -2,113 +2,37 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محجوب أونلاين | لوحة التحكم</title>
+    <title>محجوب أونلاين - لوحة التحكم</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --royal-gradient: linear-gradient(145deg, #2e004f 0%, #4b0082 50%, #0d001a 100%);
-            --gold-accent: #ffd700;
-            --soft-white: #f8f9fa;
-            --main-purple: #4b0082;
-        }
-
-        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: var(--soft-white); min-height: 100vh; }
-
-        /* القائمة الجانبية (Sidebar) */
-        .sidebar {
-            width: 260px; height: 100vh; position: fixed; right: 0; top: 0;
-            background: var(--royal-gradient); color: white;
-            transition: 0.3s; display: flex; flex-direction: column; z-index: 1000;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-        }
-
-        .brand-area { padding: 30px 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .brand-area img { width: 70px; filter: brightness(0) invert(1); margin-bottom: 10px; }
-        .brand-title { display: block; font-size: 1.2rem; font-weight: bold; color: var(--gold-accent); }
-
-        .vendor-badge {
-            padding: 15px; text-align: center; background: rgba(0,0,0,0.2); margin: 10px; border-radius: 10px;
-        }
-        .vendor-name { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
-        .certified-tag { font-size: 0.75rem; color: #00ffcc; display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-        .nav-list { list-style: none; padding: 10px 0; width: 100%; flex-grow: 1; display: flex; flex-direction: column; }
-        .nav-link {
-            padding: 15px 25px; display: flex; align-items: center; color: rgba(255,255,255,0.8);
-            text-decoration: none; transition: 0.3s; border-right: 4px solid transparent;
-        }
-        .nav-link:hover { background: rgba(255,255,255,0.05); color: white; border-right-color: var(--gold-accent); }
-        .nav-link i { font-size: 1.2rem; min-width: 35px; }
-
-        /* المحتوى الرئيسي */
-        .main-content { flex: 1; margin-right: 260px; transition: 0.3s; display: flex; flex-direction: column; }
-        
-        /* الهيدر العلوي */
-        .top-header {
-            background: white; height: 70px; display: flex; align-items: center;
-            justify-content: space-between; padding: 0 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        /* منطقة العمل الصافية */
-        .content-area { padding: 30px; flex-grow: 1; }
-
-        /* التنبيهات */
-        .flash-messages { margin-bottom: 20px; }
-        .alert { padding: 15px; border-radius: 8px; margin-bottom: 10px; background: #e1f5fe; color: #0277bd; border: 1px solid #b3e5fc; text-align: center; }
-
-        /* التجاوب مع الجوال */
-        @media (max-width: 768px) {
-            .sidebar { width: 80px; }
-            .brand-title, .vendor-badge, .link-text { display: none; }
-            .main-content { margin-right: 80px; }
-        }
+        :root { --purple: #4b0082; --gold: #ffd700; }
+        body { margin: 0; display: flex; background: #f4f4f9; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { width: 250px; background: linear-gradient(180deg, #2e004f, #0d001a); color: white; height: 100vh; position: fixed; }
+        .main { margin-right: 250px; width: 100%; }
+        .header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .nav-item { padding: 15px; color: white; text-decoration: none; display: block; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); border-right: 4px solid var(--gold); }
     </style>
 </head>
 <body>
-
-    <aside class="sidebar">
-        <div class="brand-area">
-            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp">
-            <span class="brand-title">محجوب أونلاين</span>
+    <div class="sidebar">
+        <div style="padding: 30px; text-align: center; font-weight: bold; color: var(--gold);">محجوب أونلاين</div>
+        <div style="padding: 10px; text-align: center; background: rgba(0,0,0,0.2);">
+            <i class="fas fa-user-check"></i> {{ vendor.username }}
         </div>
-
-        <div class="vendor-badge">
-            <span class="vendor-name">{{ vendor.username }}</span>
-            <span class="certified-tag"><i class="fas fa-check-circle"></i> مورد معتمد</span>
-        </div>
-
-        <nav class="nav-list">
-            <a href="/dashboard" class="nav-link"><i class="fas fa-th-large"></i> <span class="link-text">الرئيسية</span></a>
-            <a href="#" class="nav-link"><i class="fas fa-box-open"></i> <span class="link-text">المنتجات</span></a>
-            <a href="#" class="nav-link"><i class="fas fa-wallet"></i> <span class="link-text">المحفظة</span></a>
-            <a href="/logout" class="nav-link" style="margin-top: auto; color: #ff7675;"><i class="fas fa-sign-out-alt"></i> <span class="link-text">خروج</span></a>
+        <nav style="margin-top: 20px;">
+            <a href="/dashboard" class="nav-item">الرئيسية</a>
+            <a href="/logout" class="nav-item" style="color: #ff7675;">خروج</a>
         </nav>
-    </aside>
-
-    <main class="main-content">
-        <header class="top-header">
-            <div style="color: #888;">لوحة تحكم الموردين</div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span>{{ vendor.owner_name }}</span>
-                <i class="fas fa-user-circle" style="font-size: 1.8rem; color: var(--main-purple);"></i>
-            </div>
+    </div>
+    <div class="main">
+        <header class="header">
+            <span>لوحة الموردين السيادية</span>
+            <span>{{ vendor.owner_name or 'مورد جديد' }} <i class="fas fa-circle-user"></i></span>
         </header>
-
-        <section class="content-area">
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                <div class="flash-messages">
-                  {% for message in messages %}
-                    <div class="alert">{{ message }}</div>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            {% endwith %}
-
+        <div style="padding: 30px;">
             {% block content %}{% endblock %}
-        </section>
-    </main>
-
+        </div>
+    </div>
 </body>
 </html>
