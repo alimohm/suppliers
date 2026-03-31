@@ -2,30 +2,95 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>دخول | محجوب أونلاين</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | محجوب أونلاين</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { margin: 0; display: flex; height: 100vh; font-family: sans-serif; background: #fff; }
-        .brand-side { flex: 1; background: #4b0082; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; }
-        .login-side { flex: 1; display: flex; justify-content: center; align-items: center; }
-        .card { width: 100%; max-width: 380px; padding: 20px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #4b0082; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        body { margin: 0; display: flex; height: 100vh; font-family: sans-serif; background: #fff; overflow: hidden; }
+        
+        /* القسم البنفسجي (الأيمن في الصورة) */
+        .brand-side {
+            flex: 1.2;
+            background: #4b0082;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .brand-side img { width: 140px; margin-bottom: 20px; }
+        .brand-side h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .brand-side p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 40px; }
+
+        .feature-box {
+            background: rgba(255, 255, 255, 0.1);
+            width: 80%;
+            max-width: 400px;
+            padding: 15px 25px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1rem;
+        }
+        .feature-box i { color: #ffd700; font-size: 1.3rem; }
+
+        /* القسم الأبيض (الأيسر في الصورة) */
+        .login-side {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .login-container { width: 100%; max-width: 380px; text-align: center; }
+        .login-container h2 { font-size: 2rem; color: #1a0033; margin-bottom: 10px; }
+        .login-container p { color: #888; margin-bottom: 30px; }
+
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #4b0082; }
+        
+        input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background: #fdfdfd;
+            font-size: 1rem;
+            box-sizing: border-box;
+            text-align: right;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #4b0082;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        button:hover { background: #3b0066; transform: translateY(-2px); }
+
         .alert { background: #fff0f0; color: #d63031; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fab1a0; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <div class="brand-side">
-        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" style="width: 120px; filter: brightness(0) invert(1);">
-        <h1>محجوب أونلاين</h1>
-        <p>المنصة الأولى لدعم الموردين والنمو الرقمي</p>
-        <div style="margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-            <i class="fas fa-network-wired"></i> اللامركزية متطورة وحوكمة رقمية
-        </div>
-    </div>
+
     <div class="login-side">
-        <div class="card">
+        <div class="login-container">
             <h2>تسجيل الدخول</h2>
+            <p>مرحباً بك مجدداً في نظامك الإداري</p>
+
             {% with messages = get_flashed_messages() %}
               {% if messages %}
                 {% for message in messages %}
@@ -33,12 +98,42 @@
                 {% endfor %}
               {% endif %}
             {% endwith %}
+
             <form method="POST">
-                <input type="text" name="username" placeholder="اسم المستخدم" required>
-                <input type="password" name="password" placeholder="كلمة المرور" required>
+                <div class="input-group">
+                    <input type="text" name="username" placeholder="اسم المستخدم" required>
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="كلمة المرور" required>
+                    <i class="fas fa-lock"></i>
+                </div>
                 <button type="submit">دخول للمنصة</button>
             </form>
+            <div style="margin-top: 40px; color: #ccc; font-size: 0.8rem;">
+                © 2026 محجوب أونلاين - حوكمة رقمية رائدة
+            </div>
         </div>
     </div>
+
+    <div class="brand-side">
+        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" alt="Logo">
+        <h1>محجوب أونلاين</h1>
+        <p>المنصة الأولى لدعم الموردين والنمو الرقمي</p>
+        
+        <div class="feature-box">
+            <span>اللامركزية متطورة وحوكمة رقمية</span>
+            <i class="fas fa-cubes"></i>
+        </div>
+        <div class="feature-box">
+            <span>إدارة ذكية لسلاسل الإمداد</span>
+            <i class="fas fa-truck"></i>
+        </div>
+        <div class="feature-box">
+            <span>سوقك الذكي للنمو المتسارع</span>
+            <i class="fas fa-chart-line"></i>
+        </div>
+    </div>
+
 </body>
 </html>
