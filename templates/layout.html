@@ -4,17 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>محجوب أونلاين | الإدارة الملكية</title>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
     <style>
-        :root { --royal-purple: #632C8F; --gold: #ffd700; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8f9fa; }
+        :root { --royal-purple: #632C8F; --dark-bg: #0d001a; }
+        body { margin: 0; font-family: 'Cairo', sans-serif; background: #f4f7f6; }
+        .sidebar { width: 250px; background: var(--dark-bg); height: 100vh; position: fixed; color: white; padding: 20px; }
+        .main-content { margin-right: 250px; padding: 40px; }
     </style>
 </head>
 <body>
-    {% block content %}{% endblock %}
+    <div class="sidebar">
+        <h2 style="color: var(--royal-purple);">محجوب أونلاين</h2>
+        <hr>
+        <p><i class="fas fa-home"></i> الرئيسية</p>
+        <p><i class="fas fa-wallet"></i> المحفظة</p>
+        <p><i class="fas fa-box"></i> المنتجات</p>
+        <a href="{{ url_for('logout') }}" style="color:red; text-decoration:none;"><i class="fas fa-sign-out-alt"></i> خروج</a>
+    </div>
+
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>
