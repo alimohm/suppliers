@@ -6,15 +6,19 @@ import logic
 app = Flask(__name__)
 app.secret_key = 'mahjoub_king_2026'
 
-# تهيئة قاعدة البيانات عند بدء التشغيل
 init_db(app)
 
 @app.route('/')
 def index():
+    # توجيه تلقائي لصفحة الدخول بمجرد فتح الرابط
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # إذا كان مسجلاً دخول مسبقاً، يذهب للوحة التحكم مباشرة
+    if 'vendor_id' in session:
+        return redirect(url_for('dashboard'))
+        
     if request.method == 'POST':
         u = request.form.get('username')
         p = request.form.get('password')
