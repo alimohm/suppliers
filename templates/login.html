@@ -2,81 +2,50 @@
 
 {% block content %}
 <style>
-    .login-container { display: flex; height: 100vh; width: 100vw; position: fixed; top: 0; right: 0; }
-    
+    .login-wrapper { display: flex; height: 100vh; width: 100vw; position: fixed; top: 0; right: 0; z-index: 1000; background: white; }
     .brand-side {
-        flex: 1.2;
-        background: linear-gradient(135deg, #3b0066 0%, #632C8F 50%, #0d001a 100%);
-        display: flex; flex-direction: column; justify-content: center;
-        align-items: center; color: white; padding: 50px; text-align: center;
+        flex: 1.2; background: linear-gradient(135deg, #3b0066 0%, #632C8F 50%, #0d001a 100%);
+        display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 40px; text-align: center;
     }
-
-    .login-side { flex: 1; display: flex; justify-content: center; align-items: center; background: white; }
-    
-    .logo-img { width: 150px; filter: brightness(0) invert(1); margin-bottom: 20px; }
-    
-    /* تنسيق الأسطر الثلاثة مع الأيقونات */
-    .feature-box {
-        display: flex; align-items: center; margin-bottom: 20px;
-        background: rgba(255, 255, 255, 0.05); padding: 15px 25px;
-        border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px;
+    .login-side { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    .feature-card {
+        display: flex; align-items: center; background: rgba(255,255,255,0.08); 
+        padding: 15px 25px; border-radius: 12px; margin-bottom: 15px; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1);
     }
-    .feature-box i { color: #ffd700; margin-left: 15px; font-size: 1.4rem; }
-
-    .input-group { position: relative; margin-bottom: 20px; width: 100%; }
-    .input-group i { position: absolute; right: 15px; top: 18px; color: #632C8F; }
-    
-    input {
-        width: 100%; padding: 15px 45px 15px 15px; border: 2px solid #f0f0f0;
-        border-radius: 10px; outline: none; transition: 0.3s;
-    }
-    input:focus { border-color: #632C8F; }
-
-    .btn-login {
-        width: 100%; padding: 15px; background: #4b0082; color: white;
-        border: none; border-radius: 10px; font-weight: bold; cursor: pointer;
-    }
-    
+    .feature-card i { color: var(--gold); margin-left: 15px; font-size: 1.3rem; }
+    .input-box { position: relative; margin-bottom: 20px; }
+    .input-box i { position: absolute; right: 15px; top: 18px; color: #632C8F; }
+    input { width: 100%; padding: 15px 45px 15px 15px; border: 2px solid #eee; border-radius: 10px; outline: none; box-sizing: border-box; }
+    .btn-royal { width: 100%; padding: 15px; background: #4b0082; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
     @media (max-width: 900px) { .brand-side { display: none; } }
 </style>
 
-<div class="login-container">
+<div class="login-wrapper">
     <div class="brand-side">
-        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-img">
-        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">محجوب أونلاين</h1>
-        <p style="opacity: 0.8; margin-bottom: 40px;">المنصة الأولى لدعم الموردين والنمو الرقمي</p>
-
-        <div class="feature-box">
-            <i class="fas fa-network-wired"></i>
-            <span>اللامركزية متطورة وحوكمة رقمية</span>
-        </div>
-        <div class="feature-box">
-            <i class="fas fa-truck-loading"></i>
-            <span>إدارة ذكية لسلاسل الإمداد</span>
-        </div>
-        <div class="feature-box">
-            <i class="fas fa-chart-line"></i>
-            <span>سوقك الذكي للنمو المتسارع</span>
-        </div>
+        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" style="width: 140px; filter: brightness(0) invert(1); margin-bottom: 20px;">
+        <h1 style="font-size: 2.8rem; margin: 0;">محجوب أونلاين</h1>
+        <p style="opacity: 0.8; margin-bottom: 35px;">المنصة الأولى لدعم الموردين والنمو الرقمي</p>
+        
+        <div class="feature-card"><i class="fas fa-network-wired"></i><span>اللامركزية متطورة وحوكمة رقمية</span></div>
+        <div class="feature-card"><i class="fas fa-truck-loading"></i><span>إدارة ذكية لسلاسل الإمداد</span></div>
+        <div class="feature-card"><i class="fas fa-chart-line"></i><span>سوقك الذكي للنمو المتسارع</span></div>
     </div>
 
     <div class="login-side">
-        <div style="width: 100%; max-width: 350px;">
-            <h2 style="color: #2d0056; margin-bottom: 10px;">تسجيل الدخول</h2>
-            <p style="color: #888; margin-bottom: 30px;">مرحباً بك مجدداً في نظامك الإداري الملكي</p>
+        <div style="width: 100%; max-width: 380px;">
+            <h2 style="color: #2d0056; margin-bottom: 5px;">تسجيل الدخول</h2>
+            <p style="color: #777; margin-bottom: 30px;">مرحباً بك مجدداً في نظامك الإداري الملكي</p>
+
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}{% for m in messages %}<div style="color:red; margin-bottom:15px;"><i class="fas fa-exclamation-circle"></i> {{m}}</div>{% endfor %}{% endif %}
+            {% endwith %}
 
             <form method="POST" action="{{ url_for('login') }}">
-                <div class="input-group">
-                    <i class="fas fa-user"></i>
-                    <input type="text" name="username" placeholder="اسم المستخدم" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" name="password" placeholder="كلمة المرور" required>
-                </div>
-                <button type="submit" class="btn-login">دخول للمنصة</button>
+                <div class="input-box"><i class="fas fa-user"></i><input type="text" name="username" placeholder="اسم المستخدم" required></div>
+                <div class="input-box"><i class="fas fa-lock"></i><input type="password" name="password" placeholder="كلمة المرور" required></div>
+                <button type="submit" class="btn-royal">دخول للمنصة</button>
             </form>
-            <p style="text-align: center; color: #ccc; font-size: 0.8rem; margin-top: 40px;">&copy; 2026 محجوب أونلاين</p>
+            <p style="text-align: center; color: #ddd; font-size: 0.8rem; margin-top: 50px;">&copy; 2026 محجوب أونلاين</p>
         </div>
     </div>
 </div>
