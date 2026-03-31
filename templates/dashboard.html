@@ -1,31 +1,13 @@
 {% extends "layout.html" %}
 
-{% block title %}لوحة التحكم - الرئيسية{% endblock %}
-
 {% block content %}
-    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-        <h2>مرحباً، {{ vendor.owner_name }} 👋</h2>
-        <p>المحفظة: <strong>{{ vendor.wallet_address if vendor.wallet_address else 'غير مسجل' }}</strong></p>
+<div class="card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <h2 style="color: var(--royal-purple); margin-top: 0;">مرحباً بك، {{ vendor.owner_name }} 👋</h2>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+        <div style="flex: 1; min-width: 200px; background: var(--light-purple); padding: 20px; border-radius: 10px; border-right: 5px solid var(--royal-purple);">
+            <small style="color: #666;">رقم المحفظة</small>
+            <div style="font-weight: bold; font-size: 1.2rem; color: var(--royal-purple);">{{ vendor.wallet_address }}</div>
+        </div>
     </div>
-
-    <div style="margin-top: 30px;">
-        <h3>إضافة منتج جديد</h3>
-        <form action="/upload_product" method="POST" style="background: white; padding: 20px; border-radius: 10px;">
-            <input type="text" name="name" placeholder="اسم المنتج" required style="width: 100%; padding: 10px; margin-bottom: 10px;">
-            <input type="number" step="0.01" name="price" placeholder="السعر" required style="width: 100%; padding: 10px; margin-bottom: 10px;">
-            <button type="submit" style="background: var(--royal-purple); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">تأكيد الرفع والمزامنة</button>
-        </form>
-    </div>
-
-    <h3 style="margin-top: 40px;">منتجاتك المرفوعة:</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
-        {% for product in products %}
-            <div style="background: white; padding: 15px; border-radius: 10px; text-align: center; border-right: 4px solid var(--royal-purple);">
-                <h4>{{ product.name }}</h4>
-                <p style="color: green; font-weight: bold;">{{ product.price }} $</p>
-            </div>
-        {% else %}
-            <p>لا توجد منتجات حالياً.</p>
-        {% endfor %}
-    </div>
+</div>
 {% endblock %}
