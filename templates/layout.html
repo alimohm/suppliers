@@ -6,53 +6,42 @@
     <title>محجوب أونلاين</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --royal-purple: #4b0082; 
-            --royal-black: #0d001a;
-            --gold: #ffd700;
-        }
-        body { margin: 0; display: flex; font-family: sans-serif; background: #f4f7f6; }
+        :root { --p: #4b0082; --b: #0d001a; --g: #ffd700; }
+        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: #f4f7f6; }
         
-        /*Sidebar Styling*/
+        /* شريط جانبي ملكي */
         .sidebar {
             width: 260px; height: 100vh; position: fixed; right: 0;
-            background: linear-gradient(180deg, var(--royal-black) 0%, var(--royal-purple) 50%, var(--royal-black) 100%);
-            color: white; z-index: 1000; box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+            background: linear-gradient(180deg, var(--b) 0%, var(--p) 50%, var(--b) 100%);
+            color: white; z-index: 1000;
         }
-        .sidebar-header { padding: 30px 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .logo-img { width: 100px; filter: brightness(0) invert(1); margin-bottom: 10px; }
+        .sidebar-header { padding: 30px 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo-img { width: 90px; filter: brightness(0) invert(1); } /* لوجو أبيض */
         
         .nav-links { list-style: none; padding: 20px 0; }
         .nav-links a { display: flex; align-items: center; padding: 15px 25px; color: rgba(255,255,255,0.7); text-decoration: none; }
-        .nav-links a:hover { background: rgba(255,255,255,0.1); color: white; }
-        
-        .main-content { margin-right: 260px; width: 100%; padding: 30px; }
-        
-        /* إذا كنا في صفحة الدخول، نخفي الشريط الجانبي */
-        .no-sidebar .sidebar { display: none; }
-        .no-sidebar .main-content { margin-right: 0; }
+        .nav-links a:hover, .active { background: rgba(255,255,255,0.1); color: white; border-right: 4px solid var(--g); }
+
+        .main { margin-right: 260px; width: 100%; padding: 25px; transition: 0.3s; }
+        /* منطق إخفاء الشريط في صفحة الدخول */
+        .hide-sidebar .sidebar { display: none; }
+        .hide-sidebar .main { margin-right: 0; }
     </style>
 </head>
-<body class="{% if not session.get('vendor_id') %}no-sidebar{% endif %}">
-
+<body class="{% if not session.get('vendor_id') %}hide-sidebar{% endif %}">
     {% if session.get('vendor_id') %}
     <aside class="sidebar">
         <div class="sidebar-header">
             <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-img">
-            {% if vendor %}
-                <div style="font-weight: bold; font-size: 1.1rem;">{{ vendor.owner_name }}</div>
-                <div style="color: var(--gold); font-size: 0.8rem;">مورد معتمد</div>
-            {% endif %}
+            <div style="margin-top:15px; font-weight:bold;">{{ vendor.owner_name }}</div>
+            <small style="color:var(--g)">مورد معتمد</small>
         </div>
         <ul class="nav-links">
-            <li><a href="/dashboard"><i class="fas fa-home" style="margin-left: 10px;"></i> الرئيسية</a></li>
-            <li><a href="/logout" style="color: #ff8080;"><i class="fas fa-power-off" style="margin-left: 10px;"></i> خروج</a></li>
+            <li class="active"><a href="/dashboard"><i class="fas fa-home" style="margin-left:10px"></i> الرئيسية</a></li>
+            <li><a href="/logout" style="color:#ff8080"><i class="fas fa-sign-out-alt" style="margin-left:10px"></i> خروج</a></li>
         </ul>
     </aside>
     {% endif %}
-
-    <div class="main-content">
-        {% block content %}{% endblock %}
-    </div>
+    <div class="main">{% block content %}{% endblock %}</div>
 </body>
 </html>
