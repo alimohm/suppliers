@@ -3,10 +3,10 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-# مفتاح أمان قوي لضمان استقرار الجلسة (Session)
-app.secret_key = os.environ.get('SECRET_KEY', 'mahjoub_online_2026_key')
+# سر استقرار الجلسة ومنع الانهيار
+app.secret_key = os.environ.get('SECRET_KEY', 'MAHJOUB_2026_GOLDEN_KEY')
 
-# --- إعداد الاتصال بقاعدة بيانات Railway ---
+# 1. إعدادات قاعدة البيانات (Railway Postgres)
 db_url = os.environ.get('DATABASE_URL')
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -15,7 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# --- تعريف الجداول الموحدة (المفردة) ---
+# 2. تعريف النماذج (Models) - الاعتماد على الجداول المفردة
 class Vendor(db.Model):
     __tablename__ = 'vendor'
     id = db.Column(db.Integer, primary_key=True)
@@ -32,63 +32,69 @@ class Product(db.Model):
     description = db.Column(db.Text)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
 
-# --- المسارات (Routes) ---
+# 3. المسارات الأساسية (Core Routes)
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        u = request.form.get('username')
+        p = request.form.get('password')
+        # التحقق من المورد في قاعدة البيانات
+        vendor = Vendor.query.filter_by(username=u, password=p).first()
+        if vendor:
+            session['vendor_id'] = vendor.id
+            return redirect(url_for('dashboard'))
+        flash("بيانات الدخول غير صحيحة")
+    return render_template('login.html')
+
+# 4. لوحة التحكم (The Dashboard) - المنطقة الحساسة
 @app.route('/dashboard')
 def dashboard():
     if 'vendor_id' not in session:
         return redirect(url_for('login'))
     
-    # جلب بيانات المورد بأمان لتجنب خطأ 500
-    vendor_data = Vendor.query.get(session['vendor_id'])
-    
-    if not vendor_data:
-        session.clear()
-        return redirect(url_for('login'))
-    
-    # جلب منتجات هذا المورد فقط من الجدول الصحيح
-    products_list = Product.query.filter_by(vendor_id=vendor_data.id).all()
-    
-    return render_template('dashboard.html', 
-                           vendor=vendor_data, 
-                           products=products_list)
+    try:
+        # جلب البيانات لضمان عدم ظهور خطأ 500
+        vendor_data = Vendor.query.get(session['vendor_id'])
+        if not vendor_data:
+            session.clear()
+            return redirect(url_for('login'))
+            
+        # جلب المنتجات المربوطة بالمورد
+        all_products = Product.query.filter_by(vendor_id=vendor_data.id).all()
+        
+        return render_template('dashboard.html', 
+                               vendor=vendor_data, 
+                               products=all_products)
+    except Exception as e:
+        print(f"Database Error: {e}")
+        return "خطأ في تحميل اللوحة، تأكد من اتصال قاعدة البيانات", 500
 
+# 5. وظائف المعالجة (Actions) - رفع المنتجات
 @app.route('/upload_product', methods=['POST'])
 def upload_product():
     if 'vendor_id' not in session:
         return redirect(url_for('login'))
     
-    # استقبال البيانات من الفورم الموجود في dashboard.html
     name = request.form.get('name')
     price = request.form.get('price')
-    description = request.form.get('description')
+    desc = request.form.get('description')
     
     if name and price:
-        try:
-            # إنشاء منتج جديد وربطه بمعرف المورد الحالي
-            new_product = Product(
-                name=name, 
-                price=float(price), 
-                description=description, 
-                vendor_id=session['vendor_id']
-            )
-            db.session.add(new_product)
-            db.session.commit()
-            flash("تم رفع المنتج بنجاح والمزامنة مع نظام قمرة")
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error saving product: {e}")
-            flash("حدث خطأ أثناء الحفظ في القاعدة")
-            
+        new_item = Product(name=name, price=float(price), description=desc, vendor_id=session['vendor_id'])
+        db.session.add(new_item)
+        db.session.commit()
     return redirect(url_for('dashboard'))
 
-# إضافة مسار تسجيل الخروج لتنظيف الجلسة
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
 
+# 6. تشغيل التطبيق (Runner)
 if __name__ == "__main__":
-    # تشغيل السيرفر على المنفذ الذي يحدده Railway
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
