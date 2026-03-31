@@ -1,56 +1,37 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container-fluid py-4" style="direction: rtl;">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card bg-dark text-white p-4" style="border-right: 5px solid #632C8F; border-radius: 15px;">
-                <h3><i class="fas fa- crown text-warning me-2"></i> أهلاً بك يا {{ vendor.owner_name }}</h3>
-                <p class="text-secondary">لوحة تحكم الموردين - محجوب أونلاين</p>
+<div class="container-fluid py-4" style="padding: 30px;">
+    <div class="header-card" style="background: #1a1a2e; color: white; padding: 30px; border-radius: 15px; border-right: 6px solid #632C8F; margin-bottom: 30px;">
+        <div class="row align-items: center;">
+            <div class="col-md-8">
+                <h3><i class="fas fa-user-shield text-warning"></i> لوحة تحكم المورد: {{ vendor.owner_name }}</h3>
+                <p style="color: #888; margin: 0;">مرحباً بك في مركز الحوكمة الرقمية - محجوب أونلاين</p>
+            </div>
+            <div class="col-md-4 text-start">
+                <span class="badge bg-success">الحالة: متصل</span>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-5">
-            <div class="card shadow-sm p-4" style="border-radius: 20px; border: 1px solid #eee;">
-                <h4 class="mb-4 text-dark"><i class="fas fa-plus-circle text-primary"></i> إضافة منتج جديد</h4>
+    <div class="row">
+        <div class="col-md-4">
+            <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <h5 style="margin-bottom: 20px; color: #632C8F;"><i class="fas fa-plus-circle"></i> إضافة منتج للنظام</h5>
                 <form action="{{ url_for('add_product') }}" method="POST" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label class="form-label">اسم المنتج</label>
-                        <input type="text" name="name" class="form-control" placeholder="مثلاً: راوتر جيل خامس" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">السعر (بالدولار)</label>
-                        <input type="number" name="price" class="form-control" step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">صورة المنتج</label>
-                        <input type="file" name="image" class="form-control" accept="image/*" required>
-                    </div>
-                    <button type="submit" class="btn w-100 py-3" style="background-color: #4b0082; color: white; font-weight: bold; border-radius: 12px;">
-                        نشر المنتج للمتجر <i class="fas fa-paper-plane ms-2"></i>
-                    </button>
+                    <input type="text" name="name" placeholder="اسم المنتج" class="form-control mb-3" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px;">
+                    <input type="number" name="price" placeholder="السعر" class="form-control mb-3" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px;">
+                    <input type="file" name="image" class="form-control mb-3" style="margin-bottom: 15px;">
+                    <button type="submit" class="btn-royal" style="width: 100%; padding: 12px; background: #632C8F; color: white; border: none; border-radius: 8px; cursor: pointer;">نشر المنتج</button>
                 </form>
             </div>
         </div>
 
-        <div class="col-md-7">
-            <div class="row g-3">
-                <div class="col-6">
-                    <div class="p-4 text-center border rounded-4 bg-light">
-                        <i class="fas fa-box-open fa-2x mb-2" style="color: #632C8F;"></i>
-                        <h5 class="text-dark">المنتجات النشطة</h5>
-                        <h2 class="fw-bold" style="color: #632C8F;">{{ vendor.products|length }}</h2>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="p-4 text-center border rounded-4 bg-light">
-                        <i class="fas fa-wallet fa-2x mb-2 text-success"></i>
-                        <h5 class="text-dark">المحفظة الرقمية</h5>
-                        <h2 class="fw-bold text-success">نشطة</h2>
-                    </div>
-                </div>
+        <div class="col-md-8">
+            <div class="row text-center mb-4">
+                <div class="col-md-4"><div style="background:white; padding:20px; border-radius:12px;"><i class="fas fa-boxes fa-2x text-primary"></i><h4>{{ vendor.products|length }}</h4><p>منتج نشط</p></div></div>
+                <div class="col-md-4"><div style="background:white; padding:20px; border-radius:12px;"><i class="fas fa-link fa-2x text-success"></i><h4>نشط</h4><p>الويب هوك</p></div></div>
+                <div class="col-md-4"><div style="background:white; padding:20px; border-radius:12px;"><i class="fas fa-history fa-2x text-warning"></i><h4>0</h4><p>تنبيهات فنية</p></div></div>
             </div>
         </div>
     </div>
