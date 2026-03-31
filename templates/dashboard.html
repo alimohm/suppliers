@@ -1,14 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
-<div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-    <h2 style="color: #4b0082; margin-top: 0;">مرحباً بك، {{ vendor.owner_name }} 👋</h2>
-    <p style="color: #666;">لقد سجلت الدخول بنجاح إلى منصة محجوب أونلاين.</p>
-    
-    <div style="margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-        <div style="background: #f0e6f7; padding: 20px; border-radius: 12px; border-right: 5px solid #4b0082;">
-            <small style="display:block; color:#777">رقم المحفظة</small>
-            <strong style="font-size: 1.1rem; color: #4b0082;">{{ vendor.wallet_address }}</strong>
+    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+        <h1 style="color: #4b0082;">أهلاً بك يا {{ vendor.owner_name }}</h1>
+        <div style="background: #f0e6f7; padding: 20px; border-radius: 10px; display: inline-block;">
+            محفظتك: <strong>{{ vendor.wallet_address }}</strong>
         </div>
     </div>
-</div>
 {% endblock %}
