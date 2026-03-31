@@ -3,14 +3,13 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-# مفتاح الأمان للجلسات
-app.secret_key = os.environ.get('SECRET_KEY', 'mahjoub_2026_key')
+# مفتاح أمان للجلسات وتشفير البيانات
+app.secret_key = os.environ.get('SECRET_KEY', 'mahjoub_royal_purple_2026')
 
-# --- 1. إعداد قاعدة البيانات ---
-# يسحب الرابط من DATABASE_URL الذي وضعناه في Railway
+# --- 1. إعدادات قاعدة البيانات (Railway) ---
+# التأكد من استخدام الرابط العام لضمان استقرار الاتصال
 db_url = os.environ.get('DATABASE_URL')
 
-# معالجة الرابط ليتوافق مع SQLAlchemy
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
@@ -19,14 +18,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# --- 2. تعريف الجداول (مطابق لبياناتك الحقيقية) ---
+# --- 2. النماذج (Models) مطابقة لجداولك الحقيقية ---
 class Vendor(db.Model):
     __tablename__ = 'vendor'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    owner_name = db.Column(db.String(100))   # 'علي محجوب' في صورتك
-    wallet_address = db.Column(db.String(100)) # 'MQ-5035D99C' في صورتك
+    owner_name = db.Column(db.String(100))   # لعرض 'الفقية للتجارة' أو 'علي محجوب'
+    wallet_address = db.Column(db.String(100)) # لعرض رقم المحفظة
 
 class Product(db.Model):
     __tablename__ = 'product'
@@ -35,7 +34,7 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
 
-# --- 3. مسارات التطبيق (Routes) ---
+# --- 3. المسارات (Routes) ---
 
 @app.route('/')
 def index():
@@ -47,52 +46,52 @@ def login():
         u = request.form.get('username')
         p = request.form.get('password')
         
-        # البحث في الجدول عن المستخدم وكلمة المرور
+        # التحقق من البيانات المسجلة في جدول vendor
         vendor = Vendor.query.filter_by(username=u, password=p).first()
         
         if vendor:
-            # تخزين ID المورد في الجلسة (رقم 1 في صورتك)
             session['vendor_id'] = vendor.id
             return redirect(url_for('dashboard'))
         else:
-            flash("اسم المستخدم أو كلمة المرور غير صحيحة")
+            flash("خطأ في بيانات الدخول، يرجى المحاولة مرة أخرى")
             
     return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
-    # التأكد من تسجيل الدخول
+    # التحقق من وجود جلسة نشطة للمورد
     if 'vendor_id' not in session:
         return redirect(url_for('login'))
     
     try:
-        # جلب بيانات المورد بناءً على ID الجلسة
+        # جلب بيانات المورد لإرسالها للقالب (layout)
+        # هذا السطر هو المسؤول عن ظهور الاسم تحت اللوجو الأبيض
         vendor_data = Vendor.query.get(session['vendor_id'])
         
         if not vendor_data:
             session.clear()
             return redirect(url_for('login'))
             
-        # جلب المنتجات المربوطة بهذا المورد
+        # جلب قائمة المنتجات الخاصة بالمورد فقط
         products_list = Product.query.filter_by(vendor_id=vendor_data.id).all()
         
-        # عرض صفحة الداشبورد ودمجها مع الهيكل layout.html
+        # تمرير 'vendor' ليعرض الاسم في الـ sidebar والـ dashboard
         return render_template('dashboard.html', 
                                vendor=vendor_data, 
                                products=products_list)
                                
     except Exception as e:
-        # يطبع الخطأ في سجلات ريلوي للمتابعة
-        print(f"Database Error: {e}")
-        return f"خطأ في الاتصال بقاعدة البيانات: {str(e)}", 500
+        # طباعة الخطأ في سجلات ريلوي للمتابعة
+        print(f"حدث خطأ: {e}")
+        return "خطأ في تحميل البيانات، يرجى التحقق من اتصال قاعدة البيانات", 500
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# --- 4. تشغيل التطبيق ---
+# --- 4. بدء التشغيل ---
 if __name__ == "__main__":
-    # استخدام المنفذ 8080 كما يطلبه Railway
+    # التشغيل على المنفذ المخصص من ريلوي
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
