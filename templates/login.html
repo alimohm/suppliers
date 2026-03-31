@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --deep-purple: #4b0082; /* البنفسجي الملكي */
+            --royal-purple: #4b0082; /* البنفسجي الملكي */
             --pure-white: #ffffff;
-            --text-on-white: #2d0056;
+            --text-dark: #2d0056;
             --gold-accent: #ffd700;
         }
 
@@ -18,15 +18,15 @@
             padding: 0;
             display: flex;
             height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--pure-white); /* الخلفية الأساسية بيضاء */
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--pure-white); /* خلفية بيضاء للفورم */
             overflow: hidden;
         }
 
-        /* القسم البنفسجي (الهوية والرؤية) - تم تبديل مكانه ولونه */
+        /* القسم البنفسجي الملكي العميق (التبادل اللوني) */
         .brand-section {
-            flex: 1.2; /* مساحة أكبر قليلاً للهوية */
-            background: linear-gradient(135deg, var(--deep-purple) 0%, #2d0056 100%);
+            flex: 1.2;
+            background: linear-gradient(135deg, #3b0066 0%, var(--royal-purple) 50%, #0d001a 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -36,10 +36,11 @@
             text-align: center;
         }
 
-        /* استبدال لون اللوجو إلى الأبيض */
+        /* التعديل الجوهري: تحويل اللوجو للأبيض الناصع */
         .logo-login {
             width: 150px;
-            filter: brightness(0) invert(1); /* تحويل اللوجو الملون للأبيض */
+            /* هذا الكود يحول أي لوجو ملون لأبيض نقي */
+            filter: brightness(0) invert(1) !important;
             margin-bottom: 30px;
         }
 
@@ -57,7 +58,7 @@
             margin-bottom: 40px;
         }
 
-        /* بطاقات الميزات */
+        /* بطاقات الميزات بنفسجي داكن */
         .features-list {
             text-align: right;
             width: 100%;
@@ -68,21 +69,20 @@
             display: flex;
             align-items: center;
             margin-bottom: 25px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.1); /* تباين خفيف على البنفسجي */
             padding: 18px;
             border-radius: 15px;
-            backdrop-filter: blur(5px);
             border: 1px solid rgba(255,255,255,0.1);
         }
 
         .feature-item i {
             font-size: 1.6rem;
             margin-left: 18px;
-            color: var(--gold-accent); /* لمسة ذهبية */
+            color: var(--gold-accent); /* لمسة ذهبية للميزات */
         }
         .feature-item span { font-size: 1.1rem; }
 
-        /* القسم الأبيض (فورم تسجيل الدخول) - تم تبديل مكانه ولونه */
+        /* القسم الأبيض للفورم: نظيف واحترافي */
         .login-section {
             flex: 1;
             display: flex;
@@ -98,7 +98,7 @@
         }
 
         .login-card h2 {
-            color: var(--text-on-white);
+            color: var(--text-dark);
             font-size: 2.2rem;
             margin-bottom: 12px;
         }
@@ -109,7 +109,7 @@
             font-size: 1rem;
         }
 
-        /* تنسيق خانات الإدخال مع الأيقونات */
+        /* تنسيق خانات الإدخال مع الأيقونات على اليمين */
         .form-group {
             margin-bottom: 25px;
             position: relative;
@@ -120,7 +120,7 @@
             right: 18px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--deep-purple);
+            color: var(--royal-purple);
             font-size: 1.1rem;
         }
 
@@ -137,7 +137,7 @@
         }
 
         input:focus {
-            border-color: var(--deep-purple);
+            border-color: var(--royal-purple);
             background-color: #f0e6f7; /* خلفية بنفسجية فاتحة عند التركيز */
         }
 
@@ -145,7 +145,7 @@
         button {
             width: 100%;
             padding: 16px;
-            background-color: var(--deep-purple);
+            background-color: var(--royal-purple);
             color: white;
             border: none;
             border-radius: 12px;
@@ -161,7 +161,7 @@
             transform: translateY(-2px);
         }
 
-        /* إخفاء قسم الهوية على الجوال للحفاظ على التناسق */
+        /* التجاوب مع الجوال */
         @media (max-width: 900px) {
             .brand-section { display: none; }
             .login-section { flex: 1; width: 100%; }
@@ -194,7 +194,7 @@
     <div class="login-section">
         <div class="login-card">
             <h2>تسجيل الدخول</h2>
-            <p>مرحباً بك مجدداً في نظامك الإداري اللامركزي</p>
+            <p>مرحباً بك مجدداً في نظامك الإداري الملكي</p>
             
             <form method="POST">
                 <div class="form-group">
@@ -205,7 +205,7 @@
                     <i class="fas fa-lock"></i>
                     <input type="password" name="password" placeholder="كلمة المرور" required>
                 </div>
-                <button type="submit">دخول للمنصة الملكية</button>
+                <button type="submit">دخول للمنصة</button>
             </form>
             
             <div style="margin-top: 35px; text-align: center; color: #aaa; font-size: 0.8rem;">
