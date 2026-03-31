@@ -1,12 +1,17 @@
 {% extends "layout.html" %}
+
 {% block content %}
-<div class="dashboard-card" style="background: white; padding: 30px; border-radius: 15px; border-right: 5px solid #4b0082;">
-    <h2>أهلاً بك يا {{ vendor.owner_name or vendor.username }} 👋</h2>
-    <p>لقد تم التحقق من هويتك في النظام اللامركزي بنجاح.</p>
+<div class="alert-box">
+    فشل الربط التقني مع قمرة، تحقق من الـ API Key والرابط.
+</div>
+
+<div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+    <h1 style="color: var(--main-purple);">أهلاً بك، {{ vendor.owner_name or vendor.username }} 👋</h1>
+    <p style="color: #666;">الهيكل جاهز الآن. يمكنك البدء بتركيب النوافذ البرمجية هنا.</p>
     
-    <div style="background: #f4f4f9; padding: 15px; border-radius: 10px; margin-top: 20px;">
-        <strong>رقم المحفظة:</strong> 
-        <span style="color: #4b0082;">{{ vendor.wallet_address or 'لم يتم الربط بعد' }}</span>
+    <div style="margin-top: 30px; border: 2px dashed #ddd; padding: 50px; text-align: center; color: #aaa; border-radius: 15px;">
+        <i class="fas fa-plus-circle" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+        نافذة جديدة (قيد التركيب)
     </div>
 </div>
 {% endblock %}
