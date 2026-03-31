@@ -5,7 +5,7 @@ def perform_login(username, password):
     vendor = Vendor.query.filter_by(username=username).first()
     
     if not vendor:
-        return None, "عذراً، هذا المستخدم غير مسجل في المنصة."
+        return None, "عذراً، هذا المستخدم غير مسجل في المنصة اللامركزية."
     
     # 2. مطابقة كلمة المرور بعد التأكد من وجود المستخدم
     if vendor.password != password:
