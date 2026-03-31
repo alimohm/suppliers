@@ -3,43 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محجوب أونلاين | تسجيل الدخول</title>
+    <title>دخول | محجوب أونلاين</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { 
-            background: #0d001a; height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: radial-gradient(circle at center, #1a0033 0%, #0d001a 100%);
+        :root {
+            --primary-purple: #4b0082;
+            --soft-purple: #f0e6f7;
+            --pure-white: #ffffff;
+            --text-dark: #2d0056;
         }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--pure-white);
+            overflow: hidden;
+        }
+
+        /* القسم الأيمن: صورة وشعارات المنصة */
+        .brand-section {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary-purple) 0%, #2d0056 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo-login {
+            width: 150px;
+            filter: brightness(0) invert(1);
+            margin-bottom: 30px;
+        }
+
+        .brand-section h1 {
+            font-size: 2.5rem;
+            margin: 10px 0;
+            font-weight: 700;
+        }
+
+        .brand-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        .features-list {
+            margin-top: 40px;
+            text-align: right;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .feature-item i {
+            font-size: 1.5rem;
+            margin-left: 15px;
+            color: #ffd700;
+        }
+
+        /* القسم الأيسر: فورم تسجيل الدخول */
+        .login-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--pure-white);
+        }
+
         .login-card {
-            background: rgba(255, 255, 255, 0.02); padding: 50px; border-radius: 30px; width: 380px;
-            backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); text-align: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
         }
-        .logo-main { width: 130px; filter: brightness(0) invert(1); margin-bottom: 25px; }
-        h1 { color: #ffd700; font-size: 1.5rem; margin-bottom: 10px; font-weight: 400; }
-        p { color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 30px; }
-        input { 
-            width: 100%; padding: 16px; margin-bottom: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; font-size: 1rem; outline: none; transition: 0.3s;
+
+        .login-card h2 {
+            color: var(--text-dark);
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
-        input:focus { border-color: #4b0082; background: rgba(75, 0, 130, 0.1); }
-        button { 
-            width: 100%; padding: 16px; border-radius: 12px; border: none; background: #4b0082; 
-            color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.4s;
+
+        .login-card p {
+            color: #666;
+            margin-bottom: 30px;
         }
-        button:hover { background: #6a0dad; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(75, 0, 130, 0.4); }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-purple);
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 45px 15px 15px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-purple);
+            background-color: var(--soft-purple);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(75, 0, 130, 0.2);
+        }
+
+        button:hover {
+            background-color: #3b0066;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 900px) {
+            .brand-section { display: none; }
+        }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-main">
+
+    <div class="brand-section">
+        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-login">
         <h1>محجوب أونلاين</h1>
-        <p>سوقك الذكي | المنصة الأولى للموردين</p>
-        <form method="POST">
-            <input type="text" name="username" placeholder="اسم المستخدم" required>
-            <input type="password" name="password" placeholder="كلمة المرور" required>
-            <button type="submit">دخول للمنصة</button>
-        </form>
+        <p>المنصة الأولى لدعم الموردين والنمو الرقمي</p>
+        
+        <div class="features-list">
+            <div class="feature-item">
+                <i class="fas fa-network-wired"></i>
+                <span>حوكمة رقمية لا مركزية متطورة</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-truck-loading"></i>
+                <span>إدارة ذكية لسلاسل الإمداد</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-chart-line"></i>
+                <span>سوقك الذكي للنمو المتسارع</span>
+            </div>
+        </div>
     </div>
+
+    <div class="login-section">
+        <div class="login-card">
+            <h2>تسجيل الدخول</h2>
+            <p>مرحباً بك مجدداً في نظامك الإداري</p>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="اسم المستخدم" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="كلمة المرور" required>
+                </div>
+                <button type="submit">دخول للمنصة</button>
+            </form>
+            
+            <div style="margin-top: 30px; text-align: center; color: #999; font-size: 0.8rem;">
+                &copy; 2026 محجوب أونلاين - حوكمة رقمية رائدة
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
