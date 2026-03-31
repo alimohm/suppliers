@@ -1,12 +1,13 @@
 {% extends "layout.html" %}
-
 {% block content %}
-<div class="card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-    <h2 style="color: var(--royal-purple); margin-top: 0;">مرحباً بك، {{ vendor.owner_name }} 👋</h2>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
-        <div style="flex: 1; min-width: 200px; background: var(--light-purple); padding: 20px; border-radius: 10px; border-right: 5px solid var(--royal-purple);">
-            <small style="color: #666;">رقم المحفظة</small>
-            <div style="font-weight: bold; font-size: 1.2rem; color: var(--royal-purple);">{{ vendor.wallet_address }}</div>
+<div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+    <h2 style="color: #4b0082; margin-top: 0;">مرحباً بك، {{ vendor.owner_name }} 👋</h2>
+    <p style="color: #666;">لقد سجلت الدخول بنجاح إلى منصة محجوب أونلاين.</p>
+    
+    <div style="margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <div style="background: #f0e6f7; padding: 20px; border-radius: 12px; border-right: 5px solid #4b0082;">
+            <small style="display:block; color:#777">رقم المحفظة</small>
+            <strong style="font-size: 1.1rem; color: #4b0082;">{{ vendor.wallet_address }}</strong>
         </div>
     </div>
 </div>
