@@ -1,27 +1,13 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request, redirect, url_for, session
+from database import db, init_db
+import logic
 
 app = Flask(__name__)
-app.secret_key = 'mahjoub_online_secret_2026'
+app.secret_key = 'mahjoub_king_2026'
 
-# إعداد قاعدة البيانات لبيئة Railway
-db_url = os.environ.get('DATABASE_URL')
-if db_url and db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-# تعريف جدول الموردين
-class Vendor(db.Model):
-    __tablename__ = 'vendor'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(50), nullable=False)
-    owner_name = db.Column(db.String(100))
-    wallet_address = db.Column(db.String(100))
+# تهيئة قاعدة البيانات عند بدء التشغيل
+init_db(app)
 
 @app.route('/')
 def index():
@@ -32,19 +18,15 @@ def login():
     if request.method == 'POST':
         u = request.form.get('username')
         p = request.form.get('password')
-        # البحث عن المورد في قاعدة البيانات
-        vendor = Vendor.query.filter_by(username=u, password=p).first()
-        if vendor:
-            session['vendor_id'] = vendor.id
+        if logic.perform_login(u, p):
             return redirect(url_for('dashboard'))
-        flash("بيانات الدخول غير صحيحة")
     return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
-    if 'vendor_id' not in session:
+    vendor = logic.get_current_vendor()
+    if not vendor:
         return redirect(url_for('login'))
-    vendor = Vendor.query.get(session['vendor_id'])
     return render_template('dashboard.html', vendor=vendor)
 
 @app.route('/logout')
@@ -53,6 +35,5 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
-    # التشغيل على المنفذ 8080 كما هو مطلوب في Railway
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
