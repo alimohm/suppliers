@@ -1,17 +1,25 @@
-<div class="card" style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-    <h5 style="color: #632C8F;"><i class="fas fa-plus-circle"></i> إضافة منتج جديد للمتجر</h5>
+<div class="card" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+    <h4 style="color: var(--p-color); margin-bottom: 25px;"><i class="fas fa-upload"></i> بوابة رفع المنتجات الذكية</h4>
+    
     <form action="{{ url_for('add_product') }}" method="POST" enctype="multipart/form-data">
         <div style="margin-bottom: 15px;">
-            <input type="text" name="name" placeholder="اسم المنتج" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            <label>اسم المنتج</label>
+            <input type="text" name="name" required style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd;">
         </div>
+        
         <div style="margin-bottom: 15px;">
-            <input type="number" name="price" placeholder="السعر الأساسي ($)" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            <label>السعر الأساسي ($)</label>
+            <input type="number" name="price" required style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd;">
+            <small style="color: #666;">* سيتم إضافة 30% تلقائياً عبر finance.py</small>
         </div>
-        <div style="margin-bottom: 15px;">
-            <input type="file" name="image" required>
+
+        <div style="margin-bottom: 20px;">
+            <label>صورة المنتج</label>
+            <input type="file" name="image" required style="display:block; margin-top:5px;">
         </div>
-        <button type="submit" style="width: 100%; padding: 15px; background: #632C8F; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
-            نشر وتفعيل الربط التلقائي
+
+        <button type="submit" style="width:100%; padding:15px; background:var(--p-color); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
+            نشر المنتج والتحقق من الاتصال
         </button>
     </form>
 </div>
