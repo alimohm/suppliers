@@ -1,15 +1,14 @@
 {% extends "layout.html" %}
+
 {% block content %}
-<div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;">
-    <div style="width: 100px; height: 100px; background: #f8f4ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-        <i class="fas fa-rocket" style="font-size: 2.5rem; color: #4b0082;"></i>
+<div class="dashboard-container">
+    <div style="margin-bottom: 30px;">
+        <h2 style="color: #4b0082;">لوحة التحكم السيادية</h2>
+        <p style="color: #888;">أهلاً بك يا {{ vendor.owner_name or vendor.username }}، ابدأ بإدارة سلاسل إمدادك.</p>
     </div>
-    <h2 style="color: #2e004f;">مرحباً بك يا {{ vendor.owner_name or vendor.username }} 👋</h2>
-    <p style="color: #666; max-width: 500px; margin: 0 auto 30px;">
-        تم التحقق من هويتك بنجاح. الهيكل المتجاوب جاهز الآن لبناء نظام الحوكمة اللامركزية الخاص بك.
-    </p>
-    <div style="border: 2px dashed #eee; padding: 40px; border-radius: 15px; color: #bbb;">
-        <i class="fas fa-plus-circle"></i> بانتظار تركيب النافذة البرمجية الأولى للمنتجات
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        {% include 'product_upload.html' %}
     </div>
 </div>
 {% endblock %}
