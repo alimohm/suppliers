@@ -16,7 +16,7 @@
     </div>
 
     <div class="card" style="background: white; padding: 40px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-        <form action="/add_product" method="POST" enctype="multipart/form-data">
+        <form id="productForm" action="/add_product" method="POST" enctype="multipart/form-data">
             
             <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 
@@ -55,11 +55,33 @@
             <hr style="margin: 30px 0; border: 0; border-top: 1px solid var(--border-color);">
 
             <div style="display: flex; justify-content: flex-end;">
-                <button type="submit" style="background: var(--main-p-color); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: 'Cairo'; transition: 0.3s;">
-                    <i class="fas fa-cloud-upload-alt" style="margin-left: 10px;"></i> تأكيد الرفع للمنصة
+                <button type="submit" id="submitBtn" style="background: var(--main-p-color); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: 'Cairo'; transition: 0.3s; display: flex; align-items: center;">
+                    <span id="btnIcon"><i class="fas fa-cloud-upload-alt" style="margin-left: 10px;"></i></span>
+                    <span id="btnText">تأكيد الرفع للمنصة</span>
+                    <span id="btnLoader" style="display: none; margin-right: 10px;">جاري المزامنة السيادية... ⏳</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('productForm').onsubmit = function() {
+        const btn = document.getElementById('submitBtn');
+        const text = document.getElementById('btnText');
+        const icon = document.getElementById('btnIcon');
+        const loader = document.getElementById('btnLoader');
+
+        // تعطيل الزر لمنع تكرار الرفع
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.style.cursor = 'not-allowed';
+
+        // تغيير المحتوى البصري
+        text.style.display = 'none';
+        icon.style.display = 'none';
+        loader.style.display = 'inline-block';
+    };
+</script>
+
 {% endblock %}
