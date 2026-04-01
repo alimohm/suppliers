@@ -1,37 +1,36 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from database import db, init_db
-import logic # استيراد العقل المنفصل
+import logic # استدعاء العقل المنفصل لتقليل استهلاك الذاكرة
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "mahjoub_2026_secret")
+app.secret_key = os.environ.get("SK", "M_26_R") # مفتاح مختصر لتقليل الحجم
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # تحسين أداء الذاكرة
+
 init_db(app)
 
 @app.route('/')
 def index():
-    return redirect(url_for('login_view')) # توجيه للفيو الجديد
+    return redirect(url_for('lv')) # lv اختصار لـ Login View
 
-# تغيير اسم الدالة البرمجية إلى login_view مع بقاء الرابط /login
 @app.route('/login', methods=['GET', 'POST'])
-def login_view(): 
-    if 'vendor_id' in session:
-        return "تم تسجيل الدخول بنجاح" # أو وجهه للـ Dashboard
-
+def lv():
+    if 'v_id' in session: return redirect(url_for('db_v')) # db_v للـ Dashboard
+    
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        # نطلب من المنطق تنفيذ التحقق
-        result = logic.execute_authentication(username, password)
-        
-        if result['status']:
-            session['vendor_id'] = result['user'].id
-            return redirect(url_for('login_view'))
-        
-        flash(result['message'], "error")
+        # استخدام دوال المنطق مباشرة لتقليل أسطر الكود في الملف الرئيسي
+        res = logic.do_auth(request.form.get('u'), request.form.get('p'))
+        if res['status']:
+            session.update({'v_id': res['user'].id, 'name': res['user'].owner_name})
+            return redirect(url_for('db_v'))
+        flash(res['message'], "e")
         
     return render_template('login.html')
 
+@app.route('/dashboard')
+def db_v():
+    if 'v_id' not in session: return redirect(url_for('lv'))
+    return render_template('dashboard.html', name=session.get('name'))
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
