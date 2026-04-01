@@ -1,39 +1,50 @@
-from flask import session, flash, redirect, url_for
-from database import db, Vendor
+import requests # تأكد من وجود هذا السطر في أعلى الملف
 
-def login_vendor(username, password):
-    """منطق التحقق وحوكمة الدخول للمنصة اللامركزية"""
+# ... الكود القديم الموجود مسبقاً يظل كما هو ...
+
+# ==========================================
+# إعدادات الربط مع متجر قمرة (الويب هوك)
+# ==========================================
+
+STORE_ID = "qmr_e235dd03-f398-473f-aa12-79029f05e147"
+# ملاحظة: هذا الرابط يعتمد على توثيق API قمرة لرفع المنتجات
+WEBHOOK_URL = f"https://api.qumra.cloud/v1/stores/{STORE_ID}/products"
+API_KEY = "ضغ_المفتاح_الخاص_بك_هنا" 
+
+def sync_product_to_qumra(name, price, description, image_url=None):
+    """
+    دالة إرسال بيانات المنتج إلى متجر قمرة عبر Webhook
+    """
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    # تجهيز البيانات المرسلة (Payload)
+    payload = {
+        "title": name,
+        "price": float(price),
+        "description": description,
+        "image": image_url,
+        "metadata": {
+            "source": "Mahjoub Online",
+            "sync_date": "2026-04-01"
+        }
+    }
+
     try:
-        # 1. البحث عن المورد في قاعدة البيانات السيادية (Railway Postgres)
-        vendor = Vendor.query.filter_by(username=username).first()
+        # إرسال الطلب بنظام POST
+        response = requests.post(WEBHOOK_URL, json=payload, headers=headers, timeout=10)
         
-        # 2. التحقق من وجود الهوية الرقمية
-        if not vendor:
-            flash("تنبيه: هذه الهوية الرقمية غير مسجلة في المنصة اللامركزية.", "warning")
+        if response.status_code in [200, 201]:
+            print(f"✅ تم مزامنة المنتج {name} بنجاح.")
+            return True
+        else:
+            print(f"❌ فشلت المزامنة. كود الخطأ: {response.status_code}")
+            print(f"الرد: {response.text}")
             return False
             
-        # 3. التحقق من مطابقة المفتاح الخاص (كلمة المرور)
-        if vendor.password != password:
-            flash("خطأ: المفتاح الخاص (كلمة المرور) غير مطابق لسجلاتنا.", "danger")
-            return False
-            
-        # 4. في حال النجاح: إنشاء جلسة عمل آمنة للمورد وتخزين بياناته
-        session['vendor_id'] = vendor.id
-        session['brand_name'] = vendor.brand_name or "محجوب أونلاين"
-        session['wallet'] = vendor.wallet_address
-        return True
-        
     except Exception as e:
-        print(f"Logic Execution Error: {e}")
-        flash("عذراً، النظام يواجه صعوبة في مزامنة البيانات مع السيرفر السيادي الآن.", "danger")
+        print(f"⚠️ خطأ أثناء الاتصال بسيرفر قمرة: {e}")
         return False
-
-def logout():
-    """تطهير الجلسة وإغلاق بوابة الحوكمة"""
-    session.clear()
-    flash("تم تسجيل الخروج بنجاح من نظامك الإداري.", "info")
-    return redirect(url_for('login_page'))
-
-def is_logged_in():
-    """فحص حالة الحوكمة للمستخدم الحالي (هل الجلسة نشطة؟)"""
-    return 'vendor_id' in session
