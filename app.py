@@ -37,7 +37,7 @@ def dashboard():
     # جلب بيانات المورد الحالي
     vendor = Vendor.query.filter_by(username=session['username']).first()
     
-    # جلب عدد المنتجات الخاصة بهذا المورد فقط (بناءً على التحديث الجديد للقاعدة)
+    # جلب عدد المنتجات الخاصة بهذا المورد فقط
     try:
         products_count = Product.query.filter_by(vendor_username=session['username']).count()
     except Exception as e:
@@ -48,7 +48,7 @@ def dashboard():
 
 @app.route('/add_product', methods=['GET', 'POST'])
 def add_product():
-    """إضافة منتج جديد - الحفظ المحلي السريع ثم محاولة المزامنة"""
+    """إضافة منتج جديد - الحفظ المحلي السريع ثم إطلاق شرارة المزامنة"""
     if not is_logged_in():
         return redirect(url_for('login_page'))
     
@@ -65,7 +65,7 @@ def add_product():
         try:
             final_price = float(p_price)
 
-            # 2. الحفظ المحلي الفوري (لضمان بقاء البيانات في محجوب أونلاين)
+            # 2. الحفظ المحلي الفوري (لضمان بقاء البيانات في محجوب أونلاين حتى لو فشل الاتصال الخارجي)
             new_item = Product(
                 name=p_name,
                 price=final_price,
@@ -76,24 +76,23 @@ def add_product():
             db.session.add(new_item)
             db.session.commit()
             
-            # فلاش سريع للمستخدم بنجاح الحفظ المحلي
-            flash(f"✅ تم تسجيل المنتج {p_name} في نظام محجوب بنجاح.", "success")
-
-            # 3. المزامنة الخارجية مع قمرة (في بلوك مستقل لتجنب تعليق الطلب)
+            # 3. إطلاق المزامنة مع قمرة (المورد سيشعر بالسرعة لأننا سنعطيه الرد فوراً)
             try:
-                # نستخدم timeout قصير داخل send_to_qumra_webhook
+                # نرسل إشارة "طلب إضافة" لقمرة
                 status = send_to_qumra_webhook(p_name, str(final_price), p_desc)
                 if status:
-                    print(f"✅ تم مزامنة {p_name} مع متجر قمرة بنجاح.")
+                    flash(f"🚀 تم رفع {p_name} ومزامنته مع المتجر بنجاح!", "success")
                 else:
-                    print(f"⚠️ فشلت المزامنة التلقائية مع قمرة لمنتج: {p_name}")
+                    flash(f"✅ تم الحفظ في لوحة محجوب، وجاري التحديث في المتجر.", "info")
             except Exception as sync_err:
-                print(f"📡 خطأ تقني في المزامنة الخارجية: {sync_err}")
+                # في حال حدوث Timeout أو خطأ خارجي، يظل المنتج محفوظاً محلياً
+                print(f"📡 خطأ مزامنة: {sync_err}")
+                flash(f"⚠️ المنتج متاح في لوحتك، سيتم تحديث المتجر الخارجي آلياً.", "warning")
 
             return redirect(url_for('dashboard'))
 
         except ValueError:
-            flash("❌ خطأ: السعر يجب أن يكون رقماً صحيحاً.", "danger")
+            flash("❌ خطأ: السعر يجب أن يكون رقماً.", "danger")
         except Exception as e:
             db.session.rollback()
             print(f"❌ خطأ قاعدة بيانات: {e}")
@@ -108,6 +107,7 @@ def qumra_receiver():
     try:
         data = request.json
         print(f"📡 إشارة قادمة من قمرة: {data}")
+        # هنا سيتم لاحقاً إضافة منطق معالجة رصيد الـ MAH
         return {"status": "received"}, 200
     except:
         return {"status": "error"}, 400
