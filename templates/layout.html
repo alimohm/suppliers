@@ -3,142 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}اللوحة السيادية{% endblock %} | محجوب أونلاين</title>
+    <title>{% block title %}محجوب أونلاين{% endblock %} | 2026</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root {
-            --p-color: #4b0082; /* الأرجواني الملكي */
-            --gold: #FFD700;    /* الذهب للتمييز الملكي */
-            --bg-body: #f4f6f9;
-            --text-dark: #333;
-            --text-light: #fff;
+            --bg-body: #f7f8f9; /* نفس لون الخلفية في Qumra */
+            --white: #ffffff;
+            --main-p-color: #4b0082; /* أرجواني ملكي - هوية محجوب */
+            --gold: #FFD700;
+            --text-dark: #333333;
+            --border-color: #e6e6e6;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 70px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg-body); display: flex; direction: rtl; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Cairo', sans-serif; background-color: var(--bg-body); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- القائمة الجانبية (Sidebar) في اليمين - باللون البنفسجي --- */
-        .sidebar { 
-            width: 260px; height: 100vh; background: var(--p-color); 
-            display: flex; flex-direction: column; position: fixed; right: 0; 
-            padding-top: 20px; color: var(--text-light); border-left: 1px solid rgba(255,255,255,0.1); 
-            transition: 0.3s;
+        /* =========================================
+           2. الشريط الجانبي (Sidebar) - الهيكل الثابت
+           ========================================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--white);
+            height: 100%;
+            border-left: 1px solid var(--border-color); /* بما أننا RTL فالحدود على اليسار */
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1000;
         }
 
-        /* استبدال قمرة بـ محجوب أونلاين في الأعلى */
-        .brand-logo { 
-            display: flex; align-items: center; justify-content: center; 
-            padding: 10px 20px 30px 20px; gap: 10px;
-        }
-        .brand-logo img { width: 35px; filter: brightness(0) invert(1); } /* اللوجو أبيض على البنفسجي */
-        .brand-name { font-size: 18px; font-weight: 700; color: var(--gold); }
-
-        /* روابط التنقل */
-        .nav-links { flex: 1; padding: 0 15px; }
-        .nav-link { 
-            display: flex; align-items: center; padding: 12px 15px; 
-            color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 8px; 
-            margin-bottom: 5px; font-size: 15px; transition: 0.2s;
-        }
-        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white; }
-        .nav-link i { margin-left: 12px; font-size: 16px; color: var(--gold); } /* الأيقونات ذهبية */
-
-        /* --- المحتوى الرئيسي (Main Content) في اليسار --- */
-        .main-wrapper { 
-            margin-right: 260px; width: 100%; display: flex; flex-direction: column; 
-            transition: 0.3s;
+        /* حاوية الشعار - نفس مكان Qumra */
+        .brand-container {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        /* شريط العنوان العلوي (Top Navbar) */
-        .top-navbar { 
-            height: 70px; background: white; border-bottom: 1px solid #eee; 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 30px; position: sticky; top: 0; z-content: 1000;
+        /* شعار محجوب أونلاين - بحجم متناسق */
+        .logo-img {
+            max-width: 140px; /* حجم متناسق مكان Qumra */
+            height: auto;
+            max-height: 50px;
+            object-fit: contain;
+            transition: all 0.3s ease;
         }
-        
-        /* استدعاء الهوية الملكية للمورد */
-        .vendor-profile { display: flex; align-items: center; gap: 12px; }
-        .vendor-avatar { 
-            width: 45px; height: 45px; border-radius: 50%; 
-            background: var(--p-color); color: white; font-weight: 700; font-size: 18px;
-            display: flex; align-items: center; justify-content: center; 
-            border: 2px solid #eee; overflow: hidden; /* تمييز حواف اللوجو */
+
+        /* قائمة الروابط */
+        .menu-list { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 15px;
+            font-weight: 600;
+            transition: 0.2s;
+            position: relative;
         }
-        /* في حال استخدام الصورة الحقيقية للوجو المورد */
-        .vendor-avatar img { width: 100%; height: 100%; object-fit: cover; } 
+        .menu-item i { margin-left: 15px; font-size: 18px; color: #7f8c8d; width: 20px; text-align: center; }
+        .menu-item:hover, .menu-item.active { background-color: rgba(75,0,130,0.05); color: var(--main-p-color); }
+        .menu-item.active i { color: var(--main-p-color); }
 
-        .vendor-info { text-align: right; }
-        .vendor-name { font-weight: 700; color: var(--text-dark); font-size: 15px; }
-        .vendor-brand { color: var(--p-color); font-size: 13px; font-weight: 600; } /* اسم العلامة التجارية */
+        /* =========================================
+           3. المحتوى الرئيسي (Header + Content)
+           ========================================= */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; }
 
-        /* منطقة المحتوى */
-        .content-area { padding: 30px; }
+        /* الهيدر العلوي */
+        .top-header {
+            height: var(--header-height);
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .header-icon { font-size: 20px; color: #7f8c8d; cursor: pointer; }
 
-        /* --- التجاوب الذكي مع الشاشات --- */
+        /* محتوى الصفحة المتغير - يتم حقنه هنا */
+        .page-content { flex: 1; padding: 30px; overflow-y: auto; }
+
+        /* =========================================
+           4. التجاوب (Mobile Responsive)
+           ========================================= */
         @media (max-width: 991px) {
-            .sidebar { width: 80px; }
-            .brand-name { display: none; }
-            .nav-link span { display: none; }
-            .nav-link { justify-content: center; padding: 15px; }
-            .nav-link i { margin-left: 0; font-size: 20px; }
-            .main-wrapper { margin-right: 80px; }
-        }
+            :root { --sidebar-width: var(--sidebar-collapsed-width); }
+            
+            /* إخفاء النص، ترك الأيقونات فقط - نفس Qumra mobile */
+            .menu-item span, .brand-container span { display: none; }
+            
+            .menu-item { justify-content: center; padding: 15px 0; }
+            .menu-item i { margin-left: 0; font-size: 22px; }
 
-        @media (max-width: 767px) {
-            .top-navbar { padding: 0 15px; }
-            .vendor-avatar { width: 40px; height: 40px; font-size: 16px; }
-            .vendor-info { display: none; } /* إخفاء النص لتقليل الزحام على الجوال */
-            .content-area { padding: 15px; }
+            /* ضبط الشعار للأجهزة الصغيرة */
+            .logo-img { max-width: 40px; max-height: 40px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="brand-logo">
-            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" alt="محجوب أونلاين">
-            <span class="brand-name">محجوب أونلاين</span>
-        </div>
-        
-        <div class="nav-links">
-            <a href="{{ url_for('db_v') }}" class="nav-link active"><i class="fas fa-chart-line"></i> <span>الرئيسة السيادية</span></a>
-            <a href="#" class="nav-link"><i class="fas fa-wallet"></i> <span>المحفظة الرقمية MQ</span></a>
-            <a href="#" class="nav-link"><i class="fas fa-tags"></i> <span>المنتجات المسودة</span></a>
-            <a href="#" class="nav-link"><i class="fas fa-user-tie"></i> <span>إعدادات العلامة التجارية</span></a>
-            <a href="{{ url_for('logout') }}" class="nav-link" style="margin-top: auto; color: #ff6b6b;"><i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span></a>
-        </div>
-    </div>
-
-    <div class="main-wrapper">
-        <div class="top-navbar">
-            <div class="top-nav-right">
-                <h3>{% block header_title %}{% endblock %}</h3>
-            </div>
-            
-            <div class="vendor-profile">
-                <div class="vendor-info">
-                    <span class="vendor-name">{{ session.get('owner_name', 'مورد سيادي') }}</span>
-                    <br>
-                    <span class="vendor-brand">{{ session.get('brand_name', 'علامتك التجارية') }}</span>
-                </div>
-                <div class="vendor-avatar">
-                    {% if session.get('brand_logo_url') %}
-                        <img src="{{ session.get('brand_logo_url') }}" alt="لوجو">
-                    {% else %}
-                        {{ session.get('owner_name', 'م')[0] }}
-                    {% endif %}
-                </div>
-                <button style="background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer;"><i class="fas fa-angle-down"></i></button>
-            </div>
+    <nav class="sidebar">
+        <div class="brand-container">
+            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" alt="محجوب أونلاين" class="logo-img">
         </div>
 
-        <div class="content-area">
+        <div class="menu-list">
+            <a href="/dashboard" class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </a>
+            <a href="/products" class="menu-item">
+                <i class="fas fa-boxes"></i>
+                <span>إدارة المنتجات</span>
+            </a>
+            <a href="/orders" class="menu-item">
+                <i class="fas fa-receipt"></i>
+                <span>الطلبات</span>
+            </a>
+            <a href="/wallet" class="menu-item">
+                <i class="fas fa-wallet"></i>
+                <span>محفظة MQ</span>
+            </a>
+            <a href="/settings" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>الإعدادات السيادية</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <header class="top-header">
+            <div class="header-right">
+                <i class="fas fa-bars header-icon" style="margin-right: 15px;"></i>
+                <strong>بوابة حوكمة الموردين</strong>
+            </div>
+            <div class="header-actions">
+                <i class="far fa-bell header-icon"></i>
+                <div class="user-profile" style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-weight:600;">{{ session['brand_name'] }}</span>
+                    <i class="fas fa-user-circle" style="font-size:30px; color:var(--main-p-color);"></i>
+                    <a href="/logout" class="header-icon" title="خروج سيادي"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-content">
             {% block content %}{% endblock %}
         </div>
-    </div>
+    </main>
 
 </body>
 </html>
