@@ -59,3 +59,18 @@ if __name__ == '__main__':
     # ضبط المنفذ ليتوافق مع بيئة تشغيل Railway
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
+
+@app.route('/add_product', methods=['GET', 'POST'])
+def add_product():
+    if not is_logged_in():
+        return redirect(url_for('login_page'))
+    
+    if request.method == 'POST':
+        # منطق الحفظ هنا
+        name = request.form.get('product_name')
+        price = request.form.get('price')
+        # سيتم إضافة منطق رفع الصور وحفظ المسار في الخطوة القادمة
+        flash(f"تم إدراج {name} بنجاح في متجرك.", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('add_product.html')
