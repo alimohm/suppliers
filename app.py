@@ -7,16 +7,20 @@ from logic import login_vendor, logout_vendor, is_logged_in, get_vendor_data
 app = Flask(__name__)
 init_db(app)
 
-@app.route('/')
-def login_page():
-    if is_logged_in(): return redirect(url_for('dashboard'))
-    return render_template('login.html')
-
-@app.route('/login', methods=['GET', 'POST']) # أضفنا GET هنا
+@app.route('/login', methods=['GET', 'POST'])
 def do_login():
-    if request.method == 'GET':
-        return redirect(url_for('login_page')) # إذا دخلت بالرابط، يرجعك لصفحة الدخول
+    if request.method == 'POST':
+        user = request.form.get('username')
+        pw = request.form.get('password')
+        
+        # هنا يعمل المنطق الذي صممناه في logic.py
+        if login_vendor(user, pw):
+            return redirect(url_for('dashboard'))
+        
+        # إذا فشل التحقق، سيعود لصفحة الدخول وتظهر الرسائل (Flash Messages)
+        return redirect(url_for('login_page'))
     
+    return redirect(url_for('login_page'))
     # هذا الجزء يبقى كما هو لمعالجة البيانات
     user = request.form.get('username')
     pw = request.form.get('password')
