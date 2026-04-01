@@ -74,3 +74,9 @@ def add_product():
         return redirect(url_for('dashboard'))
 
     return render_template('add_product.html')
+
+@app.route('/add_product')
+def add_product_page():
+    if 'username' not in session:
+        return redirect(url_for('login_page'))
+    return render_template('add_product.html')
