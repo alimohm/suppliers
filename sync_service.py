@@ -4,7 +4,7 @@ import requests
 # إعدادات الربط - تسحب من Railway أو تستخدم الافتراضي
 API_KEY = os.environ.get("QUMRA_API_KEY", "qmr_e235dd03-f398-473f-aa12-79029f05e147")
 STORE_ID = "qmr_e235dd03-f398-473f-aa12-79029f05e147"
-API_URL = f"https://api.qumra.cloud/v1/stores/{STORE_ID}/products"
+API_URL = f"https://mahjoub-online-1-production-c824.up.railway.app/add_product/{STORE_ID}/products"
 
 # رابط سيرفرك في Railway (تأكد أن هذا هو الرابط الصحيح لمشروعك)
 BASE_URL = "https://mahjoub-online-1-production-c824.up.railway.app"
