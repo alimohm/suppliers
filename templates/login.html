@@ -16,27 +16,31 @@
         * { box-sizing: border-box; }
         body { margin: 0; padding: 0; display: flex; height: 100vh; font-family: 'Cairo', sans-serif; background: var(--p-color); overflow: hidden; }
 
-        /* --- الأقسام المعكوسة بدقة --- */
-        
         /* القسم اليمين - الهوية (أبيض) */
         .brand-section { 
             flex: 1.2; background: #ffffff; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; text-align: center; 
-            color: #333; padding: 40px; order: 2; /* يمين الشاشة */
+            color: #333; padding: 40px; order: 2;
         }
 
         /* القسم اليسار - الدخول (بنفسجي) */
         .login-section { 
             flex: 1; background: var(--p-color); display: flex; flex-direction: column; 
             justify-content: center; align-items: center; padding: 40px; color: white;
-            order: 1; /* يسار الشاشة */
+            order: 1;
         }
 
-        /* تنسيق نموذج الدخول */
         .login-card { width: 100%; max-width: 380px; text-align: center; }
         .login-card h2 { font-size: 32px; color: white; margin-bottom: 10px; font-weight: 700; }
-        .login-card p { font-size: 14px; opacity: 0.8; margin-bottom: 30px; }
+        .login-card p { font-size: 14px; opacity: 0.8; margin-bottom: 25px; }
         
+        /* التنبيهات الذكية فوق الحقول مباشرة */
+        .alert { 
+            background: #ff4d4d; color: white; padding: 12px; border-radius: 10px; 
+            margin-bottom: 20px; font-size: 14px; text-align: right; display: flex; align-items: center;
+        }
+        .alert i { margin-left: 10px; }
+
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group input { 
             width: 100%; padding: 18px 50px 18px 15px; border: 1px solid rgba(255,255,255,0.2); 
@@ -50,7 +54,6 @@
         }
         .btn-login:hover { background: var(--gold); transform: scale(1.02); }
 
-        /* تنسيق قسم الهوية الأبيض */
         .logo { width: 140px; margin-bottom: 20px; }
         .brand-section h1 { font-size: 40px; color: var(--p-color); margin: 0; font-weight: 700; }
         .brand-section .slogan { font-size: 18px; color: #666; margin-bottom: 40px; }
@@ -62,16 +65,11 @@
         .feature-item i { color: var(--p-color); margin-left: 15px; font-size: 20px; }
         .feature-item span { color: #444; font-weight: 600; font-size: 15px; }
 
-        /* التنبيهات */
-        .alert { color: white; background: #e74c3c; padding: 12px; border-radius: 10px; margin-bottom: 20px; width: 100%; font-size: 14px; }
-
-        /* التجاوب مع الجوال (Responsive) */
         @media (max-width: 850px) {
             body { flex-direction: column; overflow-y: auto; }
             .brand-section { order: 1; width: 100%; padding: 40px 20px; min-height: auto; }
             .login-section { order: 2; width: 100%; padding: 40px 20px; }
             .feature-item { width: 100%; }
-            .brand-section h1 { font-size: 30px; }
         }
     </style>
 </head>
@@ -93,7 +91,12 @@
             <p>مرحباً بك مجدداً في نظامك الإداري الملكي</p>
             
             {% with messages = get_flashed_messages() %}
-                {% if messages %}<div class="alert"><i class="fas fa-times-circle"></i> {{ messages[0] }}</div>{% endif %}
+                {% if messages %}
+                    <div class="alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
             {% endwith %}
 
             <form method="POST">
@@ -107,7 +110,7 @@
                 </div>
                 <button type="submit" class="btn-login">دخول للمنصة</button>
             </form>
-            <p style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 50px;">© 2026 محجوب أونلاين - حوكمة رقمية رائدة</p>
+            <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 50px;">© 2026 محجوب أونلاين - حوكمة رقمية رائدة</p>
         </div>
     </div>
 
