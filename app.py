@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.utils import secure_filename # أداة أمان لرفع الملفات
 from config import Config
 from database import db, init_db, Product, Vendor 
 from logic import login_vendor, logout, is_logged_in
@@ -8,7 +9,11 @@ from sync_service import send_to_qumra_webhook
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# تهيئة قاعدة البيانات والربط مع Railway مع التحديث التلقائي للأعمدة
+# إعدادات مجلد الرفع الذي أنشأته توكاً
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # حد أقصى 16 ميجا للصورة
+
+# تهيئة قاعدة البيانات
 init_db(app)
 
 @app.route('/')
@@ -30,14 +35,11 @@ def login_page():
 
 @app.route('/dashboard')
 def dashboard():
-    """لوحة التحكم - عرض الإحصائيات مع الخصوصية لكل مورد"""
     if not is_logged_in():
         return redirect(url_for('login_page'))
     
-    # جلب بيانات المورد الحالي
     vendor = Vendor.query.filter_by(username=session['username']).first()
     
-    # جلب عدد المنتجات الخاصة بهذا المورد فقط
     try:
         products_count = Product.query.filter_by(vendor_username=session['username']).count()
     except Exception as e:
@@ -48,44 +50,51 @@ def dashboard():
 
 @app.route('/add_product', methods=['GET', 'POST'])
 def add_product():
-    """إضافة منتج جديد - الحفظ المحلي السريع ثم إطلاق شرارة المزامنة"""
     if not is_logged_in():
         return redirect(url_for('login_page'))
     
     if request.method == 'POST':
-        # 1. سحب البيانات والتحقق الأولي
         p_name = request.form.get('name')
         p_price = request.form.get('price')
         p_desc = request.form.get('description', '') 
-        
+        p_image = request.files.get('image') # استقبال ملف الصورة من النموذج
+
         if not p_name or not p_price:
             flash("❌ يرجى إدخال اسم المنتج وسعره.", "danger")
             return redirect(url_for('add_product'))
 
         try:
             final_price = float(p_price)
+            image_filename = None
 
-            # 2. الحفظ المحلي الفوري (لضمان بقاء البيانات في محجوب أونلاين حتى لو فشل الاتصال الخارجي)
+            # معالجة رفع الصورة وحفظها في المجلد الجديد
+            if p_image and p_image.filename != '':
+                image_filename = secure_filename(p_image.filename)
+                # التأكد من وجود المجلد (احتياطاً)
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                p_image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+
+            # الحفظ المحلي في قاعدة بيانات محجوب أونلاين
             new_item = Product(
                 name=p_name,
                 price=final_price,
                 description=p_desc,
+                image_file=image_filename, # حفظ اسم الملف في القاعدة
                 vendor_username=session['username']
             )
             
             db.session.add(new_item)
             db.session.commit()
             
-            # 3. إطلاق المزامنة مع قمرة (المورد سيشعر بالسرعة لأننا سنعطيه الرد فوراً)
+            # إطلاق المزامنة مع قمرة مع تمرير اسم ملف الصورة
             try:
-                # نرسل إشارة "طلب إضافة" لقمرة
-                status = send_to_qumra_webhook(p_name, str(final_price), p_desc)
+                # نمرر اسم ملف الصورة لـ sync_service لكي تصنع الرابط لقمرة
+                status = send_to_qumra_webhook(p_name, str(final_price), p_desc, image_filename)
                 if status:
                     flash(f"🚀 تم رفع {p_name} ومزامنته مع المتجر بنجاح!", "success")
                 else:
-                    flash(f"✅ تم الحفظ في لوحة محجوب، وجاري التحديث في المتجر.", "info")
+                    flash(f"✅ تم الحفظ في لوحة محجوب، وجاري المزامنة التقنية.", "info")
             except Exception as sync_err:
-                # في حال حدوث Timeout أو خطأ خارجي، يظل المنتج محفوظاً محلياً
                 print(f"📡 خطأ مزامنة: {sync_err}")
                 flash(f"⚠️ المنتج متاح في لوحتك، سيتم تحديث المتجر الخارجي آلياً.", "warning")
 
@@ -103,11 +112,9 @@ def add_product():
 
 @app.route('/webhook/qumra', methods=['POST'])
 def qumra_receiver():
-    """استقبال التنبيهات من منصة قمرة لتحديث الرصيد والطلبات"""
     try:
         data = request.json
         print(f"📡 إشارة قادمة من قمرة: {data}")
-        # هنا سيتم لاحقاً إضافة منطق معالجة رصيد الـ MAH
         return {"status": "received"}, 200
     except:
         return {"status": "error"}, 400
