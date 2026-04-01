@@ -43,3 +43,12 @@ def init_db(app):
                 db.session.commit()
         except Exception as e:
             print(f"Error: {e}")
+            
+# أضف هذا النموذج داخل ملف database.py
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(500)) # لتخزين رابط الصورة
+    description = db.Column(db.Text)
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id')) # ربط المنتج بمورد معين
