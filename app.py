@@ -1,3 +1,24 @@
+# في أعلى ملف app.py تأكد من استيراد الدالة الجديدة
+from logic import handle_product_sync 
+
+@app.route('/add_product', methods=['GET', 'POST'])
+def add_product():
+    if not is_logged_in():
+        return redirect(url_for('login_page'))
+    
+    if request.method == 'POST':
+        # نرسل كل بيانات النموذج (request.form) إلى ملف logic لمعالجتها
+        success, p_name = handle_product_sync(request.form)
+        
+        if success:
+            flash(f"✅ تم مزامنة المنتج '{p_name}' مع متجر قمرة بنجاح!", "success")
+        else:
+            flash(f"⚠️ المنتج '{p_name}' جاهز محلياً، لكن تعذر الاتصال بالويب هوك.", "warning")
+            
+        return redirect(url_for('dashboard'))
+
+    return render_template('add_product.html')
+
 import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from config import Config
