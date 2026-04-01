@@ -7,15 +7,19 @@ init_db(app) # تهيئة القاعدة فور التشغيل
 
 @app.route('/login', methods=['GET', 'POST'])
 def lv():
+    if 'v_id' in session: return redirect(url_for('db_v'))
+    
     if request.method == 'POST':
-        # إرسال البيانات للمنطق
         res = logic.do_auth(request.form.get('username'), request.form.get('password'))
-        
         if res['status']:
-            session['v_id'] = res['user'].id
+            # تخزين الهوية الملكية في الجلسة
+            session.update({
+                'v_id': res['user'].id,
+                'owner_name': res['user'].owner_name,
+                'brand_name': res['user'].brand_name or "متجر سيادي",
+                'brand_logo_url': res['user'].brand_logo_url
+            })
             return redirect(url_for('db_v'))
-        
-        # ظهور الرسالة المخصصة في الواجهة
         flash(res['msg'], "error")
         
     return render_template('login.html')
