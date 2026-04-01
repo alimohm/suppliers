@@ -2,41 +2,39 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from config import Config
 from database import db, init_db, Vendor
-import logic  # محرك السرعة والـ SEO والصلاحيات
-import finance  # المحرك المالي الدقيق بنظام Decimal
 
-# 1. تهيئة التطبيق والقاعدة مع إعدادات الاستقرار (The Core)
+# استيراد الملفات المنفصلة (حتى لو تعطل أحدها، يسهل حصره)
+try:
+    import logic
+    import finance
+except ImportError:
+    # نظام حماية في حال فقدان ملفات المنطق
+    logic = None
+    finance = None
+
+# 1. تهيئة التطبيق والقاعدة
 app = Flask(__name__)
 app.config.from_object(Config)
 init_db(app)
 
-# 2. ضمان وجود الجداول والحساب السيادي عند التشغيل
+# 2. حجر الأساس: إنشاء الجداول والحساب الملكي
 with app.app_context():
-    db.create_all() # إنشاء الجداول فوراً لمنع الأخطاء التقنية
-    
-    # التأكد من وجود حساب المالك "ali" كقاعدة استقرار
-    if not Vendor.query.filter_by(username="ali").first():
-        default_vendor = Vendor(
-            username="ali", 
-            password="123", 
-            owner_name="علي محجوب", 
-            brand_name="محجوب أونلاين"
-        )
-        db.session.add(default_vendor)
-        db.session.commit()
+    try:
+        db.create_all() 
+        if not Vendor.query.filter_by(username="ali").first():
+            db.session.add(Vendor(
+                username="ali", 
+                password="123", 
+                owner_name="علي محجوب", 
+                brand_name="محجوب أونلاين"
+            ))
+            db.session.commit()
+    except Exception as e:
+        print(f"فشل في تهيئة القاعدة: {e}")
 
-# 3. توجيه الصفحة الرئيسية (التحويل الذكي)
-@app.route('/')
-def home():
-    # إذا كانت الجلسة نشطة، اذهب للهيكل مباشرة
-    if 'vendor_id' in session:
-        return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
-
-# 4. بوابة الدخول الملكية (المعكوسة والآمنة)
+# 3. بوابة الدخول (مستقلة تماماً عن باقي الوظائف)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # منع المستخدم المسجل من رؤية صفحة الدخول مرة أخرى
     if 'vendor_id' in session:
         return redirect(url_for('dashboard'))
 
@@ -44,48 +42,45 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # البحث والتحقق عبر 'عقل النظام' في logic.py
         user = Vendor.query.filter_by(username=username).first()
         
-        if not user:
-            flash("عذراً، اسم المستخدم هذا غير مسجل لدينا", "error")
-        elif user.password != password:
-            flash("خطأ في بيانات الدخول: كلمة المرور غير صحيحة", "error")
-        else:
-            # نجاح العملية: إنشاء الجلسة وتفعيل نظام الصلاحيات
-            session.permanent = True # بقاء الجلسة نشطة (Persistent)
+        if user and user.password == password:
+            session.permanent = True
             session['vendor_id'] = user.id
-            session['role'] = "admin" if user.username == "ali" else "vendor"
-            
-            flash(f"مرحباً بك في عرشك الرقمي، {user.owner_name}", "success")
-            return redirect(url_for('dashboard')) # التحويل الفوري للهيكل
+            return redirect(url_for('dashboard'))
+        
+        flash("خطأ في بيانات الدخول: يرجى التحقق من الاسم أو كلمة المرور", "error")
             
     return render_template('login.html')
 
-# 5. لوحة الهيكل (Dashboard) - مركز العمليات الأرجواني
+# 4. لوحة الهيكل (تعتمد على logic.py إذا كان متاحاً)
 @app.route('/dashboard')
 def dashboard():
-    # الدرع الواقي: حماية الرابط من الدخول غير المصرح به
     if 'vendor_id' not in session:
         return redirect(url_for('login'))
         
     vendor = Vendor.query.get(session['vendor_id'])
     
-    # استدعاء بيانات الهيكل بتنسيق SEO الصديق من logic.py
-    dashboard_data = logic.get_dashboard_stats(vendor.id)
-    
-    # عرض الواجهة التي تحتوي على "الخطوات الأربع"
-    return render_template('dashboard.html', vendor=vendor, stats=dashboard_data)
+    # محاولة جلب البيانات من logic.py دون تعطيل الصفحة
+    stats = {}
+    if logic:
+        try: stats = logic.get_dashboard_stats(vendor.id)
+        except: pass
+        
+    return render_template('dashboard.html', vendor=vendor, stats=stats)
 
-# 6. تسجيل الخروج وتطهير الجلسة
+# 5. التوجيه الذكي عند فتح الرابط الرئيسي
+@app.route('/')
+def home():
+    return redirect(url_for('dashboard')) if 'vendor_id' in session else redirect(url_for('login'))
+
+# 6. تسجيل الخروج
 @app.route('/logout')
 def logout():
-    session.clear() # تدمير كافة بيانات الجلسة للأمان
-    flash("تم تسجيل الخروج بنجاح. ننتظرك قريباً.", "info")
+    session.clear()
     return redirect(url_for('login'))
 
-# 7. تشغيل السيرفر الملكي مع ضغط البيانات
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    # تشغيل السيرفر ليكون متوافقاً مع الهواتف والتابلت
-    app.run(host='0.0.0.0', port=port, debug=False)
+    # تفعيل debug=True ليخبرك المتصفح بمكان الخطأ بالضبط إذا حدث
+    app.run(host='0.0.0.0', port=port, debug=True)
