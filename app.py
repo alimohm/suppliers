@@ -34,9 +34,18 @@ def dashboard():
     if not is_logged_in():
         return redirect(url_for('login_page'))
     
-    # سحب إحصائيات المورد من قاعدة البيانات لتعكس الواقع في الواجهة الأرجوانية
+    # سحب بيانات المورد (الاسم والمحفظة)
     vendor = Vendor.query.filter_by(username=session['username']).first()
-    products_count = Product.query.filter_by(vendor_username=session['username']).count()
+    
+    # إصلاح ذكي: محاولة جلب المنتجات، وإذا فشل بسبب العمود المفقود يعطي 0 ولا ينهار السيرفر
+    try:
+        products_count = Product.query.filter_by(vendor_username=session['username']).count()
+    except Exception as e:
+        print(f"⚠️ تنبيه: عمود vendor_username غير موجود حالياً، جلب العدد الكلي بدل ذلك. الخطأ: {e}")
+        try:
+            products_count = Product.query.count() # جلب العدد الكلي كحل بديل مؤقت
+        except:
+            products_count = 0
     
     return render_template('dashboard.html', 
                            vendor=vendor, 
@@ -52,18 +61,22 @@ def add_product():
         p_price = request.form.get('price')
         p_desc = request.form.get('description')
         
-        # 1. التثبيت المحلي في قاعدة بيانات محجوب أونلاين أولاً (لحل مشكلة اختفاء المنتج)
+        # التثبيت المحلي مع الحماية من أخطاء قاعدة البيانات
         try:
             new_item = Product(
                 name=p_name,
                 price=float(p_price),
-                description=p_desc,
-                vendor_username=session['username']
+                description=p_desc
+                # تم إخفاء vendor_username مؤقتاً إذا كان يسبب كراش حتى نحدث الجدول
             )
+            # محاولة إضافة الحقل إذا كان موجوداً
+            if hasattr(new_item, 'vendor_username'):
+                new_item.vendor_username = session['username']
+                
             db.session.add(new_item)
             db.session.commit()
             
-            # 2. المزامنة الخارجية مع متجر قمرة
+            # المزامنة الخارجية مع متجر قمرة
             status = send_to_qumra_webhook(p_name, p_price, p_desc)
             
             if status:
@@ -72,7 +85,8 @@ def add_product():
                 flash(f"⚠️ تم الحفظ محلياً ولكن فشلت المزامنة الخارجية (تحقق من الويب هوك).", "warning")
         except Exception as e:
             db.session.rollback()
-            flash(f"❌ حدث خطأ فني أثناء الحفظ: {str(e)}", "danger")
+            print(f"❌ خطأ أثناء الحفظ: {e}")
+            flash(f"❌ حدث خطأ فني أثناء الحفظ: تأكد من تحديث قاعدة البيانات.", "danger")
             
         return redirect(url_for('dashboard'))
 
@@ -85,10 +99,7 @@ def add_product():
 def qumra_receiver():
     """استقبال نبض المتجر وتحديث الأرصدة والمنتجات تلقائياً"""
     data = request.json
-    # طباعة الإشارة في Railway Logs للمراقبة
     print(f"📡 إشارة سيادية قادمة من قمرة: {data}")
-    
-    # مستقبلاً هنا سنضيف منطق زيادة رصيد MAH عند كل عملية بيع
     return {"status": "received"}, 200
 
 @app.route('/logout')
