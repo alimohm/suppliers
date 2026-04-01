@@ -1,9 +1,14 @@
-# logic.py
 from database import Vendor
 
-def execute_authentication(username, password): 
-    """دالة التحقق المستقلة تماماً"""
-    user = Vendor.query.filter_by(username=username).first()
-    if user and user.password == password:
-        return {"status": True, "user": user}
-    return {"status": False, "message": "بيانات الدخول غير صحيحة"}
+def do_auth(u, p):
+    """التحقق السيادي من الهوية"""
+    # البحث عن المستخدم في المنصة اللامركزية
+    user = Vendor.query.filter_by(username=u).first()
+    
+    if not user:
+        return {"status": False, "msg": "اسم المستخدم غير مسجل في المنصة اللامركزية"}
+    
+    if user.password != p:
+        return {"status": False, "msg": "كلمة المرور غير صحيحة"}
+    
+    return {"status": True, "user": user}
