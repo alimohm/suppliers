@@ -3,25 +3,28 @@ import random
 import string
 from flask_sqlalchemy import SQLAlchemy
 
+# 1. تعريف كائن قاعدة البيانات
 db = SQLAlchemy()
 
+# 2. نموذج المورد مع الحقول الجديدة (الهاتف، البراند، المحفظة)
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(20))
     owner_name = db.Column(db.String(120))
-    brand_name = db.Column(db.String(120)) # سيتم توليده تلقائياً
+    brand_name = db.Column(db.String(120))
     brand_logo_url = db.Column(db.String(255))
-    wallet_address = db.Column(db.String(255), unique=True) # رقم المحفظة الفريد
+    wallet_address = db.Column(db.String(255), unique=True) # محفظة MAH الفريدة
 
-def generate_mq_wallet():
-    """توليد رقم محفظة سيادي يبدأ بـ MQ متبوعاً بـ 8 رموز"""
+def generate_mah_wallet():
+    """توليد رقم محفظة يبدأ بـ MAH متبوعاً بـ 8 رموز عشوائية"""
     chars = string.ascii_uppercase + string.digits
-    code = ''.join(random.choice(chars) for _ in range(8))
-    return f"MQ-{code}"
+    suffix = ''.join(random.choice(chars) for _ in range(8))
+    return f"MAH-{suffix}"
 
 def init_db(app):
+    # جلب الرابط من Railway
     uri = os.environ.get('DATABASE_URL')
     if uri and uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
@@ -35,22 +38,19 @@ def init_db(app):
     db.init_app(app)
     
     with app.app_context():
-        # تنبيه: هذا يمسح البيانات القديمة لإصلاح الهيكل
+        # إعادة بناء الجداول لضمان وجود الحقول الجديدة
         db.drop_all() 
         db.create_all()
         
-        # إنشاء حسابك 'ali' مع بيانات تلقائية ذكية
+        # إنشاء حسابك 'ali' ببياناته التلقائية
         if not Vendor.query.filter_by(username='ali').first():
-            ali_user = "ali"
             new_v = Vendor(
-                username=ali_user,
+                username='ali',
                 password='123',
                 phone='77xxxxxxx',
                 owner_name='علي محجوب',
-                # توليد اسم العلامة تلقائياً إذا لم يتوفر
-                brand_name=f"متجر {ali_user}", 
-                # توليد رقم محفظة MQ تلقائي
-                wallet_address=generate_mq_wallet()
+                brand_name='محجوب أونلاين', # الاسم الرسمي للمنصة
+                wallet_address=generate_mah_wallet() # توليد MAH تلقائي
             )
             db.session.add(new_v)
             db.session.commit()
