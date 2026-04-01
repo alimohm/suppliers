@@ -8,34 +8,34 @@ app = Flask(__name__)
 app.config.from_object(Config)
 init_db(app)
 
-# المسار الرئيسي للمنصة
+# 1. الرابط الأساسي: يحول المستخدم تلقائياً لبوابة الدخول
 @app.route('/')
 def index():
-    # فحص منطقي: هل المستخدم سجل دخوله مسبقاً؟
     if is_logged_in():
-        return redirect(url_for('dashboard')) # إذا نعم، اذهب للوحة التحكم
-    
-    # إذا لا، قم بتحويله فوراً لصفحة تسجيل الدخول
+        return redirect(url_for('dashboard'))
     return redirect(url_for('login_page'))
 
-# صفحة واجهة الدخول
-@app.route('/login-interface') # غيرنا المسار قليلاً ليكون منظماً
+# 2. رابط الدخول الموحد: يعرض الواجهة ويستقبل البيانات
+# https://.../login
+@app.route('/login', methods=['GET', 'POST'])
 def login_page():
+    # إذا كان المستخدم مسجلاً بالفعل، لا داعي لإظهار صفحة الدخول
     if is_logged_in():
         return redirect(url_for('dashboard'))
-    return render_template('login.html')
 
-# معالجة بيانات الدخول (المنطق)
-@app.route('/login', methods=['POST'])
-def do_login():
-    user = request.form.get('username')
-    pw = request.form.get('password')
-    
-    if login_vendor(user, pw):
-        return redirect(url_for('dashboard'))
-    
-    # في حال الفشل، ارجع لصفحة الواجهة لتظهر رسائل الخطأ
-    return redirect(url_for('login_page'))
+    # إذا كانت محاولة دخول (ضغط زر دخول)
+    if request.method == 'POST':
+        user = request.form.get('username')
+        pw = request.form.get('password')
+        
+        if login_vendor(user, pw):
+            return redirect(url_for('dashboard'))
+        
+        # في حال الفشل، يعيد تحميل الصفحة لإظهار رسائل الخطأ
+        return redirect(url_for('login_page'))
+
+    # إذا كان مجرد فتح للرابط (GET)، يعرض التصميم الأرجواني
+    return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
