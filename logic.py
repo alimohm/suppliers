@@ -48,3 +48,34 @@ def sync_product_to_qumra(name, price, description, image_url=None):
     except Exception as e:
         print(f"⚠️ خطأ أثناء الاتصال بسيرفر قمرة: {e}")
         return False
+
+import requests
+
+# بيانات الربط الثابتة
+STORE_ID = "qmr_e235dd03-f398-473f-aa12-79029f05e147"
+WEBHOOK_URL = f"https://api.qumra.cloud/v1/stores/{STORE_ID}/products"
+API_KEY = "ضغ_المفتاح_هنا" 
+
+def handle_product_sync(form_data):
+    """دالة معالجة البيانات وإرسال الويب هوك"""
+    name = form_data.get('name')
+    price = form_data.get('price')
+    description = form_data.get('description')
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "title": name,
+        "price": float(price) if price else 0,
+        "description": description,
+        "metadata": {"source": "Mahjoub Online"}
+    }
+
+    try:
+        response = requests.post(WEBHOOK_URL, json=payload, headers=headers, timeout=10)
+        return response.status_code in [200, 201], name
+    except:
+        return False, name
