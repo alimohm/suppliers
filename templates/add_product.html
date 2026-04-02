@@ -7,6 +7,7 @@
     :root {
         --royal-purple: #4b0082;
         --soft-bg: #f8f9ff;
+        --gold-accent: #d4af37;
     }
 
     body { background-color: var(--soft-bg); font-family: 'Cairo', sans-serif; }
@@ -38,6 +39,7 @@
         outline: none;
     }
 
+    /* أداة الذكاء الاصطناعي - سوقك الذكي */
     .ai-engine-container {
         background: linear-gradient(145deg, #f9f7ff, #ffffff);
         border: 2px dashed var(--royal-purple);
@@ -46,26 +48,6 @@
         margin: 30px 0;
         position: relative;
     }
-
-    .style-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 12px;
-        margin: 15px 0;
-    }
-
-    .style-card {
-        background: white;
-        border: 1.5px solid #eee;
-        padding: 12px;
-        border-radius: 12px;
-        cursor: pointer;
-        text-align: center;
-        font-weight: 700;
-        transition: 0.3s;
-    }
-
-    .style-card.active { background: var(--royal-purple); color: white; border-color: var(--royal-purple); }
 
     .btn-ai-generate {
         background: var(--royal-purple);
@@ -78,6 +60,8 @@
         cursor: pointer;
         transition: 0.3s;
     }
+
+    .btn-ai-generate:hover { transform: scale(1.01); box-shadow: 0 10px 20px rgba(75, 0, 130, 0.2); }
 
     .publish-btn {
         background: linear-gradient(135deg, var(--royal-purple), #2d004d);
@@ -92,18 +76,20 @@
         margin-top: 20px;
     }
 
-    /* ميزة الربط التلقائي */
-    .locked-badge {
-        background: #f0f0f0;
-        color: #666;
+    /* ميزة الربط التلقائي للهوية */
+    .locked-identity {
+        background: #f8f9fa;
+        color: var(--royal-purple);
+        font-weight: 700;
+        border: 1.5px solid #ddd;
         cursor: not-allowed;
     }
 </style>
 
 <div class="master-card" dir="rtl">
     <div class="text-center mb-5">
-        <h3 class="fw-bold" style="color: var(--royal-purple);">✨ إضافة منتج جديد</h3>
-        <p class="text-muted">الموظف المسؤول: <b>{{ vendor.employee_name }}</b> | المؤسسة: <b>{{ vendor.brand_name }}</b></p>
+        <h3 class="fw-bold" style="color: var(--royal-purple);">✨ إدارة منتجات محجوب أونلاين</h3>
+        <p class="text-muted">المنصة الأولى اللامركزية في اليمن | سوقك الذكي</p>
     </div>
 
     <form id="productForm" method="POST" enctype="multipart/form-data">
@@ -113,10 +99,11 @@
                 <input type="text" id="pName" name="name" class="premium-input" placeholder="مثلاً: هاتف ذكي سامسونج..." required>
             </div>
             <div class="col-md-6">
-                <label class="form-label">العلامة التجارية (مربوطة آلياً بقاعدة البيانات)</label>
-                <input type="text" id="pBrandDisplay" class="premium-input locked-badge" value="{{ vendor.brand_name }}" readonly>
+                <label class="form-label">اسم المستخدم مربوط بـ (العلامة التجارية أو المورد)</label>
+                <input type="text" id="pBrandDisplay" class="premium-input locked-identity" 
+                       value="{{ vendor.username }} | {{ vendor.brand_name }}" readonly>
                 <input type="hidden" name="brand" value="{{ vendor.brand_name }}">
-                <small class="text-muted">يتم تسجيل المنتج تحت هوية: {{ vendor.brand_name }}</small>
+                <small class="text-muted">يتم تسجيل المنتج آلياً تحت هوية المؤسسة الموثقة.</small>
             </div>
         </div>
 
@@ -142,16 +129,16 @@
         <div class="ai-engine-container">
             <h6 class="fw-bold mb-3"><i class="fas fa-magic"></i> مساعد سوقك الذكي (الذكاء الاصطناعي)</h6>
             <label class="form-label small">المواصفات الأساسية (افصل بينها بفاصلة):</label>
-            <textarea id="pSpecs" class="premium-input mb-3" rows="2" placeholder="مثلاً: شاشة 6.5 بوصة، بطارية 5000mAh..."></textarea>
+            <textarea id="pSpecs" class="premium-input mb-3" rows="2" placeholder="مثلاً: شاشة OLED، معالج سريع، كاميرا 108MP..."></textarea>
             
             <button type="button" class="btn-ai-generate" onclick="generatePremiumDesc()">
-                توليد الوصف للمؤسسة والمنتج ✨
+                توليد الوصف الاحترافي ✨
             </button>
         </div>
 
         <div class="mb-4">
-            <label class="form-label">الوصف النهائي</label>
-            <textarea id="pDesc" name="description" class="premium-input" rows="8"></textarea>
+            <label class="form-label">الوصف النهائي للمنتج</label>
+            <textarea id="pDesc" name="description" class="premium-input" rows="8" placeholder="سيظهر الوصف المولد هنا..."></textarea>
         </div>
 
         <div class="mb-4">
@@ -160,7 +147,7 @@
         </div>
 
         <button type="submit" class="publish-btn">
-             نشر المنتج في سوقك الذكي 🚀
+             حفظ ونشر المنتج الآن 🚀
         </button>
     </form>
 </div>
@@ -168,27 +155,28 @@
 <script>
     function generatePremiumDesc() {
         const name = document.getElementById('pName').value;
-        // قراءة اسم المؤسسة المربوطة آلياً
-        const brandName = document.getElementById('pBrandDisplay').value;
+        // استخراج اسم العلامة التجارية من الحقل المدمج
+        const combinedIdentity = document.getElementById('pBrandDisplay').value;
+        const brandName = combinedIdentity.split('|')[1]?.trim() || "مورد موثوق";
         const specs = document.getElementById('pSpecs').value;
         const target = document.getElementById('pDesc');
 
         if(!name || !specs) {
-            alert("يرجى إدخال اسم المنتج والمواصفات."); return;
+            alert("يرجى إدخال اسم المنتج والمواصفات أولاً."); return;
         }
 
         let result = `🌟 المنتج المميز: ${name}\n`;
-        result += `🏢 برعاية: ${brandName}\n`;
-        result += `🔗 متوفر الآن عبر منصة "محجوب أونلاين" اللامركزية 🇾🇪\n\n`;
-        result += `🚀 المواصفات الفنية:\n`;
+        result += `🏢 العلامة التجارية: ${brandName}\n`;
+        result += `🔗 متوفر الآن عبر "محجوب أونلاين" - سوقك الذكي 🇾🇪\n\n`;
+        result += `🚀 المزايا والخصائص:\n`;
         
         specs.split('،').forEach(s => {
             if(s.trim()) result += `✅ ${s.trim()}\n`;
         });
 
-        result += `\n🛡️ الضمان والخدمة:\n`;
-        result += `نحن في ${brandName} نضمن لك جودة المنتج وخدمة ما بعد البيع عبر سوقك الذكي.\n\n`;
-        result += `📥 اطلب الآن عبر الرابط!`;
+        result += `\n🛡️ لماذا تطلب منا؟\n`;
+        result += `نحن نضمن لك أصالة المنتج من خلال ${brandName} وشحن آمن عبر منصتنا اللامركزية.\n\n`;
+        result += `📥 اطلب الآن واستمتع بمستقبل التسوق!`;
 
         target.value = result;
     }
