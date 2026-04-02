@@ -15,128 +15,118 @@
             --main-p-color: #4b0082;
             --gold: #FFD700;
             --sidebar-width: 280px;
-            --border-color: #eef2f3;
         }
 
-        body { 
-            margin: 0; 
-            font-family: 'Cairo', sans-serif; 
-            background: var(--bg-body); 
-            color: #2c3e50; 
-        }
-        
-        .main-layout { 
-            display: flex; 
-            height: 100vh; 
-            overflow: hidden; 
-        }
-        
-        .sidebar { 
-            width: var(--sidebar-width); 
-            background: var(--white); 
-            border-left: 1px solid var(--border-color);
+        body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-body); display: flex; height: 100vh; overflow: hidden; }
+
+        /* السايدبار - مطابق للصورة */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--white);
+            height: 100%;
+            border-left: 1px solid #eef2f3;
             display: flex;
             flex-direction: column;
-            z-index: 100;
+            z-index: 1000;
         }
 
-        .main-wrapper { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
+        .brand-section { padding: 25px; text-align: center; border-bottom: 1px solid #eef2f3; }
+        .logo-img { height: 45px; }
 
-        .page-content { 
-            flex: 1; 
-            padding: 30px; 
-            overflow-y: auto; 
-        }
-
-        .menu-list {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
+        .menu-list { flex: 1; padding: 20px 0; }
         .menu-item {
-            display: flex; 
-            align-items: center; 
-            gap: 15px;
-            padding: 15px 25px; 
-            text-decoration: none; 
-            color: #7f8c8d;
-            transition: 0.3s; 
-            font-weight: 600;
+            display: flex; align-items: center; padding: 14px 20px;
+            text-decoration: none; color: #7f8c8d; font-weight: 600;
+            margin: 4px 15px; border-radius: 12px; transition: 0.3s;
             cursor: pointer;
         }
+        .menu-item i { margin-left: 15px; font-size: 18px; width: 25px; text-align: center; }
+        
+        /* تلوين العنصر النشط كما في الصورة */
+        .menu-item.active { background: #f2eefa; color: var(--main-p-color); }
+        .menu-item:hover { background: #f8f9fa; }
 
-        .menu-item:hover, .menu-item.active {
-            background: #f8faff; 
-            color: var(--main-p-color);
-            border-right: 4px solid var(--main-p-color);
+        /* الهيكل الرئيسي */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
+        /* الهيدر العلوي الأبيض */
+        .top-header {
+            height: 80px;
+            background: var(--white);
+            border-bottom: 1px solid #eef2f3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
         }
 
-        @media (max-width: 768px) {
-            .sidebar { 
-                position: absolute;
-                right: -100%;
-                transition: 0.3s;
-            }
-            .sidebar.active { right: 0; }
+        .header-welcome { font-size: 14px; font-weight: 700; color: #2c3e50; flex: 1; text-align: center; }
+        .header-welcome span { color: var(--main-p-color); }
+
+        .user-section { display: flex; align-items: center; gap: 15px; }
+        .user-badge {
+            display: flex; align-items: center; gap: 10px;
+            background: #f8fafc; padding: 6px 15px; border-radius: 12px;
+            border: 1px solid #eef2f3;
         }
+
+        .page-content { flex: 1; padding: 30px; overflow-y: auto; }
+
+        /* المودال (نافذة الرفع) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
     </style>
 </head>
 <body>
 
-    <div class="main-layout">
-        {% if session.get('username') %}
-        <nav class="sidebar">
-            <div style="padding: 30px; text-align: center;">
-                <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" 
-                     alt="Logo" 
-                     style="height: 45px; object-fit: contain;">
+    <nav class="sidebar">
+        <div class="brand-section">
+            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-img">
+        </div>
+        <div class="menu-list">
+            <a href="{{ url_for('dashboard') }}" class="menu-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-th-large"></i><span>الرئيسية</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-wallet"></i><span>محفظة MAH</span>
+            </a>
+            <div onclick="openUploadModal()" class="menu-item">
+                <i class="fas fa-plus-circle"></i><span>رفع منتج</span>
             </div>
-            
-            <div class="menu-list">
-                <a href="{{ url_for('dashboard') }}" class="menu-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                    <i class="fas fa-th-large"></i> 
-                    <span>لوحة الحوكمة</span>
-                </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-cog"></i><span>الإعدادات</span>
+            </a>
+        </div>
+    </nav>
 
-                <div onclick="openUploadModal()" class="menu-item">
-                    <i class="fas fa-plus-circle"></i> 
-                    <span>رفع منتج</span>
-                </div>
-                
-                <div style="margin-top: auto; border-top: 1px solid var(--border-color);">
-                    <a href="{{ url_for('logout_route') }}" class="menu-item" style="color: #e74c3c;">
-                        <i class="fas fa-power-off"></i> خروج آمن
-                    </a>
-                </div>
-            </div>
-        </nav>
-        {% endif %}
+    <main class="main-wrapper">
+        <header class="top-header">
+            <a href="{{ url_for('logout_route') }}" style="color:#e74c3c; font-size: 18px;"><i class="fas fa-power-off"></i></a>
 
-        <main class="main-wrapper">
-            <div class="page-content">
-                {% block content %}{% endblock %}
+            <div class="header-welcome">
+                نظامك الإداري <span>| المنصة اللامركزية الأولى في اليمن</span>
             </div>
-        </main>
-    </div>
+
+            <div class="user-section">
+                <div class="user-badge">
+                    <span style="font-size: 13px; font-weight: 800; color: var(--main-p-color);">@{{ session.get('username', 'ali') }}</span>
+                    <div style="color: var(--main-p-color);"><i class="fas fa-user-circle fa-lg"></i></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-content">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
     <script>
         function openUploadModal() {
             const modal = document.getElementById('uploadProductModal');
             if (modal) {
                 modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden'; 
-            } else {
-                // إذا لم تكن في صفحة الداشبورد، ننتقل لصفحة الإضافة العادية
-                window.location.href = "{{ url_for('add_product') }}";
+                document.body.style.overflow = 'hidden';
             }
         }
-
         function closeUploadModal() {
             const modal = document.getElementById('uploadProductModal');
             if (modal) {
@@ -144,8 +134,6 @@
                 document.body.style.overflow = 'auto';
             }
         }
-
-        console.log("تَمَّ تَحْمِيلُ هَيْكَلِ مَحْجُوب أُونْلَايْن بِنَجَاح ✅");
     </script>
 </body>
 </html>
