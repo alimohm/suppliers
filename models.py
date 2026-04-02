@@ -8,24 +8,30 @@ def generate_mah_wallet():
     return f"MAH-{suffix}"
 
 class Vendor(db.Model):
-    """جدول الموردين - يمثل الكيان اللامركزي للتاجر"""
+    """جدول الموردين والموظفين - الكيان اللامركزي لمحجوب أونلاين"""
     __tablename__ = 'vendor'
     
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False) # مثل: moshtaq
+    
+    # بيانات الدخول للموظف (مثلاً: username: moshtaq)
+    username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     
-    # العلامة التجارية (مثل: عمار الفقيه للتجارة)
-    brand_name = db.Column(db.String(120), nullable=False)
+    # الحقول التشغيلية (الربط بين الموظف والمؤسسة)
+    employee_name = db.Column(db.String(120), nullable=True) # الاسم: مشتاق الفقيه
+    brand_name = db.Column(db.String(120), nullable=False)    # المؤسسة: عمار الفقيه للتجارة
     
-    # المحفظة الرقمية اللامركزية
+    # الهوية الرقمية اللامركزية للمؤسسة
     wallet_address = db.Column(db.String(255), unique=True, default=generate_mah_wallet)
     
+    # توكن الربط الخارجي
     qomra_access_token = db.Column(db.Text, nullable=True)
+    
+    # علاقة المنتجات
     products = db.relationship('Product', backref='vendor_owner', lazy=True)
 
     def __repr__(self):
-        return f'<Vendor {self.brand_name} (@{self.username})>'
+        return f'<Vendor Employee: {self.employee_name} | Brand: {self.brand_name}>'
 
 class Product(db.Model):
     """جدول المنتجات - قلب منصة محجوب أونلاين اللامركزية"""
@@ -33,17 +39,23 @@ class Product(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
-    brand = db.Column(db.String(120), nullable=True)  # براند المنتج نفسه
+    
+    # براند المنتج (يُملأ آلياً بـ "عمار الفقيه للتجارة" عند الإضافة)
+    brand = db.Column(db.String(120), nullable=True)  
+    
+    # التفاصيل المالية والمخزون
     price = db.Column(db.Float, nullable=False)
     currency = db.Column(db.String(10), default='YER') # (YER, SAR, USD)
     stock = db.Column(db.Integer, default=1)           # الكمية المتوفرة
+    
+    # المحتوى والوسائط
     description = db.Column(db.Text)
     image_file = db.Column(db.String(200))
     is_published = db.Column(db.Boolean, default=False)
     
-    # الربط مع المورد (ForeignKey)
-    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
-    vendor_username = db.Column(db.String(80))
+    # الربط التقني (تتبع الموظف والمؤسسة)
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id')) # ربط بـ ID الموظف
+    vendor_username = db.Column(db.String(80))                    # يوزر الموظف (للتدقيق)
 
     def __repr__(self):
-        return f'<Product {self.name} - {self.price} {self.currency}>'
+        return f'<Product {self.name} - Added by {self.vendor_username}>'
