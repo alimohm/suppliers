@@ -6,6 +6,7 @@ GRAPHQL_URL = "https://mahjoub.online/admin/graphql"
 API_KEY = str(os.environ.get("QUMRA_ACCESS_TOKEN", "")).strip()
 
 def send_to_qumra_webhook(name, price, description, image_filename=None):
+    # استخدام الرابط المباشر للصورة على سيرفر Railway
     BASE_URL = "https://mahjoub-online-1-production-c824.up.railway.app"
     
     headers = {
@@ -13,6 +14,7 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
         "Content-Type": "application/json"
     }
 
+    # استعلام متوافق مع بنية قمرة التي اكتشفناها
     query = """
     mutation CreateProduct($name: String!, $price: Float!, $description: String, $image: String) {
       createProduct(name: $name, price: $price, description: $description, image: $image) {
@@ -30,10 +32,11 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
     }
 
     try:
+        # التشفير بـ UTF-8 لدعم العربية
         json_payload = json.dumps({'query': query, 'variables': variables}, ensure_ascii=False)
         encoded_payload = json_payload.encode('utf-8')
         
-        print("🚀 Sending product to Qumra: " + str(name))
+        print("🚀 Sending product: " + str(name))
         
         response = requests.post(
             GRAPHQL_URL, 
@@ -43,16 +46,14 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
         )
         
         response_data = response.json()
-        # أهم سطر: طباعة الرد الكامل لنعرف إذا كان هناك خطأ في الحقول
-        print("📡 Qumra Full Response: " + json.dumps(response_data, ensure_ascii=False))
+        
+        # طباعة الرد الكامل لفك اللغز
+        print("📡 Qumra Response: " + json.dumps(response_data, ensure_ascii=False))
 
-        # التحقق من النجاح
         if response.status_code == 200 and "errors" not in response_data:
             return True
-        else:
-            print("⚠️ Qumra rejected the product or returned errors.")
-            return False
+        return False
 
     except Exception as e:
-        print("❌ Technical Error: " + str(e))
+        print("❌ Error: " + str(e))
         return False
