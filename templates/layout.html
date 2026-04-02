@@ -68,6 +68,7 @@
             color: #7f8c8d;
             transition: 0.3s; 
             font-weight: 600;
+            cursor: pointer;
         }
 
         .menu-item:hover, .menu-item.active {
@@ -99,11 +100,14 @@
             
             <div class="menu-list">
                 <a href="{{ url_for('dashboard') }}" class="menu-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                    <i class="fas fa-th-large"></i> لوحة الحوكمة
+                    <i class="fas fa-th-large"></i> 
+                    <span>لوحة الحوكمة</span>
                 </a>
-                <a href="{{ url_for('add_product') }}" class="menu-item {% if request.endpoint == 'add_product' %}active{% endif %}">
-                    <i class="fas fa-plus-circle"></i> إضافة منتج
-                </a>
+
+                <div onclick="openUploadModal()" class="menu-item">
+                    <i class="fas fa-plus-circle"></i> 
+                    <span>رفع منتج</span>
+                </div>
                 
                 <div style="margin-top: auto; border-top: 1px solid var(--border-color);">
                     <a href="{{ url_for('logout_route') }}" class="menu-item" style="color: #e74c3c;">
@@ -122,7 +126,26 @@
     </div>
 
     <script>
-        console.log("تَمَّ تَحْمِيلُ هَيْكَلِ مَحْجُوب أُونْلَايْن بِنَجَاح ✅");
+        function openUploadModal() {
+            const modal = document.getElementById('uploadProductModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; 
+            } else {
+                // إذا لم تكن في صفحة الداشبورد، ننتقل لصفحة الإضافة العادية
+                window.location.href = "{{ url_for('add_product') }}";
+            }
+        }
+
+        function closeUploadModal() {
+            const modal = document.getElementById('uploadProductModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        console.log("تَمَّ تَحْمِيلُ هَيْكَلِ مَحْجُوب أُونْلَايْن بِنَجَاح ✅");
     </script>
 </body>
 </html>
