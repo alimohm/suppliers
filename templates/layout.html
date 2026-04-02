@@ -12,20 +12,18 @@
         :root {
             --bg-body: #f4f7f6;
             --white: #ffffff;
-            --main-p-color: #4b0082; /* الأرجواني السيادي */
+            --main-p-color: #4b0082; 
             --gold: #FFD700;
             --text-dark: #2c3e50;
             --border-color: #eef2f3;
             --sidebar-width: 280px;
-            --sidebar-collapsed-width: 80px;
             --header-height: 80px;
         }
 
-        * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Cairo', sans-serif; background-color: var(--bg-body); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
 
         /* =========================================
-           1. الشريط الجانبي (Sidebar)
+           الشريط الجانبي (Sidebar)
            ========================================= */
         .sidebar {
             width: var(--sidebar-width);
@@ -34,42 +32,22 @@
             border-left: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
             z-index: 1000;
         }
 
         .brand-container {
-            height: 100px; /* زيادة الطول لاستيعاب الهوية الجديدة */
-            display: flex;
-            align-items: center;
-            padding: 20px;
+            padding: 25px 20px;
             border-bottom: 1px solid var(--border-color);
-            gap: 12px;
+            text-align: center;
         }
 
-        .logo-img {
-            height: 45px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        .brand-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand-name {
-            font-size: 17px;
-            font-weight: 800;
-            color: var(--main-p-color);
-            line-height: 1.2;
-        }
-
-        .brand-tagline {
-            font-size: 13px;
-            font-weight: 600;
-            color: #7f8c8d;
-        }
+        .logo-img { height: 50px; margin-bottom: 10px; }
+        
+        .brand-name { font-size: 18px; font-weight: 800; color: var(--main-p-color); display: block; }
+        .brand-tagline { font-size: 13px; color: #7f8c8d; font-weight: 600; margin-bottom: 8px; display: block; }
+        
+        /* اسم المستخدم تحت العلامة التجارية */
+        .brand-user { font-size: 12px; color: #95a5a6; display: block; background: #f8fafc; padding: 4px 10px; border-radius: 20px; width: fit-content; margin: 0 auto; }
 
         .menu-list { flex: 1; padding: 20px 0; overflow-y: auto; }
         .menu-item {
@@ -80,17 +58,17 @@
             color: #7f8c8d;
             font-size: 15px;
             font-weight: 600;
-            transition: 0.3s;
             margin: 4px 15px;
             border-radius: 12px;
+            transition: 0.3s;
         }
-        .menu-item i { margin-left: 15px; font-size: 18px; width: 25px; text-align: center; }
+        .menu-item i { margin-left: 15px; font-size: 18px; }
         .menu-item:hover, .menu-item.active { background-color: rgba(75,0,130,0.08); color: var(--main-p-color); }
 
         /* =========================================
-           2. المحتوى الرئيسي
+           المحتوى العلوي (Header)
            ========================================= */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; }
 
         .top-header {
             height: var(--header-height);
@@ -102,37 +80,29 @@
             padding: 0 30px;
         }
 
-        /* نص المنصة اللامركزية في الهيدر */
-        .platform-status {
-            font-size: 14px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-        .platform-status span {
-            color: var(--main-p-color);
-            font-weight: 400;
-            margin-right: 5px;
-        }
+        .platform-status { font-size: 15px; font-weight: 700; color: #2c3e50; }
+        .platform-status span { color: var(--main-p-color); margin-right: 5px; font-weight: 400; }
 
-        .header-profile { display: flex; align-items: center; gap: 15px; }
-        .vendor-details { text-align: left; line-height: 1.2; }
-        .vendor-brand { display: block; font-weight: 700; color: var(--main-p-color); font-size: 14px; }
-        .vendor-user { font-size: 11px; color: #95a5a6; }
-        
-        .avatar {
-            width: 42px; height: 42px; border-radius: 12px;
-            background: #f0f3f4; display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--border-color);
+        /* زر سحب الرصيد */
+        .withdraw-btn {
+            background: linear-gradient(135deg, #4b0082, #6a0dad);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Cairo';
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(75, 0, 130, 0.2);
         }
+        .withdraw-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(75, 0, 130, 0.3); }
 
         .page-content { flex: 1; padding: 30px; overflow-y: auto; }
-
-        @media (max-width: 991px) {
-            .sidebar { width: var(--sidebar-collapsed-width); }
-            .brand-info, .menu-item span, .vendor-details, .platform-status { display: none; }
-            .menu-item { justify-content: center; margin: 5px; padding: 15px 0; }
-            .menu-item i { margin-left: 0; }
-        }
     </style>
 </head>
 <body>
@@ -140,10 +110,9 @@
     <nav class="sidebar">
         <div class="brand-container">
             <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" alt="محجوب أونلاين" class="logo-img">
-            <div class="brand-info">
-                <span class="brand-name">محجوب أونلاين</span>
-                <span class="brand-tagline">سوقك الذكي</span>
-            </div>
+            <span class="brand-name">محجوب أونلاين</span>
+            <span class="brand-tagline">سوقك الذكي</span>
+            <span class="brand-user">@{{ session.get('username', 'ali') }}</span>
         </div>
 
         <div class="menu-list">
@@ -156,15 +125,15 @@
                 <span>محفظة MAH</span>
             </a>
             <a href="/add_product" class="menu-item {{ 'active' if request.path == '/add_product' }}">
-                <i class="fas fa-cloud-upload-alt"></i>
+                <i class="fas fa-plus-circle"></i>
                 <span>رفع منتج جديد</span>
             </a>
             <a href="#" class="menu-item">
-                <i class="fas fa-chart-line"></i>
+                <i class="fas fa-chart-pie"></i>
                 <span>الإحصائيات</span>
             </a>
             <a href="#" class="menu-item">
-                <i class="fas fa-user-gear"></i>
+                <i class="fas fa-cog"></i>
                 <span>إعدادات المتجر</span>
             </a>
         </div>
@@ -174,19 +143,16 @@
         <header class="top-header">
             <div class="header-right">
                 <div class="platform-status">
-                    أهلاً بك في نظامك الإداري الملكي <span>| المنصة اللامركزية في اليمن اليوم</span>
+                    أهلاً بك في نظامك الإداري <span>| المنصة اللامركزية الأولى في اليمن</span>
                 </div>
             </div>
 
-            <div class="header-profile">
-                <div class="vendor-details">
-                    <span class="vendor-brand">{{ session.get('brand_name', 'محجوب أونلاين') }}</span>
-                    <span class="vendor-user">@{{ session.get('username', 'ali') }}</span>
-                </div>
-                <div class="avatar">
-                    <i class="fas fa-user-tie" style="color:var(--main-p-color);"></i>
-                </div>
-                <a href="/logout" style="color:#e74c3c; margin-right:10px;"><i class="fas fa-power-off"></i></a>
+            <div class="header-left" style="display: flex; align-items: center; gap: 20px;">
+                <button class="withdraw-btn">
+                    <i class="fas fa-arrow-down"></i> سحب الرصيد
+                </button>
+                
+                <a href="/logout" style="color:#e74c3c; font-size: 18px;"><i class="fas fa-power-off"></i></a>
             </div>
         </header>
 
