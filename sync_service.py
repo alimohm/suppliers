@@ -2,11 +2,18 @@ import os
 import requests
 import json
 
+# الرابط المستخرج من واجهة GraphQL الخاصة بك
 GRAPHQL_URL = "https://mahjoub.online/admin/graphql"
-API_KEY = os.environ.get("QUMRA_ACCESS_TOKEN", "YOUR_TOKEN")
+
+# المفتاح الذي أنشأته (Access Token) - تأكد من وضعه في إعدادات Railway
+API_KEY = os.environ.get("QUMRA_ACCESS_TOKEN", "ضع_المفتاح_هنا_إذا_لم_تضعه_في_railway")
 
 def send_to_qumra_webhook(name, price, description, image_filename=None):
-    BASE_URL = "https://mahjoub-online-1-production-c824.app.railway.app" # رابط سيرفرك
+    """
+    إرسال المنتج كمسودة (DRAFT) عبر GraphQL مع معالجة الحروف العربية.
+    """
+    # رابط سيرفرك في Railway للوصول للصور المرفوعة
+    BASE_URL = "https://mahjoub-online-1-production-c824.up.railway.app"
     
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -14,7 +21,7 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
         "Accept": "application/json"
     }
 
-    # الاستعلام مع إضافة حقل الحالة (status)
+    # بناء الاستعلام (Mutation) المتوافق مع نظام قمرة
     query = """
     mutation CreateNewProduct($input: CreateProductInput!) {
       createProduct(input: $input) {
@@ -25,23 +32,27 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
     }
     """
     
-    # المتغيرات مع تحديد الحالة كمسودة
+    # تجهيز البيانات (المتغيرات)
     variables = {
         "input": {
             "title": name,
             "price": float(price),
             "description": description,
-            "status": "DRAFT",  # إرسال المنتج كمسودة للمراجعة
+            "status": "DRAFT",  # يصل كمسودة للمراجعة في قمرة
             "image": f"{BASE_URL}/static/uploads/{image_filename}" if image_filename else None
         }
     }
 
     try:
-        # تشفير UTF-8 لضمان وصول اللغة العربية (هاتف، عطر، إلخ)
-        data_to_send = json.dumps({'query': query, 'variables': variables}, ensure_ascii=False).encode('utf-8')
+        # تحويل البيانات إلى JSON مع تشفير UTF-8 لضمان سلامة الحروف العربية (مثل: هاتف، عطر)
+        data_to_send = json.dumps(
+            {'query': query, 'variables': variables}, 
+            ensure_ascii=False
+        ).encode('utf-8')
         
-        print(f"🚀 جاري إرسال المنتج كمسودة: {name}")
+        print(f"🚀 محاولة مزامنة المنتج: {name} (الحالة: مسودة)")
         
+        # إرسال الطلب للسيرفر
         response = requests.post(
             GRAPHQL_URL, 
             data=data_to_send, 
@@ -49,12 +60,14 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
             timeout=30
         )
         
-        print(f"📡 رد السيرفر: {response.status_code} - {response.text}")
-        
-        # نعتبر العملية ناجحة إذا عاد كود 200 ولم توجد أخطاء في GraphQL
-        result = response.json()
-        return response.status_code == 200 and "errors" not in result
+        # --- فك شفرة الرد لكشف الأخطاء الصامتة ---
+        try:
+            response_data = response.json()
+            print(f"📡 رد السيرفر التفصيلي: {json.dumps(response_data, indent=2, ensure_ascii=False)}")
+        except:
+            print(f"📡 الرد ليس بتنسيق JSON: {response.text}")
 
-    except Exception as e:
-        print(f"❌ فشل المزامنة: {e}")
-        return False
+        # التحقق من النجاح التقني والبرمجي (GraphQL Errors)
+        if response.status_code == 200:
+            if "errors" in response_data:
+                print(f"⚠️ رفض السيرفر الطلب بسبب أخطاء في
