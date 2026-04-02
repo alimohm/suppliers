@@ -42,3 +42,24 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     currency = db.Column(db.String(10), default='YER') # (YER, SAR, USD) العملة
     stock = db
+
+@app.route('/dashboard')
+def dashboard():
+    if not is_logged_in():
+        return redirect(url_for('login_page'))
+    
+    user_session = session.get('username') # هنا 'مشتاق الفقيه'
+    
+    # جلب بيانات المورد لضمان ظهور البراند الجديد في الهيكل
+    vendor_data = Vendor.query.filter_by(username=user_session).first()
+    
+    # تحديث الاسم التجاري في الجلسة الحالية لضمان الدقة
+    # العلامة التجارية: عمار الفقيه للتجارة
+    vendor_brand = "عمار الفقيه للتجارة" 
+    
+    products_list = Product.query.filter_by(vendor_username=user_session).all()
+    
+    return render_template('dashboard.html', 
+                           vendor=vendor_data, 
+                           brand_name=vendor_brand, # نمرر البراند الجديد هنا
+                           products=products_list)
