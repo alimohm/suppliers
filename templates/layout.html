@@ -10,19 +10,18 @@
     
     <style>
         :root {
-            --bg-body: #f8fafb;
+            --bg-body: #f4f7f6;
             --white: #ffffff;
             --main-p-color: #4b0082;
             --gold: #FFD700;
-            --sidebar-width: 260px; /* العرض الافتراضي للكمبيوتر */
-            --sidebar-collapsed: 80px; /* العرض للجوال والتابلت */
-            --header-height: 80px;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 85px;
         }
 
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-body); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- السايدبار الديناميكي --- */
+        /* --- السايدبار الذكي --- */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--white);
@@ -34,75 +33,82 @@
             z-index: 1000;
         }
 
-        .brand-section { padding: 25px; text-align: center; border-bottom: 1px solid #eef2f3; }
-        .logo-img { height: 40px; transition: 0.3s; }
-
-        .menu-list { flex: 1; padding: 20px 0; overflow-x: hidden; }
-        
-        .menu-item {
-            display: flex; align-items: center; padding: 14px 20px;
-            text-decoration: none; color: #7f8c8d; font-weight: 600;
-            margin: 4px 15px; border-radius: 12px; transition: 0.3s;
-            white-space: nowrap; /* منع انكسار النص */
+        /* منطقة اللوجو مع النص (بناءً على طلبك) */
+        .brand-container {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f1f1f1;
         }
-        
-        .menu-item i { font-size: 18px; min-width: 25px; text-align: center; margin-left: 15px; }
-        .menu-item span { transition: opacity 0.3s; }
+        .logo-img { height: 45px; flex-shrink: 0; }
+        .brand-details { display: flex; flex-direction: column; line-height: 1.2; }
+        .brand-name { font-weight: 800; color: var(--main-p-color); font-size: 14px; }
+        .brand-sub { font-size: 10px; color: #888; font-weight: 600; }
 
+        .menu-list { flex: 1; padding: 20px 0; }
+        .menu-item {
+            display: flex; align-items: center; padding: 12px 18px;
+            text-decoration: none; color: #7f8c8d; font-weight: 700;
+            margin: 5px 15px; border-radius: 12px; transition: 0.3s;
+            white-space: nowrap;
+        }
+        .menu-item i { font-size: 18px; min-width: 30px; text-align: center; margin-left: 12px; }
         .menu-item.active { background: rgba(75,0,130,0.08); color: var(--main-p-color); }
-        .menu-item:hover:not(.active) { background: #f8f9fa; color: var(--main-p-color); }
 
         /* --- الهيكل الرئيسي --- */
         .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
+        /* الهيدر العلوي مع الرسالة الترحيبية */
         .top-header {
-            height: var(--header-height);
+            height: 80px;
             background: var(--white);
             border-bottom: 1px solid #eef2f3;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 25px;
         }
 
-        .brand-info { display: flex; flex-direction: column; }
-        .brand-name { font-weight: 800; color: var(--main-p-color); font-size: 16px; }
-        .brand-tag { font-size: 11px; color: #7f8c8d; }
+        .welcome-msg { 
+            font-size: 14px; font-weight: 700; color: #2c3e50; 
+            border-right: 4px solid var(--main-p-color); padding-right: 15px;
+        }
+        .welcome-msg span { color: var(--main-p-color); }
 
-        .user-area { display: flex; align-items: center; gap: 12px; }
-        .user-badge {
-            display: flex; align-items: center; gap: 8px;
-            background: #f8fafc; padding: 5px 12px; border-radius: 10px; border: 1px solid #eef2f3;
+        .user-section { display: flex; align-items: center; gap: 15px; }
+        .user-pill {
+            display: flex; align-items: center; gap: 10px;
+            background: #f8fafc; padding: 6px 15px; border-radius: 50px;
+            border: 1px solid #eef2f3;
         }
 
-        .page-content { flex: 1; padding: 25px; overflow-y: auto; }
+        .page-content { flex: 1; padding: 30px; overflow-y: auto; }
 
-        /* =============================================
-           قواعد الاستجابة (Responsive Logic)
-           ============================================= */
-
-        /* للشاشات المتوسطة (التابلت) والصغيرة (الجوال) */
+        /* --- استجابة الشاشات (Dynamic Responsive) --- */
         @media (max-width: 1024px) {
             .sidebar { width: var(--sidebar-collapsed); }
-            .sidebar .menu-item span { display: none; } /* إخفاء النص */
-            .sidebar .menu-item i { margin-left: 0; font-size: 20px; }
-            .sidebar .menu-item { justify-content: center; margin: 4px 10px; }
-            .brand-name { font-size: 14px; }
+            .brand-details, .menu-item span { display: none; }
+            .brand-container { justify-content: center; padding: 15px 5px; }
+            .menu-item { justify-content: center; margin: 5px 10px; padding: 12px 0; }
+            .menu-item i { margin-left: 0; }
         }
 
-        /* للجوالات الصغيرة جداً */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
+            .welcome-msg { font-size: 12px; padding-right: 10px; }
             .top-header { padding: 0 15px; }
-            .brand-tag { display: none; } /* إخفاء النص الفرعي لتوفير مساحة */
-            .user-name { display: none; }
-            .page-content { padding: 15px; }
         }
     </style>
 </head>
 <body>
 
     <nav class="sidebar">
-        <div class="brand-section">
+        <div class="brand-container">
             <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-img">
+            <div class="brand-details">
+                <span class="brand-name">محجوب أونلاين | سوقك الذكي</span>
+                <span class="brand-sub">لوحتك الإدارية اللامكرزية</span>
+            </div>
         </div>
+
         <div class="menu-list">
             <a href="{{ url_for('dashboard') }}" class="menu-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
                 <i class="fas fa-th-large"></i><span>الرئيسية</span>
@@ -121,17 +127,16 @@
 
     <main class="main-wrapper">
         <header class="top-header">
-            <div class="brand-info">
-                <span class="brand-name">محجوب أونلاين | سوقك الذكي</span>
-                <span class="brand-tag">لوحتك الإدارية اللامركزية</span>
+            <div class="welcome-msg">
+                مرحباً في نظامك الإداري | <span>المنصة اللامركزية الأولى في اليمن</span>
             </div>
 
-            <div class="user-area">
-                <div class="user-badge">
-                    <span class="user-name" style="font-size: 12px; font-weight: 800; color: var(--main-p-color);">@{{ session.get('username', 'ali') }}</span>
+            <div class="user-section">
+                <div class="user-pill">
+                    <span style="font-size: 13px; font-weight: 800; color: var(--main-p-color);">@ali</span>
                     <i class="fas fa-user-circle fa-lg" style="color: var(--main-p-color);"></i>
                 </div>
-                <a href="{{ url_for('logout_route') }}" style="color:#e74c3c; font-size: 16px;"><i class="fas fa-power-off"></i></a>
+                <a href="#" style="color:#e74c3c;"><i class="fas fa-power-off"></i></a>
             </div>
         </header>
 
