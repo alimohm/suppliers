@@ -33,7 +33,7 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
         json_payload = json.dumps({'query': query, 'variables': variables}, ensure_ascii=False)
         encoded_payload = json_payload.encode('utf-8')
         
-        print("🚀 Sending product: " + str(name))
+        print("🚀 Sending product to Qumra: " + str(name))
         
         response = requests.post(
             GRAPHQL_URL, 
@@ -43,11 +43,16 @@ def send_to_qumra_webhook(name, price, description, image_filename=None):
         )
         
         response_data = response.json()
-        # طباعة بسيطة جداً لتجنب أخطاء Syntax
-        print("📡 Response received from Qumra")
+        # أهم سطر: طباعة الرد الكامل لنعرف إذا كان هناك خطأ في الحقول
+        print("📡 Qumra Full Response: " + json.dumps(response_data, ensure_ascii=False))
 
-        return response.status_code == 200 and "errors" not in response.text
+        # التحقق من النجاح
+        if response.status_code == 200 and "errors" not in response_data:
+            return True
+        else:
+            print("⚠️ Qumra rejected the product or returned errors.")
+            return False
 
     except Exception as e:
-        print("❌ Error in sync: " + str(e))
+        print("❌ Technical Error: " + str(e))
         return False
