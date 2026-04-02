@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}محجوب أونلاين{% endblock %} | 2026</title>
+    <title>محجوب أونلاين | المنصة اللامركزية الأولى</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,7 +12,7 @@
         :root {
             --bg-body: #f4f7f6;
             --white: #ffffff;
-            --main-p-color: #4b0082;
+            --main-p-color: #4b0082; /* الأرجواني الملكي */
             --gold: #FFD700;
             --text-dark: #2c3e50;
             --border-color: #eef2f3;
@@ -21,8 +21,16 @@
             --header-height: 80px;
         }
 
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Cairo', sans-serif; background-color: var(--bg-body); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; outline: none; }
+        body { 
+            margin: 0; 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-dark); 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
         /* =========================================
            1. الشريط الجانبي (Sidebar)
@@ -34,25 +42,25 @@
             border-left: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
         }
 
         .brand-container {
-            height: 100px;
+            height: 110px;
             display: flex;
             align-items: center;
             padding: 20px;
             border-bottom: 1px solid var(--border-color);
-            gap: 12px;
+            gap: 15px;
         }
 
-        .logo-img { height: 45px; width: auto; object-fit: contain; }
+        .logo-img { height: 50px; width: auto; object-fit: contain; }
         .brand-info { display: flex; flex-direction: column; }
-        .brand-name { font-size: 17px; font-weight: 800; color: var(--main-p-color); line-height: 1.2; }
+        .brand-name { font-size: 18px; font-weight: 800; color: var(--main-p-color); line-height: 1.2; }
         .brand-tagline { font-size: 13px; font-weight: 600; color: #7f8c8d; }
 
-        .menu-list { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .menu-list { flex: 1; padding: 25px 0; overflow-y: auto; }
         .menu-item {
             display: flex;
             align-items: center;
@@ -61,96 +69,137 @@
             color: #7f8c8d;
             font-size: 15px;
             font-weight: 600;
-            transition: 0.3s;
-            margin: 4px 15px;
+            margin: 5px 15px;
             border-radius: 12px;
+            transition: 0.3s;
         }
         .menu-item i { margin-left: 15px; font-size: 18px; width: 25px; text-align: center; }
-        .menu-item:hover, .menu-item.active { background-color: rgba(75,0,130,0.08); color: var(--main-p-color); }
+        .menu-item:hover, .menu-item.active { 
+            background: linear-gradient(90deg, rgba(75,0,130,0.1), transparent);
+            color: var(--main-p-color); 
+            border-right: 4px solid var(--main-p-color);
+        }
 
         /* =========================================
            2. المحتوى الرئيسي والهيدر
            ========================================= */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; width: 100%; }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
         .top-header {
             height: var(--header-height);
-            background-color: var(--white);
+            background: var(--white);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 30px;
-            flex-wrap: nowrap;
         }
 
-        .platform-status { font-size: 14px; font-weight: 700; color: #2c3e50; }
+        .platform-status { font-size: 15px; font-weight: 700; color: var(--text-dark); }
         .platform-status span { color: var(--main-p-color); font-weight: 600; margin-right: 5px; }
 
-        /* تنسيق البروفايل (اسم المستخدم بجانب الأيقونة) */
-        .header-profile { display: flex; align-items: center; gap: 12px; }
-        
-        .user-meta { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 12px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .vendor-user { font-size: 13px; font-weight: 700; color: var(--main-p-color); }
-        
-        .avatar {
-            width: 35px; height: 35px; border-radius: 10px;
-            background: var(--main-p-color); display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 14px;
-        }
-
-        .page-content { flex: 1; padding: 30px; overflow-y: auto; width: 100%; }
-
-        /* زر سحب الرصيد - يضاف برمجياً في الـ Dashboard */
-        .withdraw-action {
+        /* البروفايل: اسم المستخدم بجانب الأيقونة */
+        .header-profile { display: flex; align-items: center; gap: 15px; }
+        .user-badge {
             display: flex;
-            flex-direction: column;
             align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
             cursor: pointer;
             transition: 0.3s;
         }
-        .withdraw-icon-btn {
+        .user-badge:hover { background: #f1f5f9; }
+        .user-name { font-size: 14px; font-weight: 800; color: var(--main-p-color); }
+        .user-icon { 
+            width: 32px; height: 32px; border-radius: 50%; 
+            background: var(--main-p-color); color: white; 
+            display: flex; align-items: center; justify-content: center; font-size: 14px; 
+        }
+
+        /* =========================================
+           3. أصبع السحب التفاعلي (Animated Finger)
+           ========================================= */
+        .withdraw-card {
+            background: linear-gradient(135deg, var(--main-p-color), #2d004d);
+            padding: 30px;
+            border-radius: 25px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            box-shadow: 0 15px 35px rgba(75, 0, 130, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-info h2 { font-size: 32px; margin: 10px 0; font-weight: 800; }
+        .wallet-info span { color: var(--gold); font-weight: 700; }
+
+        .finger-pull-wrapper { text-align: center; }
+        .finger-btn {
+            position: relative;
+            width: 60px;
+            height: 60px;
             background: var(--gold);
             border: none;
-            width: 50px;
-            height: 50px;
             border-radius: 50%;
+            cursor: pointer;
+            color: var(--main-p-color);
+            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-            transition: 0.3s ease;
+            z-index: 2;
+            animation: finger-jump 2s infinite ease-in-out;
+            transition: 0.3s;
         }
-        .withdraw-icon-btn:hover { transform: translateY(-3px) scale(1.05); background: #fff; }
-        .withdraw-text { font-size: 11px; font-weight: 800; color: var(--gold); margin-top: 5px; }
+        
+        .pulse-effect {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            animation: pulse-ring 2s infinite;
+            z-index: 1;
+        }
+
+        .withdraw-label { 
+            display: block; margin-top: 10px; font-size: 11px; 
+            font-weight: 800; color: var(--gold); text-transform: uppercase; 
+        }
+
+        /* الأنميشن */
+        @keyframes finger-jump {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
 
         /* =========================================
-           3. التجاوب مع الأجهزة (Responsiveness)
+           4. التجاوب الكامل (Responsiveness)
            ========================================= */
-        
-        /* التابلت والأجهزة المتوسطة */
+        .page-content { flex: 1; padding: 40px; overflow-y: auto; }
+
         @media (max-width: 1024px) {
             .sidebar { width: var(--sidebar-collapsed-width); }
             .brand-info, .menu-item span { display: none; }
-            .brand-container { justify-content: center; padding: 10px; }
-            .menu-item { justify-content: center; margin: 5px; }
+            .menu-item { justify-content: center; margin: 8px; }
             .menu-item i { margin-left: 0; }
         }
 
-        /* الهواتف */
         @media (max-width: 768px) {
             .top-header { padding: 0 15px; }
             .platform-status { font-size: 12px; }
-            .platform-status span { display: block; margin-right: 0; margin-top: 2px; }
-            .user-meta { padding: 4px 8px; }
-            .vendor-user { font-size: 11px; }
-            .page-content { padding: 15px; }
-        }
-
-        /* الهواتف الصغيرة جداً */
-        @media (max-width: 480px) {
-            .platform-status { display: none; } /* إخفاء النص الطويل في الشاشات الصغيرة جداً لتوفير مساحة */
-            .sidebar { position: fixed; left: auto; right: 0; height: 100%; } /* تثبيت السايدبار في الموبايل */
+            .platform-status span { display: block; margin-right: 0; }
+            .user-name { display: none; } /* إخفاء الاسم في الموبايل لترك مساحة */
+            .withdraw-card { flex-direction: column; text-align: center; gap: 20px; }
         }
     </style>
 </head>
@@ -158,7 +207,7 @@
 
     <nav class="sidebar">
         <div class="brand-container">
-            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" alt="محجوب أونلاين" class="logo-img">
+            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" alt="Logo" class="logo-img">
             <div class="brand-info">
                 <span class="brand-name">محجوب أونلاين</span>
                 <span class="brand-tagline">سوقك الذكي</span>
@@ -166,26 +215,11 @@
         </div>
 
         <div class="menu-list">
-            <a href="/dashboard" class="menu-item {{ 'active' if request.path == '/dashboard' }}">
-                <i class="fas fa-th-large"></i>
-                <span>الرئيسية</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="fas fa-wallet"></i>
-                <span>محفظة MAH</span>
-            </a>
-            <a href="/add_product" class="menu-item {{ 'active' if request.path == '/add_product' }}">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <span>رفع منتج جديد</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="fas fa-chart-line"></i>
-                <span>الإحصائيات</span>
-            </a>
-            <a href="#" class="menu-item">
-                <i class="fas fa-user-gear"></i>
-                <span>إعدادات المتجر</span>
-            </a>
+            <a href="#" class="menu-item active"><i class="fas fa-th-large"></i><span>الرئيسية</span></a>
+            <a href="#" class="menu-item"><i class="fas fa-wallet"></i><span>محفظة MAH</span></a>
+            <a href="#" class="menu-item"><i class="fas fa-plus-circle"></i><span>رفع منتج جديد</span></a>
+            <a href="#" class="menu-item"><i class="fas fa-chart-bar"></i><span>الإحصائيات</span></a>
+            <a href="#" class="menu-item"><i class="fas fa-gears"></i><span>الإعدادات</span></a>
         </div>
     </nav>
 
@@ -198,19 +232,35 @@
             </div>
 
             <div class="header-profile">
-                <div class="user-meta">
-                    <span class="vendor-user">@{{ session.get('username', 'ali') }}</span>
-                    <div class="avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
+                <div class="user-badge">
+                    <span class="user-name">@ali</span>
+                    <div class="user-icon"><i class="fas fa-user-shield"></i></div>
                 </div>
-                <a href="/logout" style="color:#e74c3c; margin-right:5px; font-size: 18px;"><i class="fas fa-power-off"></i></a>
+                <a href="#" style="color:#e74c3c; font-size: 20px;"><i class="fas fa-power-off"></i></a>
             </div>
         </header>
 
         <div class="page-content">
-            {% block content %}{% endblock %}
-        </div>
+            
+            <div class="withdraw-card">
+                <div class="wallet-info">
+                    <p style="margin:0; opacity: 0.8;">الرصيد المتاح حالياً</p>
+                    <h2>0.00 <span>MAH</span></h2>
+                    <small style="opacity: 0.6;">رقم المحفظة: MAJ-882026-X</small>
+                </div>
+
+                <div class="finger-pull-wrapper">
+                    <div style="position: relative; display: inline-block;">
+                        <button class="finger-btn">
+                            <i class="fas fa-hand-pointer"></i>
+                            <div class="pulse-effect"></div>
+                        </button>
+                    </div>
+                    <span class="withdraw-label">سحب الرصيد</span>
+                </div>
+            </div>
+
+            </div>
     </main>
 
 </body>
