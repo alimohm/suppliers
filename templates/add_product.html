@@ -1,162 +1,233 @@
 {% extends "layout.html" %}
 
-{% block title %}إضافة منتج | سوقك الذكي{% endblock %}
+{% block title %}إضافة منتج احترافي | سوقك الذكي{% endblock %}
 
 {% block content %}
 <style>
-    /* التنسيقات الأساسية المتوافقة مع الهوية */
+    /* المتغيرات اللونية للهوية البصرية */
+    :root {
+        --royal-purple: #4b0082;
+        --accent-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        --soft-bg: #f8f9fc;
+        --border-radius: 16px;
+    }
+
+    body { background-color: var(--soft-bg); font-family: 'Cairo', sans-serif; }
+
     .upload-card {
         background: #ffffff;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        max-width: 850px;
-        margin: 20px auto;
-        border: 1px solid #f0f0f0;
+        padding: 2rem;
+        border-radius: 25px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        max-width: 900px;
+        margin: 2rem auto;
+        border: 1px solid rgba(0,0,0,0.03);
     }
 
-    /* صندوق مساعد الكتابة الذكي - الأداة الوحيدة الآن */
-    .ai-dashed-box {
-        border: 2px dashed #6a11cb;
-        background: #fdfbff;
-        border-radius: 15px;
-        padding: 20px;
+    .form-header {
         text-align: center;
-        margin: 25px 0;
+        margin-bottom: 2rem;
+        color: var(--royal-purple);
     }
 
-    .ai-trigger-btn {
-        background: #4b0082;
-        color: white;
-        border: none;
-        padding: 10px 25px;
-        border-radius: 10px;
+    .form-label {
         font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+        font-size: 0.95rem;
+        color: #444;
+        margin-bottom: 8px;
+        display: block;
     }
 
     .form-control {
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        padding: 12px;
-        font-family: 'Cairo', sans-serif;
+        width: 100%;
+        border-radius: var(--border-radius);
+        border: 1.5px solid #eee;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        background: #fafafa;
     }
 
-    .main-submit-btn {
-        width: 100%;
-        background: #4b0082;
+    .form-control:focus {
+        border-color: #6a11cb;
+        box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.1);
+        background: #fff;
+        outline: none;
+    }
+
+    /* أداة التوليد الذكي الاحترافية */
+    .ai-smart-tool {
+        background: #f4f0ff;
+        border: 2px dashed #6a11cb;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .ai-btn-main {
+        background: var(--accent-gradient);
         color: white;
         border: none;
-        padding: 15px;
+        padding: 10px 25px;
         border-radius: 12px;
-        font-weight: 800;
+        font-weight: 700;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 auto;
+        transition: 0.3s;
     }
+
+    .ai-btn-main:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3); }
+
+    .ai-options-dropdown {
+        display: none;
+        margin-top: 1rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .style-item {
+        padding: 12px 20px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .style-item:hover { background: #f8f5ff; color: var(--royal-purple); }
+
+    .publish-btn {
+        width: 100%;
+        background: var(--royal-purple);
+        color: white;
+        border: none;
+        padding: 18px;
+        border-radius: var(--border-radius);
+        font-weight: 800;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        transition: 0.3s;
+    }
+
+    /* التحسين لجميع الشاشات */
+    @media (max-width: 768px) {
+        .upload-card { margin: 1rem; padding: 1.5rem; }
+        .row > div { margin-bottom: 1rem; }
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
 <div class="upload-card" dir="rtl">
-    <h5 class="text-center mb-4" style="color: #4b0082; font-weight: 800;">إضافة منتج جديد للمنصة</h5>
+    <div class="form-header">
+        <h4 class="fw-bold">✨ إضافة منتج جديد للمتجر</h4>
+        <p class="text-muted small">املأ البيانات أدناه لنشر منتجك في سوقك الذكي</p>
+    </div>
 
     <form id="productForm">
-        <div class="row g-3 mb-3">
-            <div class="col-md-8">
-                <label class="fw-bold">اسم المنتج</label>
-                <input type="text" id="prodName" class="form-control" placeholder="أدخل اسم المنتج...">
+        <div class="row mb-3">
+            <div class="col-md-8 mb-3 mb-md-0">
+                <label class="form-label">اسم المنتج</label>
+                <input type="text" id="productName" class="form-control" placeholder="مثلاً: سماعة بلوتوث احترافية..." required>
             </div>
             <div class="col-md-4">
-                <label class="fw-bold">الفئة</label>
-                <select class="form-control"><option>إلكترونيات</option></select>
+                <label class="form-label">الفئة</label>
+                <select class="form-control">
+                    <option>إلكترونيات</option>
+                    <option>أزياء</option>
+                    <option>منزل ومطبخ</option>
+                </select>
             </div>
         </div>
 
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <label class="fw-bold">السعر</label>
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label">السعر</label>
                 <input type="number" class="form-control" placeholder="0.00">
             </div>
-            <div class="col-md-4">
-                <label class="fw-bold">العملة</label>
-                <select class="form-control"><option>ريال سعودي</option></select>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label class="form-label">العملة</label>
+                <select class="form-control">
+                    <option>ريال يمني</option>
+                    <option>ريال سعودي</option>
+                </select>
             </div>
             <div class="col-md-4">
-                <label class="fw-bold">الكمية</label>
+                <label class="form-label">الكمية</label>
                 <input type="number" class="form-control" placeholder="100">
             </div>
         </div>
 
-        <div class="ai-dashed-box">
-            <p style="color: #6a11cb; font-weight: 800; margin-bottom: 12px;">✨ مساعد الكتابة الذكي</p>
-            <button type="button" class="ai-trigger-btn" data-bs-toggle="modal" data-bs-target="#aiModal">
-                توليد الوصف بالمواصفات <i class="fas fa-magic"></i>
+        <div class="ai-smart-tool">
+            <button type="button" class="ai-btn-main" onclick="toggleAI()">
+                <i class="fas fa-magic"></i> مساعد الكتابة الذكي
             </button>
+            
+            <div id="aiDropdown" class="ai-options-dropdown">
+                <div class="p-3 border-bottom">
+                    <label class="form-label">المواصفات السريعة (نقاط):</label>
+                    <textarea id="quickSpecs" class="form-control" rows="2" placeholder="شاشة 4K، بطارية 5000mAh..."></textarea>
+                </div>
+                <div class="style-item" onclick="generateAI('خبير')"><span>👨‍🏫</span> خبير (تركيز على التفاصيل التقنية)</div>
+                <div class="style-item" onclick="generateAI('احترافي')"><span>💼</span> احترافي (رسمي وتسويقي)</div>
+                <div class="style-item" onclick="generateAI('ودي')"><span>😊</span> ودي (جذاب وقريب للمستهلك)</div>
+                <div class="style-item" onclick="generateAI('بسيط')"><span>📝</span> بسيط (واضح ومباشر)</div>
+            </div>
         </div>
 
         <div class="mb-4">
-            <label class="fw-bold">وصف المنتج (النتيجة)</label>
-            <textarea id="prodDesc" class="form-control" rows="5" placeholder="سيتم تعبئة الوصف هنا تلقائياً..."></textarea>
+            <label class="form-label">وصف المنتج الكامل</label>
+            <textarea id="finalDesc" class="form-control" rows="6" placeholder="اكتب وصف المنتج هنا أو استخدم المساعد الذكي..."></textarea>
         </div>
 
         <div class="mb-4">
-            <label class="fw-bold">صورة المنتج</label>
-            <input type="file" class="form-control">
+            <label class="form-label">الصور والفيديوهات</label>
+            <input type="file" id="mediaInput" class="form-control" multiple accept="image/*,video/*" onchange="autoRename(this)">
+            <small id="fileLabel" class="text-success mt-2 d-none fw-bold">
+                <i class="fas fa-check"></i> تم ضبط الملفات باسم المنتج تلقائياً
+            </small>
         </div>
 
-        <button type="submit" class="main-submit-btn">
-            <i class="fas fa-rocket"></i> نشر المنتج الآن
+        <button type="submit" class="publish-btn">
+             نشر المنتج في المتجر الآن <i class="fas fa-rocket"></i>
         </button>
     </form>
 </div>
 
-<div class="modal fade" id="aiModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered text-end" dir="rtl">
-        <div class="modal-content" style="border-radius: 20px;">
-            <div class="modal-body p-4">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">المواصفات (اكتب نقاط سريعة):</label>
-                    <textarea id="aiSpecs" class="form-control" rows="3" placeholder="مثلاً: دقة 4K، معالج قوي، بطارية تدوم 24 ساعة..."></textarea>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold">أسلوب الكتابة:</label>
-                    <select id="aiStyle" class="form-control">
-                        <option value="خبير">👨‍🏫 خبير (تركيز على التفاصيل التقنية)</option>
-                        <option value="احترافي">💼 احترافي (رسمي وتسويقي)</option>
-                        <option value="ودي">😊 ودي (جذاب وقريب للمستهلك)</option>
-                        <option value="بسيط">📝 بسيط (واضح ومباشر)</option>
-                    </select>
-                </div>
-                <button type="button" class="main-submit-btn" onclick="executeGeneration()">توليد الوصف الآن ✨</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-    function executeGeneration() {
-        const name = document.getElementById('prodName').value;
-        const specs = document.getElementById('aiSpecs').value;
-        const style = document.getElementById('aiStyle').value;
-        const output = document.getElementById('prodDesc');
-
-        if(!name) { alert("يرجى إدخال اسم المنتج أولاً."); return; }
-
-        // إغلاق المودال وبدء التوليد
-        bootstrap.Modal.getInstance(document.getElementById('aiModal')).hide();
-        output.value = "جاري التوليد بذكاء لأسلوبك الـ " + style + "...";
-
-        setTimeout(() => {
-            let text = "";
-            if(style === "خبير") {
-                text = `تقرير تقني لمنتج ${name}: يتميز بمواصفات عالية تشمل (${specs}) لضمان أداء احترافي فائق الدقة.`;
-            } else if(style === "ودي") {
-                text = `يا هلا! جبنا لك ${name} الرهيب. بميزات مثل (${specs})، بيسهل عليك حياتك اليومية بشكل ما تتخيله!`;
-            } else {
-                text = `نقدم لكم ${name} المتوفر الآن بمواصفات (${specs}). جودة مضمونة تجدونها فقط في سوقك الذكي.`;
-            }
-            output.value = text;
-        }, 1200);
+    // وظيفة القائمة المنسدلة
+    function toggleAI() {
+        const dropdown = document.getElementById('aiDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
-</script>
-{% endblock %}
+
+    // وظيفة التوليد الذكي
+    function generateAI(style) {
+        const name = document.getElementById('productName').value;
+        const specs = document.getElementById('quickSpecs').value;
+        const output = document.getElementById('finalDesc');
+
+        if(!name) { alert("أدخل اسم المنتج أولاً يا صديقي!"); return; }
+
+        output.value = "جاري صياغة المحتوى بذكاء بأسلوب " + style + "...";
+        
+        setTimeout(() => {
+            let result = "";
+            if(style === 'خبير') result = `مراجعة تقنية لـ ${name}:\nتتميز بـ (${specs}) لتقديم كفاءة مثالية للمستخدم المحترف.`;
+            else if(style === 'ودي') result = `يا هلا! جبنا لك ${name} الرهيب. بمواصفات مثل (${specs})، بيخلي حياتك أسهل. اطلبه الحين!`;
+            else result = `نقدم لكم ${name} الجديد. يتميز بـ (${specs}). متوفر الآن بأفضل سعر في سوقك الذكي.`;
+            
+            output.value = result;
+            toggleAI();
+        }, 1000);
