@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
 
-# استيراد الإعدادات والمنطق البرمجي الخاص بك
+# استيراد الإعدادات والمنطق البرمجي
 from config import Config
 from database import db, init_db, Product, Vendor 
 from logic import login_vendor, logout, is_logged_in
@@ -35,8 +35,9 @@ def login_page():
         user = request.form.get('username')
         pw = request.form.get('password')
         if login_vendor(user, pw):
-            # إعداد بيانات الجلسة (المحفظة الرقمية)
-            session['wallet'] = "0xMAH_" + os.urandom(4).hex().upper() 
+            # إعداد بيانات الجلسة (المحفظة الرقمية) لضمان عدم انهيار الداشبورد
+            if 'wallet' not in session:
+                session['wallet'] = "0xMAH_" + os.urandom(4).hex().upper() 
             return redirect(url_for('dashboard'))
         flash("❌ خطأ في اسم المستخدم أو كلمة المرور", "danger")
     
@@ -48,41 +49,51 @@ def dashboard():
     if not is_logged_in():
         return redirect(url_for('login_page'))
     
-    # جلب بيانات المورد الحالي والمنتجات
-    vendor = Vendor.query.filter_by(username=session['username']).first()
-    products = Product.query.filter_by(vendor_username=session['username']).all()
-    products_count = len(products)
+    # 1. جلب بيانات المورد
+    vendor = Vendor.query.filter_by(username=session.get('username')).first()
     
+    # 2. جلب المنتجات (ضروري جداً لأن الداشبورد يحاول عرضها)
+    try:
+        products = Product.query.filter_by(vendor_username=session.get('username')).all()
+        products_count = len(products)
+    except Exception as e:
+        print(f"Database Error: {e}")
+        products = []
+        products_count = 0
+    
+    # 3. التأكد من وجود قيمة للمحفظة لتجنب KeyError
+    if 'wallet' not in session:
+        session['wallet'] = "0xMAH_Identity_Locked"
+
+    # تمرير كل المتغيرات التي يطلبها ملف dashboard.html
     return render_template('dashboard.html', 
                            vendor=vendor, 
+                           products=products, 
                            products_count=products_count)
 
-# --- إضافة المنتج (دعم الرابط المباشر والنافذة) ---
+# --- إضافة المنتج ---
 @app.route('/add_product', methods=['GET', 'POST'])
 def add_product():
     if not is_logged_in():
         return redirect(url_for('login_page'))
     
     if request.method == 'POST':
-        # استقبال البيانات (لاحظ الأسماء المتوافقة مع HTML الخاص بك)
         p_name = request.form.get('name')
         p_price = request.form.get('price')
         p_desc = request.form.get('description', '') 
         p_image = request.files.get('image')
 
         if not p_name or not p_price:
-            flash("❌ يرجى إدخال البيانات الأساسية للمنتج.", "danger")
+            flash("❌ يرجى إدخال البيانات الأساسية.", "danger")
             return redirect(url_for('dashboard'))
 
         try:
-            # معالجة وحفظ الصورة
             image_filename = None
             if p_image and p_image.filename != '':
                 ext = os.path.splitext(p_image.filename)[1]
                 image_filename = f"{secure_filename(p_name)}_{os.urandom(2).hex()}{ext}"
                 p_image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
 
-            # الحفظ في قاعدة البيانات
             new_product = Product(
                 name=p_name,
                 price=float(p_price),
@@ -93,9 +104,9 @@ def add_product():
             db.session.add(new_product)
             db.session.commit()
             
-            # المزامنة مع المنصة الخارجية
+            # المزامنة الخارجية
             send_to_qumra_webhook(p_name, p_price, p_desc, image_filename)
-            flash(f"🚀 تم رفع {p_name} ومزامنته بنجاح!", "success")
+            flash(f"🚀 تم رفع {p_name} بنجاح!", "success")
             
             return redirect(url_for('dashboard'))
             
