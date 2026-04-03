@@ -5,9 +5,10 @@ from werkzeug.utils import secure_filename
 # --- استيراد الملفات الخاصة بالمشروع ---
 from config import Config
 from database import db, init_db
-from models import Product, Vendor, AdminUser, seed_admin # التعديل هنا
+from models import Product, Vendor, AdminUser, seed_admin
 from logic import login_vendor, logout, is_logged_in
-from admin_logic import is_admin_logged_in, verify_admin_credentials
+# استيراد دوال الإدارة المحدثة
+from admin_logic import is_admin_logged_in, verify_admin_credentials, logout_admin_logic
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -20,15 +21,17 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 init_db(app)
 
-# --- تفعيل قاعدة البيانات وحقن بيانات الإدارة ---
+# --- تفعيل قاعدة البيانات وحقن بيانات الإدارة (صبري) ---
 with app.app_context():
     db.create_all()
-    seed_admin() # سيقوم بإنشاء حساب "صبري" بكلمة مرور "123" إذا لم يكن موجوداً
+    seed_admin() 
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# ==========================================
 # --- مسارات الموردين (Vendors) ---
+# ==========================================
 
 @app.route('/')
 def index():
@@ -42,10 +45,9 @@ def login_page():
     if request.method == 'POST':
         u = request.form.get('username')
         p = request.form.get('password')
+        # دالة login_vendor تتولى الـ flash والـ session للمورد
         if login_vendor(u, p):
-            flash("مرحباً بك في نظام محجوب أونلاين الإداري", "success")
             return redirect(url_for('dashboard'))
-        flash("خطأ في بيانات الدخول.", "danger")
     return render_template('login.html')
 
 @app.route('/dashboard')
@@ -102,19 +104,21 @@ def add_product():
 
     return render_template('add_product.html', vendor=vendor)
 
-# --- مسارات الإدارة (Admin) ---
+# ==========================================
+# --- مسارات الإدارة المركزية (Admin) ---
+# ==========================================
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login_route():
+    if is_admin_logged_in(): return redirect(url_for('admin_dashboard_route'))
+    
     if request.method == 'POST':
         u = request.form.get('admin_user')
         p = request.form.get('admin_pass')
+        # دالة verify_admin_credentials تتولى الـ flash والـ session للإدارة
         if verify_admin_credentials(u, p):
-            session['is_admin'] = True
-            session['username'] = u # لتسجيل اسم صبري في الجلسة
-            flash("مرحباً بك في لوحة الإدارة المركزية", "success")
             return redirect(url_for('admin_dashboard_route'))
-        flash("خطأ في بيانات الدخول الإدارية!", "danger")
+            
     return render_template('admin_login.html')
 
 @app.route('/admin/dashboard')
@@ -123,12 +127,25 @@ def admin_dashboard_route():
         return redirect(url_for('admin_login_route'))
     
     all_vendors = Vendor.query.all()
-    pending_count = Product.query.filter_by(status='pending').count()
-    return render_template('admin_dashboard.html', vendors=all_vendors, pending_count=pending_count)
+    # جلب المنتجات التي تنتظر الموافقة من "صبري"
+    pending_products = Product.query.filter_by(status='pending').all()
+    pending_count = len(pending_products)
+    
+    return render_template('admin_dashboard.html', 
+                           vendors=all_vendors, 
+                           pending_count=pending_count,
+                           admin_name=session.get('admin_user'))
 
+@app.route('/admin/logout')
+def admin_logout():
+    logout_admin_logic() # تنظيف جلسة الإدارة
+    return redirect(url_for('admin_login_route'))
+
+# --- تسجيل الخروج العام ---
 @app.route('/logout')
 def logout_route():
     session.clear() 
+    flash("تم تسجيل الخروج من النظام اللامركزي.", "info")
     return redirect(url_for('login_page'))
 
 if __name__ == '__main__':
