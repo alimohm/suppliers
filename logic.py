@@ -1,45 +1,37 @@
-from flask import session, flash, redirect, url_for
+# logic.py
 from models import Vendor
+from werkzeug.security import check_password_hash
+from flask import session
 
 def login_vendor(username, password):
-    """
-    منطق تسجيل دخول الموردين المتوافق مع الهيكل اللامركزي الموحد.
-    """
-    try:
-        # 1. جلب المورد من قاعدة البيانات
-        vendor = Vendor.query.filter_by(username=username).first()
-        
-        # 2. التحقق من وجود المستخدم
-        if not vendor:
-            flash("عذراً، اسم المستخدم هذا غير مسجل في المنصة اللامركزية.", "danger")
-            return False
-        
-        # 3. التحقق من مطابقة كلمة المرور (مع تحويلها لنص لمنع الانهيار)
-        if str(vendor.password) != str(password):
-            flash("كلمة المرور غير صحيحة، يرجى التأكد والمحاولة مرة أخرى.", "danger")
-            return False
+    # البحث في قاعدة بيانات الموردين المرتبطة
+    vendor = Vendor.query.filter_by(username=username).first()
 
-        # 4. تفعيل الجلسة مع إضافة الأوسمة التي يطلبها layout.html
-        session['is_logged_in'] = True
-        session['is_admin'] = False           # 💡 ضروري جداً لكي يعرف الهيكل أنك مورد وليس مديراً
-        session['username'] = vendor.username  # ليظهر @username في الهيدر
-        session['brand_name'] = vendor.brand_name
-        session['wallet'] = vendor.wallet_address
-        
-        flash(f"🚀 تم تسجيل الدخول بنجاح. مرحباً بك في {vendor.brand_name}", "success")
-        return True
+    if not vendor:
+        return False, "المستخدم غير مسجل في المنصة اللامركزية."
 
-    except Exception as e:
-        print(f"DEBUG VENDOR LOGIN ERROR: {e}")
-        flash("حدث خطأ تقني أثناء الدخول، يرجى المحاولة لاحقاً.", "danger")
-        return False
+    if not check_password_hash(vendor.password, password):
+        return False, "فشل تأمين البوابة: كلمة المرور غير صحيحة."
 
-def is_logged_in():
-    """التحقق من حالة الدخول بناءً على وسم التفعيل"""
-    return session.get('is_logged_in', False)
+    # --- فحص الحالة السيادية للمورد ---
+    status = vendor.status.lower() if vendor.status else 'pending'
 
-def logout():
-    """تطهير الجلسة وتأمين النظام عند الخروج"""
-    session.clear()
-    flash("🔒 تم تسجيل الخروج وتأمين الجلسة بنجاح.", "info")
-    return redirect(url_for('login_page'))
+    if status == 'blocked':
+        return False, "وصول مرفوض: تم حظر حسابك بقرار سيادي."
+    
+    elif status == 'restricted':
+        return False, "حساب مقيد: صلاحياتك معلقة حالياً."
+    
+    elif status == 'pending':
+        return False, "الدخول معلق: حسابك لا يزال تحت المراجعة."
+
+    # إذا مر من كل الفحوصات:
+    session['user_id'] = vendor.id
+    session['username'] = vendor.username
+    session['role'] = 'vendor'
+    
+    if status == 'under_surveillance':
+        session['surveillance_mode'] = True
+        return True, "تنبيه: أنت الآن تحت نظام الرقابة الرقمية المستمرة."
+
+    return True, "تم الدخول بنجاح."
