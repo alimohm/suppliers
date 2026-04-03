@@ -14,13 +14,14 @@ class Vendor(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     
-    # بيانات الدخول للموظف (مثلاً: username: mushtaq)
+    # بيانات الدخول للمورد
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     
-    # الحقول التشغيلية
+    # الحقول التشغيلية والمعلومات الشخصية
     employee_name = db.Column(db.String(120), nullable=True) 
     brand_name = db.Column(db.String(120), nullable=False)    
+    phone_number = db.Column(db.String(20), nullable=True) # تم إضافة حقل رقم الهاتف هنا
     
     # --- صلاحيات المدير العام ---
     is_active = db.Column(db.Boolean, default=True) # تجميد أو تفعيل المورد
@@ -28,14 +29,14 @@ class Vendor(db.Model):
     # الهوية الرقمية اللامركزية للمؤسسة
     wallet_address = db.Column(db.String(255), unique=True, default=generate_mah_wallet)
     
-    # توكن الربط الخارجي (Qomra وغيره)
+    # توكن الربط الخارجي
     qomra_access_token = db.Column(db.Text, nullable=True)
     
     # علاقة المنتجات
     products = db.relationship('Product', backref='vendor_owner', lazy=True)
 
     def __repr__(self):
-        return f'<Vendor Employee: {self.employee_name} | Brand: {self.brand_name}>'
+        return f'<Vendor: {self.employee_name} | Brand: {self.brand_name}>'
 
 class Product(db.Model):
     """جدول المنتجات - قلب منصة محجوب أونلاين اللامركزية"""
@@ -51,9 +52,9 @@ class Product(db.Model):
     
     # المحتوى والوسائط
     description = db.Column(db.Text)
-    image_file = db.Column(db.Text) # يخزن مسارات الصور والفيديو
+    image_file = db.Column(db.Text) 
     
-    # --- حقول التحكم الإداري (صبري) ---
+    # --- حقول التحكم الإداري (علي محجوب) ---
     status = db.Column(db.String(20), default='pending') # pending, approved, rejected
     is_published = db.Column(db.Boolean, default=False)
     
@@ -72,12 +73,28 @@ class AdminUser(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
 
-# --- دالة مساعدة لحقن بياناتك (صبري) تلقائياً ---
+# --- دالة حقن البيانات المحدثة (علي محجوب) ---
 def seed_admin():
-    """تأكد من وجود حساب صبري في قاعدة البيانات"""
-    admin = AdminUser.query.filter_by(username='صبري').first()
+    """تأكد من وجود حساب علي محجوب كمدير وكمورد في قاعدة البيانات"""
+    
+    # 1. تحديث حساب المدير العام
+    admin = AdminUser.query.filter_by(username='علي محجوب').first()
     if not admin:
-        new_admin = AdminUser(username='صبري', password='123')
+        new_admin = AdminUser(username='علي محجوب', password='123')
         db.session.add(new_admin)
         db.session.commit()
-        print("✅ تم تفعيل حساب المدير العام: صبري")
+        print("✅ تم تفعيل حساب المدير العام: علي محجوب")
+
+    # 2. إضافة علي محجوب كمورد (Vendor) افتراضي للمنصة
+    vendor = Vendor.query.filter_by(username='ali_mahjoub').first()
+    if not vendor:
+        new_vendor = Vendor(
+            username='ali_mahjoub',
+            password='123',
+            employee_name='علي محجوب',
+            brand_name='Mahjoub Online',
+            phone_number='777777777' # يمكنك تعديله لاحقاً
+        )
+        db.session.add(new_vendor)
+        db.session.commit()
+        print("✅ تم إضافة علي محجوب كمورد معتمد للمنصة")
