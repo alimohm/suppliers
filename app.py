@@ -10,12 +10,17 @@ from logic import login_vendor, logout, is_logged_in
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# إعدادات الميديا
+# إعدادات الميديا المطورة
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# الصيغ المسموح بها (صور وفيديو)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 init_db(app)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -28,7 +33,7 @@ def login_page():
     if is_logged_in(): return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
-        u = request.form.get('username') # يدخل بـ moshtaq
+        u = request.form.get('username')
         p = request.form.get('password')
         if login_vendor(u, p):
             flash("مرحباً بك في نظام محجوب أونلاين الإداري", "success")
@@ -41,17 +46,15 @@ def dashboard():
     if not is_logged_in(): return redirect(url_for('login_page'))
     
     user_session = session.get('username')
-    # جلب بيانات الموظف (مشتاق) والمؤسسة (عمار الفقيه)
     vendor_data = Vendor.query.filter_by(username=user_session).first()
     
     if not vendor_data:
         return redirect(url_for('logout_route'))
 
-    # جلب المنتجات المربوطة بالمؤسسة التي يتبعها هذا الموظف
     products_list = Product.query.filter_by(brand=vendor_data.brand_name).all()
     
     return render_template('dashboard.html', 
-                           vendor=vendor_data, # يحتوي على اسم الموظف والبراند
+                           vendor=vendor_data, 
                            products=products_list)
 
 @app.route('/add_product', methods=['GET', 'POST'])
@@ -67,31 +70,39 @@ def add_product():
         p_currency = request.form.get('currency', 'YER')
         p_stock = request.form.get('stock', 1)
         p_desc = request.form.get('description')
-        p_image = request.files.get('image')
+        
+        # --- تعديل الرفع المتعدد للميديا ---
+        media_files = request.files.getlist('product_media') # تأكد أن الاسم يطابق الـ name في HTML
+        saved_files = []
 
         if p_name and p_price:
-            image_filename = None
-            if p_image:
-                ext = os.path.splitext(p_image.filename)[1]
-                image_filename = f"{secure_filename(p_name)}_{os.urandom(2).hex()}{ext}"
-                p_image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+            for file in media_files:
+                if file and allowed_file(file.filename):
+                    ext = os.path.splitext(file.filename)[1]
+                    # توليد اسم فريد لكل ملف (اسم المنتج + كود عشوائي)
+                    filename = f"{secure_filename(p_name)}_{os.urandom(2).hex()}{ext}"
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    saved_files.append(filename)
+
+            # تحويل قائمة الملفات إلى نص واحد مفصول بفاصلة لتخزينه في قاعدة البيانات
+            all_media_str = ",".join(saved_files) if saved_files else None
 
             # --- الربط التلقائي الذكي ---
             new_item = Product(
                 name=p_name,
-                brand=vendor.brand_name,        # يربط بـ "عمار الفقيه للتجارة" تلقائياً
+                brand=vendor.brand_name,
                 price=float(p_price),
                 currency=p_currency,
                 stock=int(p_stock),
                 description=p_desc,
-                image_file=image_filename,
-                vendor_id=vendor.id,            # ID الموظف (مشتاق)
-                vendor_username=user_session    # يوزر الموظف (للمراجعة)
+                image_file=all_media_str, # سيخزن الآن مثلاً: "img1.jpg,video1.mp4"
+                vendor_id=vendor.id,
+                vendor_username=user_session
             )
             db.session.add(new_item)
             db.session.commit()
             
-            flash(f"✅ تم إضافة المنتج بنجاح بواسطة {vendor.employee_name}", "success")
+            flash(f"✅ تم إضافة {len(saved_files)} ملف ميديا للمنتج بنجاح!", "success")
             return redirect(url_for('dashboard'))
 
     return render_template('add_product.html', vendor=vendor)
