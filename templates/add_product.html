@@ -38,14 +38,13 @@
         outline: none;
     }
 
-    /* أداة الذكاء الاصطناعي - سوقك الذكي */
+    /* أداة الذكاء الاصطناعي */
     .ai-engine-container {
         background: linear-gradient(145deg, #f9f7ff, #ffffff);
         border: 2px dashed var(--royal-purple);
         border-radius: 20px;
         padding: 25px;
         margin: 30px 0;
-        position: relative;
     }
 
     .style-grid {
@@ -77,7 +76,30 @@
         width: 100%;
         font-weight: 800;
         cursor: pointer;
-        transition: 0.3s;
+    }
+
+    /* تصميم قسم المعاينة للميديا */
+    .preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .preview-item {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid #eee;
+    }
+    .video-badge {
+        position: relative;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 10px;
     }
 
     .publish-btn {
@@ -93,12 +115,7 @@
         margin-top: 20px;
     }
 
-    .locked-identity {
-        background: #f0f0f0;
-        color: #555;
-        font-weight: 700;
-        cursor: not-allowed;
-    }
+    .locked-identity { background: #f0f0f0; color: #555; font-weight: 700; cursor: not-allowed; }
 </style>
 
 <div class="master-card" dir="rtl">
@@ -142,11 +159,8 @@
 
         <div class="ai-engine-container">
             <h6 class="fw-bold mb-3"><i class="fas fa-magic"></i> مساعد صياغة الوصف الذكي</h6>
-            
-            <label class="form-label small">المواصفات الأساسية:</label>
             <textarea id="pSpecs" class="premium-input mb-3" rows="3" placeholder="اكتب المواصفات هنا مفصولة بفاصلة..."></textarea>
             
-            <label class="form-label small">اختر أسلوب العرض:</label>
             <div class="style-grid">
                 <div class="style-card active" onclick="setStyle(this, 'خبير تقني')">👨‍🏫 خبير تقني</div>
                 <div class="style-card" onclick="setStyle(this, 'احترافي')">💼 احترافي</div>
@@ -154,24 +168,24 @@
                 <div class="style-card" onclick="setStyle(this, 'بسيط')">📝 بسيط</div>
             </div>
 
-            <button type="button" class="btn-ai-generate" onclick="generatePremiumDesc()">
-                توليد الوصف الاحترافي ✨
-            </button>
+            <button type="button" class="btn-ai-generate" onclick="generatePremiumDesc()">توليد الوصف الاحترافي ✨</button>
         </div>
 
         <div class="mb-4">
             <label class="form-label">الوصف النهائي للمنتج</label>
-            <textarea id="pDesc" name="description" class="premium-input" rows="8" placeholder="سيتم تعبئة الوصف هنا..."></textarea>
+            <textarea id="pDesc" name="description" class="premium-input" rows="8"></textarea>
         </div>
 
         <div class="mb-4">
-            <label class="form-label">صورة المنتج</label>
-            <input type="file" name="image" class="premium-input" accept="image/*" required>
+            <label class="form-label">ألبوم الميديا (صور وفيديو المنتج)</label>
+            <input type="file" name="product_media" class="premium-input" id="mediaInput" accept="image/*,video/mp4" multiple onchange="previewMedia()">
+            <small class="text-muted">يمكنك اختيار أكثر من صورة وفيديو واحد للمنتج (الحد الأقصى للمجموع 10 ملفات).</small>
+            
+            <div id="mediaPreview" class="preview-container">
+                </div>
         </div>
 
-        <button type="submit" class="publish-btn">
-             حفظ ونشر المنتج الآن 🚀
-        </button>
+        <button type="submit" class="publish-btn">حفظ ونشر المنتج الآن 🚀</button>
     </form>
 </div>
 
@@ -191,25 +205,33 @@
         const specs = document.getElementById('pSpecs').value;
         const target = document.getElementById('pDesc');
 
-        if(!name || !specs) {
-            alert("يرجى ملء الاسم والمواصفات أولاً."); return;
-        }
+        if(!name || !specs) { alert("يرجى ملء الاسم والمواصفات أولاً."); return; }
 
-        let result = `🌟 المنتج: ${name}\n`;
-        result += `🏢 العلامة التجارية: ${brandName}\n`;
-        result += `🔗 متوفر حصرياً عبر "محجوب أونلاين" - سوقك الذكي 🇾🇪\n`;
-        result += `🎭 الأسلوب المختارة: ${currentStyle}\n\n`;
-        result += `🚀 المزايا الرئيسية:\n`;
-        
-        specs.split('،').forEach(s => {
-            if(s.trim()) result += `✅ ${s.trim()}\n`;
-        });
-
-        result += `\n🛡️ لماذا تختار محجوب أونلاين؟\n`;
-        result += `نحن نضمن لك الشفافية والأمان في كل عملية شراء عبر تقنياتنا اللامركزية.\n\n`;
-        result += `📥 اطلب الآن وانضم لمستقبل التسوق!`;
-
+        let result = `🌟 المنتج: ${name}\n🏢 العلامة التجارية: ${brandName}\n🔗 متوفر حصرياً عبر "محجوب أونلاين" - سوقك الذكي 🇾🇪\n\n🚀 المزايا الرئيسية:\n`;
+        specs.split('،').forEach(s => { if(s.trim()) result += `✅ ${s.trim()}\n`; });
+        result += `\n🛡️ نحن نضمن لك الشفافية والأمان في كل عملية شراء.\n📥 اطلب الآن!`;
         target.value = result;
+    }
+
+    // دالة المعاينة الجديدة
+    function previewMedia() {
+        const preview = document.getElementById('mediaPreview');
+        const files = document.getElementById('mediaInput').files;
+        preview.innerHTML = '';
+
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                if (file.type.startsWith('image/')) {
+                    div.innerHTML = `<img src="${e.target.result}" class="preview-item">`;
+                } else if (file.type.startsWith('video/')) {
+                    div.innerHTML = `<div class="preview-item video-badge">🎥 Video</div>`;
+                }
+                preview.appendChild(div);
+            }
+            reader.readAsDataURL(file);
+        });
     }
 </script>
 {% endblock %}
