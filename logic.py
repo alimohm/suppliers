@@ -1,51 +1,45 @@
 from flask import session
 from werkzeug.security import check_password_hash
-# استيراد المورد وقاعدة البيانات (تأكد من صحة مسار الاستيراد حسب ملفاتك)
-from models import Vendor 
-from database import db 
+from models import Vendor
+from database import db
 
 def login_vendor(username, password):
+    """
+    التحقق من دخول المورد إلى المنصة اللامركزية.
+    تنبيه: يتم التعامل مع التشفير والحالات السيادية (نشط/موقف).
+    """
     try:
-        # 1. البحث عن المورد في قاعدة البيانات المرتبطة
+        # 1. البحث عن المستخدم في القاعدة
         vendor = Vendor.query.filter_by(username=username).first()
 
-        # 2. التحقق من الوجود
+        # 2. إذا كان المستخدم غير موجود نهائياً
         if not vendor:
-            return False, "المستخدم غير مسجل في المنصة اللامركزية."
+            return False, "تنبيه: اسم المستخدم هذا غير مسجل في المنصة اللامركزية."
 
-        # 3. التحقق من كلمة المرور المشفرة
+        # 3. التحقق من كلمة المرور (مقارنة الشفرة الرقمية)
         if not check_password_hash(vendor.password, password):
             return False, "فشل تأمين البوابة: كلمة المرور غير صحيحة."
 
-        # 4. مراجعة الحالات السيادية (المنطق الذي طلبته)
-        status = vendor.status.lower() if vendor.status else 'pending'
-
-        if status == 'blocked': # موقف
-            return False, "وصول مرفوض: تم حظر حسابك بقرار سيادي."
+        # 4. فحص الحالة السيادية للمورد (Status)
+        if vendor.status == 'blocked' or not vendor.is_active:
+            return False, "وصول مرفوض: تم إيقاف صلاحيات هذا الحساب بقرار سيادي."
         
-        elif status == 'restricted': # مقيد
-            return False, "حساب مقيد: صلاحياتك معلقة حالياً."
-        
-        elif status == 'pending': # تحت المراجعة
-            return False, "الدخول معلق: حسابك لا يزال تحت المراجعة الفنية."
+        if vendor.status == 'pending':
+            return False, "بانتظار الاعتماد: حسابك لا يزال تحت مراجعة برج المراقبة."
 
-        # 5. إذا اجتاز الاختبارات (تفعيل الجلسة)
-        session.clear() # تنظيف الجلسة القديمة للأمان
+        # 5. تفعيل الجلسة في حال النجاح
+        session.clear() # تنظيف أي جلسات سابقة
         session['user_id'] = vendor.id
         session['username'] = vendor.username
+        session['brand'] = vendor.brand_name
         session['role'] = 'vendor'
         
-        # حالة "تحت الرقابة"
-        if status == 'under_surveillance':
-            session['surveillance_mode'] = True
-            return True, "تنبيه: أنت الآن تحت نظام الرقابة الرقمية المستمرة."
-
-        return True, "تم الدخول بنجاح إلى منصة الموردين."
+        # رسالة ترحيب خاصة بالمورد
+        return True, f"أهلاً بك في سوقك الذكي، سيد {vendor.employee_name}."
 
     except Exception as e:
-        # في حال حدوث خطأ في الاتصال بقاعدة البيانات
-        return False, f"خطأ في الاتصال بالمنصة: {str(e)}"
+        return False, f"عطل فني في بوابة الدخول: {str(e)}"
 
 def is_logged_in():
-    """التحقق من حالة تسجيل الدخول للمورد"""
+    """التحقق من وجود جلسة مورد نشطة"""
     return session.get('role') == 'vendor' and 'user_id' in session
