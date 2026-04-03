@@ -1,5 +1,6 @@
 import random
 import string
+from datetime import datetime
 from database import db
 
 def generate_mah_wallet():
@@ -17,9 +18,12 @@ class Vendor(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     
-    # الحقول التشغيلية (الربط بين الموظف والمؤسسة)
-    employee_name = db.Column(db.String(120), nullable=True) # الاسم: مشتاق الفقيه
-    brand_name = db.Column(db.String(120), nullable=False)    # المؤسسة: عمار الفقيه للتجارة
+    # الحقول التشغيلية
+    employee_name = db.Column(db.String(120), nullable=True) 
+    brand_name = db.Column(db.String(120), nullable=False)    
+    
+    # --- إضافة للمدير (علي) ---
+    is_active = db.Column(db.Boolean, default=True) # يسمح لك بتعطيل المورد
     
     # الهوية الرقمية اللامركزية للمؤسسة
     wallet_address = db.Column(db.String(255), unique=True, default=generate_mah_wallet)
@@ -39,23 +43,32 @@ class Product(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
-    
-    # براند المنتج (يُملأ آلياً بـ "عمار الفقيه للتجارة" عند الإضافة)
     brand = db.Column(db.String(120), nullable=True)  
     
-    # التفاصيل المالية والمخزون
     price = db.Column(db.Float, nullable=False)
-    currency = db.Column(db.String(10), default='YER') # (YER, SAR, USD)
-    stock = db.Column(db.Integer, default=1)           # الكمية المتوفرة
+    currency = db.Column(db.String(10), default='YER') 
+    stock = db.Column(db.Integer, default=1)           
     
-    # المحتوى والوسائط
+    # المحتوى والوسائط (تم تعديل image_file ليدعم ميديا متعددة)
     description = db.Column(db.Text)
-    image_file = db.Column(db.String(200))
+    image_file = db.Column(db.Text) # نص طويل يخزن مسارات الصور والفيديو مفصولة بفاصلة
+    
+    # --- حقول التحكم الإداري (علي) ---
+    # الحالة: pending (انتظار)، approved (مقبول)، rejected (مرفوض)
+    status = db.Column(db.String(20), default='pending') 
     is_published = db.Column(db.Boolean, default=False)
     
-    # الربط التقني (تتبع الموظف والمؤسسة)
-    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id')) # ربط بـ ID الموظف
-    vendor_username = db.Column(db.String(80))                    # يوزر الموظف (للتدقيق)
+    # الربط التقني
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id')) 
+    vendor_username = db.Column(db.String(80))                    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow) # تاريخ الإضافة
 
     def __repr__(self):
-        return f'<Product {self.name} - Added by {self.vendor_username}>'
+        return f'<Product {self.name} - Status: {self.status}>'
+
+# --- جدول اختياري للمدير العام (علي) لزيادة الأمان ---
+class AdminUser(db.Model):
+    __tablename__ = 'admin_user'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
