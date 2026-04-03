@@ -3,24 +3,24 @@ from models import AdminUser
 
 def verify_admin_credentials(username, password):
     """
-    منطق المطابقة المركزي لبرج المراقبة:
-    يتحقق من البيانات ويرسل تنبيهات دقيقة للمستخدم.
+    منطق مطابقة محمي ضد الانهيار (Crash-Proof)
     """
     try:
-        # 1. البحث عن مدير النظام (Admin) في قاعدة البيانات
+        # 1. البحث عن المدير في قاعدة البيانات
         admin = AdminUser.query.filter_by(username=username).first()
         
-        # 2. التحقق من وجود الحساب أولاً
-        if not admin:
-            flash("🚫 هذا المستخدم غير مسجل في المنصة اللامركزية لـ محجوب أونلاين.", "warning")
+        # 2. الفحص الأول: إذا لم يجد الاسم (هذا الجزء شغال عندك تمام)
+        if admin is None:
+            flash("🚫 هذا المستخدم غير مسجل في المنصة اللامركزية.", "warning")
             return False
         
-        # 3. التحقق من مطابقة مفتاح الدخول (كلمة المرور)
-        if admin.password != password:
-            flash("⚠️ كلمة المرور غير صحيحة، يرجى التأكد والمحاولة مرة أخرى كمدير.", "danger")
+        # 3. الفحص الثاني: مطابقة كلمة المرور (هنا كان يحدث الانهيار)
+        # نستخدم التحقق المباشر مع التأكد من أن admin ليس فارغاً
+        if str(admin.password) != str(password):
+            flash("⚠️ كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى.", "danger")
             return False
 
-        # 4. في حال النجاح: تفعيل الجلسة الأمنية لبرج المراقبة
+        # 4. حالة النجاح التام
         session['is_admin'] = True
         session['admin_user'] = admin.username
         
@@ -28,23 +28,16 @@ def verify_admin_credentials(username, password):
         return True
 
     except Exception as e:
-        # تأمين النظام في حال حدوث خطأ تقني في قاعدة البيانات
-        print(f"❌ خطأ في منطق الإدارة: {e}")
-        flash("حدث خطأ تقني أثناء محاولة الاتصال ببرج المراقبة.", "danger")
+        # هذا الجزء يمنع الانهيار ويطبع الخطأ في الـ Logs لتعرفه
+        print(f"DEBUG ERROR: {e}")
+        flash("حدث خطأ تقني في برج المراقبة، يرجى مراجعة المبرمج.", "danger")
         return False
 
 def is_admin_logged_in():
-    """
-    صمام الأمان: يتحقق هل المتصفح يمتلك صلاحية الأدمن حالياً؟
-    تستخدم لحماية المسارات الحساسة في app.py
-    """
     return session.get('is_admin', False)
 
 def logout_admin_logic():
-    """
-    تطهير الجلسة وتأمين النظام عند الخروج
-    """
     session.pop('is_admin', None)
     session.pop('admin_user', None)
-    flash("🔒 تم تسجيل الخروج من برج المراقبة بنجاح.", "info")
+    flash("🔒 تم تأمين الخروج من برج المراقبة.", "info")
     return True
