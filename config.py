@@ -1,39 +1,18 @@
 import os
 
 class Config:
-    """
-    إعدادات منصة محجوب أونلاين - الهوية الرقمية 2026
-    تم ضبط هذا الملف ليعمل بذكاء بين البيئة المحلية وبيئة السيرفر (Railway).
-    """
+    # قراءة مفتاح التشفير أو استخدام مفتاح افتراضي للأمان
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'mahjoub_secret_key_2026')
     
-    # 1. سر التشفير للجلسات (المفتاح الملكي الخاص بك)
-    # يحاول القراءة من متغيرات البيئة 'SK'، وإذا لم يجدها يستخدم القيمة الافتراضية.
-    SECRET_KEY = os.environ.get('SK', 'MAHJOUB_ROYAL_2026')
+    # جلب رابط قاعدة البيانات من بيئة Railway أو استخدام SQLite محلياً للتجربة
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     
-    # 2. الربط الذكي بقاعدة البيانات
-    # نقرأ رابط قاعدة البيانات من Railway
-    database_url = os.environ.get('DATABASE_URL')
+    # تصحيح الرابط إذا كان يبدأ بـ postgres:// ليصبح postgresql:// (مهم لـ SQLAlchemy)
+    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
     
-    if database_url:
-        # تصحيح بروتوكول Postgres ليتوافق مع SQLAlchemy الحديثة
-        if database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql://", 1)
-        SQLALCHEMY_DATABASE_URI = database_url
-    else:
-        # خطة بديلة (Fallback): إذا كنت تشغل الكود على جهازك الشخصي
-        # سيتم إنشاء قاعدة بيانات محلية باسم mahjoub_local.db لضمان عدم توقف النظام.
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///mahjoub_local.db'
-    
-    # تعطيل نظام التتبع لزيادة سرعة الأداء وتوفير موارد السيرفر
+    # إذا لم يجد الرابط (في حال التشغيل المحلي)، يستخدم ملف sqlite
+    if not SQLALCHEMY_DATABASE_URI:
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///mahjoub_online.db'
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # --- 3. إعدادات الميديا والرفع اللامركزي ---
-    
-    # تحديد مسار مجلد الصور في static
-    UPLOAD_FOLDER = os.path.join('static', 'uploads')
-    
-    # تحديد الحجم الأقصى للصورة (16 ميجا بايت) لضمان دقة عرض المنتجات
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024 
-
-    # أنواع الملفات المسموح برفعها لضمان أمن المنصة
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
