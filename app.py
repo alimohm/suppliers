@@ -5,9 +5,9 @@ from werkzeug.utils import secure_filename
 # --- استيراد الملفات الخاصة بالمشروع ---
 from config import Config
 from database import db, init_db
-from models import Product, Vendor
+from models import Product, Vendor, AdminUser, seed_admin # التعديل هنا
 from logic import login_vendor, logout, is_logged_in
-from admin_logic import is_admin_logged_in, verify_admin_credentials # نقلناها للأعلى
+from admin_logic import is_admin_logged_in, verify_admin_credentials
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -19,6 +19,11 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 init_db(app)
+
+# --- تفعيل قاعدة البيانات وحقن بيانات الإدارة ---
+with app.app_context():
+    db.create_all()
+    seed_admin() # سيقوم بإنشاء حساب "صبري" بكلمة مرور "123" إذا لم يكن موجوداً
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -88,7 +93,7 @@ def add_product():
                 image_file=all_media_str,
                 vendor_id=vendor.id,
                 vendor_username=user_session,
-                status='pending' # لكي تظهر في لوحة الإدارة للموافقة
+                status='pending'
             )
             db.session.add(new_item)
             db.session.commit()
@@ -106,6 +111,7 @@ def admin_login_route():
         p = request.form.get('admin_pass')
         if verify_admin_credentials(u, p):
             session['is_admin'] = True
+            session['username'] = u # لتسجيل اسم صبري في الجلسة
             flash("مرحباً بك في لوحة الإدارة المركزية", "success")
             return redirect(url_for('admin_dashboard_route'))
         flash("خطأ في بيانات الدخول الإدارية!", "danger")
@@ -122,10 +128,9 @@ def admin_dashboard_route():
 
 @app.route('/logout')
 def logout_route():
-    session.clear() # يمسح جلسة المورد والمدير معاً
+    session.clear() 
     return redirect(url_for('login_page'))
 
-# --- تشغيل السيرفر (يجب أن يكون في النهاية) ---
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
