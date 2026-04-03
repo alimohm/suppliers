@@ -1,45 +1,37 @@
-from flask import session, flash
-from models import AdminUser
+# logic.py
+from models import Vendor
+from werkzeug.security import check_password_hash
+from flask import session
 
-def verify_admin_credentials(username, password):
-    """
-    منطق مطابقة محمي ضد الانهيار ومتوافق مع الهوية الجديدة (علي محجوب)
-    """
-    try:
-        # 1. البحث عن المدير في قاعدة البيانات باستخدام الاسم المدخل
-        admin = AdminUser.query.filter_by(username=username).first()
-        
-        # 2. الفحص الأول: التحقق من وجود المستخدم
-        if admin is None:
-            flash("🚫 هذا المستخدم غير مسجل في المنصة اللامركزية.", "warning")
-            return False
-        
-        # 3. الفحص الثاني: مطابقة كلمة المرور مع تحويلها لنص لمنع الانهيار
-        if str(admin.password) != str(password):
-            flash("⚠️ كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى.", "danger")
-            return False
+def login_vendor(username, password):
+    # البحث في قاعدة بيانات الموردين المرتبطة
+    vendor = Vendor.query.filter_by(username=username).first()
 
-        # 4. حالة النجاح التام: إعداد الجلسة (Session)
-        session['is_admin'] = True
-        session['admin_user'] = admin.username # سيخزن "علي محجوب" هنا
-        
-        # رسالة الترحيب الملكية التي تظهر في الداشبورد
-        flash(f"🛡️ تم تفعيل وصول برج المراقبة. مرحباً بك يا سيد {admin.username}", "success")
-        return True
+    if not vendor:
+        return False, "المستخدم غير مسجل في المنصة اللامركزية."
 
-    except Exception as e:
-        # طباعة الخطأ في سجلات السيرفر (Logs) لتسهيل التصحيح
-        print(f"DEBUG ERROR IN ADMIN_LOGIC: {e}")
-        flash("حدث خطأ تقني في أنظمة برج المراقبة، يرجى التحقق من قاعدة البيانات.", "danger")
-        return False
+    if not check_password_hash(vendor.password, password):
+        return False, "فشل تأمين البوابة: كلمة المرور غير صحيحة."
 
-def is_admin_logged_in():
-    """التحقق مما إذا كان المدير مسجلاً دخوله حالياً"""
-    return session.get('is_admin', False)
+    # --- فحص الحالة السيادية للمورد ---
+    status = vendor.status.lower() if vendor.status else 'pending'
 
-def logout_admin_logic():
-    """تأمين الخروج ومسح بيانات الجلسة"""
-    session.pop('is_admin', None)
-    session.pop('admin_user', None)
-    flash("🔒 تم تأمين الخروج من برج المراقبة بنجاح.", "info")
-    return True
+    if status == 'blocked':
+        return False, "وصول مرفوض: تم حظر حسابك بقرار سيادي."
+    
+    elif status == 'restricted':
+        return False, "حساب مقيد: صلاحياتك معلقة حالياً."
+    
+    elif status == 'pending':
+        return False, "الدخول معلق: حسابك لا يزال تحت المراجعة."
+
+    # إذا مر من كل الفحوصات:
+    session['user_id'] = vendor.id
+    session['username'] = vendor.username
+    session['role'] = 'vendor'
+    
+    if status == 'under_surveillance':
+        session['surveillance_mode'] = True
+        return True, "تنبيه: أنت الآن تحت نظام الرقابة الرقمية المستمرة."
+
+    return True, "تم الدخول بنجاح."
