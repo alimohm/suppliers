@@ -14,7 +14,7 @@ init_db(app)
 def login_vendor_logic(username, password):
     vendor = Vendor.query.filter_by(username=username).first()
     if not vendor:
-        return False, "تنبيه: اسم المستخدم هذا غير مسجل في المنصة."
+        return False, "تنبيه: اسم المستخدم هذا غير مسجل في المنصة اللامركزية."
     
     if not check_password_hash(vendor.password, password):
         return False, "فشل تأمين البوابة: كلمة المرور غير صحيحة."
