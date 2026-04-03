@@ -128,3 +128,32 @@ def admin_dashboard():
     return render_template('admin_dashboard.html', 
                            vendors=all_vendors, 
                            pending_count=len(pending_products))
+
+# استيراد المنطق الجديد
+from admin_logic import is_admin_logged_in, verify_admin_credentials
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login_route():
+    if request.method == 'POST':
+        u = request.form.get('admin_user')
+        p = request.form.get('admin_pass')
+        if verify_admin_credentials(u, p):
+            session['is_admin'] = True
+            flash("مرحباً بك في لوحة الإدارة المركزية", "success")
+            return redirect(url_for('admin_dashboard_route'))
+        flash("خطأ في بيانات الدخول الإدارية!", "danger")
+    return render_template('admin_login.html')
+
+@app.route('/admin/dashboard')
+def admin_dashboard_route():
+    # التحقق من الصلاحية
+    if not is_admin_logged_in():
+        return redirect(url_for('admin_login_route'))
+    
+    # جلب البيانات من الجداول المحدثة
+    all_vendors = Vendor.query.all()
+    pending_count = Product.query.filter_by(status='pending').count()
+    
+    return render_template('admin_dashboard.html', 
+                           vendors=all_vendors, 
+                           pending_count=pending_count)
