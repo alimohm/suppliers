@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}منصة الموردين | محجوب أونلاين{% endblock %}</title>
+    <title>{% block title %}محجوب أونلاين | سوقك الذكي - منصة الموردين{% endblock %}</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -16,14 +16,12 @@
             --sidebar-width: 280px;
             --sidebar-collapsed: 85px;
             --danger: #e74c3c;
-            --success: #27ae60;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-body); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- السايدبار المخصص للمورد --- */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--white);
@@ -41,9 +39,12 @@
             display: flex; align-items: center; gap: 12px;
             border-bottom: 1px solid #f8f9fa;
         }
-        .logo-img { height: 48px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* اللوجو الجديد بدون خلفية */
+        .logo-img { height: 48px; border-radius: 8px; flex-shrink: 0; }
         .brand-details { display: flex; flex-direction: column; line-height: 1.3; }
+        /* سوقك الذكي */
         .brand-name { font-weight: 800; color: var(--royal-p); font-size: 15px; }
+        /* المنصة الأولى اللامركزية */
         .brand-sub { font-size: 10px; color: #999; font-weight: 600; }
 
         .menu-list { flex: 1; padding: 20px 0; overflow-y: auto; }
@@ -100,8 +101,8 @@
         <div class="brand-container">
             <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-img" alt="محجوب أونلاين">
             <div class="brand-details">
-                <span class="brand-name">محجوب أونلاين</span>
-                <span class="brand-sub">بوابتك للنمو الذكي</span>
+                <span class="brand-name">محجوب أونلاين | سوقك الذكي</span>
+                <span class="brand-sub">المنصة الأولى اللامركزية | السيادة الرقمية</span>
             </div>
         </div>
 
@@ -112,14 +113,6 @@
             
             <a href="{{ url_for('add_product') }}" class="menu-item {% if request.endpoint == 'add_product' %}active{% endif %}">
                 <i class="fas fa-plus-circle"></i><span>رفع المنتجات</span>
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fas fa-shopping-cart"></i><span>إدارة الطلبات</span>
-            </a>
-
-            <a href="#" class="menu-item">
-                <i class="fas fa-wallet"></i><span>المحفظة المالية</span>
             </a>
 
             <hr style="border: 0; border-top: 1px solid #f1f3f5; margin: 15px 25px;">
