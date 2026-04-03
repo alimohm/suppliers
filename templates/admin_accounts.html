@@ -1,58 +1,179 @@
 {% extends "layout.html" %}
 
-{% block title %}إدارة الحسابات والاعتماد | محجوب أونلاين{% endblock %}
+{% block title %}إدارة الحسابات السيادية | محجوب أونلاين{% endblock %}
 
 {% block content %}
 <style>
-    /* تنسيقات الهوية السيادية */
-    .border-right-royal { border-right: 5px solid #4b0082; }
-    .bg-dark-purple { background-color: #30005a; color: white; }
-    .avatar-sm { 
-        width: 40px; height: 40px; display: flex; 
-        align-items: center; justify-content: center; font-weight: bold; 
+    /* ========================================= */
+    /* الهوية البصرية الملكية - تصميم علي محجوب 2026 */
+    /* ========================================= */
+    :root {
+        --royal-p: #4b0082;
+        --dark-p: #30005a;
+        --gold-p: #FFD700;
+        --soft-bg: #f4f7fe;
+        --success-p: #2e7d32;
+        --warning-p: #ef6c00;
+        --danger-p: #c62828;
+        --info-p: #1976d2;
     }
-    .font-monospace { font-family: 'Courier New', Courier, monospace; letter-spacing: 1px; }
-    .card-royal { border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-    .table thead th { background-color: #f8f9fa; color: #555; text-transform: uppercase; font-size: 13px; }
-    .btn-action { border-radius: 10px; padding: 8px 16px; transition: 0.3s; }
+
+    body { background-color: var(--soft-bg); font-family: 'Cairo', sans-serif; }
+
+    /* كارد الرأس السيادي */
+    .header-commander {
+        background: white;
+        border-right: 8px solid var(--royal-p);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+
+    /* تصميم الجدول المتقدم */
+    .master-table-card {
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        border: none;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #666;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        padding: 20px;
+        border-bottom: 2px solid #eee;
+    }
+
+    /* الهوية الرقمية (Avatar & Brand) */
+    .vendor-identity { display: flex; align-items: center; gap: 15px; }
+    .v-img {
+        width: 55px; height: 55px;
+        border-radius: 18px;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .v-avatar-default {
+        width: 55px; height: 55px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--royal-p), var(--dark-p));
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 1.5rem;
+        box-shadow: 0 5px 15px rgba(75, 0, 130, 0.2);
+    }
+
+    /* محفظة MAH البنكية */
+    .mah-wallet {
+        background: var(--dark-p);
+        color: var(--gold-p);
+        font-family: 'monospace';
+        padding: 8px 18px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        border: 1px solid rgba(255,215,0,0.2);
+        display: inline-block;
+    }
+
+    /* نظام الحالات الملون (Badge System) */
+    .s-badge {
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .s-active { background: #e8f5e9; color: var(--success-p); border: 1px solid #c8e6c9; }
+    .s-review { background: #fff3e0; color: var(--warning-p); border: 1px solid #ffe0b2; }
+    .s-restricted { background: #e3f2fd; color: var(--info-p); border: 1px solid #bbdefb; }
+    .s-blocked { background: #ffebee; color: var(--danger-p); border: 1px solid #ffcdd2; }
+
+    /* حركات الصفوف */
+    .table-hover tbody tr { transition: 0.3s ease; cursor: default; }
+    .table-hover tbody tr:hover { background-color: #f9faff; transform: scale(1.005); }
+    tr.blocked-style { opacity: 0.6; filter: grayscale(1); background: #fcfcfc !important; }
+
+    /* القوائم المنسدلة */
+    .btn-manage {
+        background: #f1f3f9;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        color: var(--royal-p);
+        transition: 0.3s;
+    }
+    .btn-manage:hover { background: var(--royal-p); color: white; }
+    .dropdown-menu-royal {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        padding: 15px;
+    }
+
+    /* تصميم الـ Modal */
+    .modal-royal-content { border-radius: 30px; border: none; overflow: hidden; }
+    .modal-royal-header { background: var(--dark-p); color: white; padding: 25px; border: none; }
+    .form-control-royal {
+        background: #f8f9fa;
+        border: 2px solid #eee;
+        border-radius: 15px;
+        padding: 14px;
+        transition: 0.3s;
+    }
+    .form-control-royal:focus {
+        border-color: var(--royal-p);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(75,0,130,0.1);
+    }
 </style>
 
-<div class="container-fluid py-4" dir="rtl">
-    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-4 rounded-4 shadow-sm border-right-royal">
+<div class="container-fluid py-5" dir="rtl">
+    <div class="header-commander d-flex justify-content-between align-items-center">
         <div>
-            <h3 class="fw-bold text-dark mb-1">🏰 إدارة الحسابات والاعتماد</h3>
-            <p class="text-muted mb-0 small">تحكم سيادي كامل في هوية الموردين ومحافظ MAH العشوائية</p>
+            <h2 class="fw-bold text-dark mb-1">🏰 إدارة الحسابات والاعتماد السيادي</h2>
+            <p class="text-muted mb-0">تحكم كامل في هوية الموردين، الرقابة، ومحافظ الـ MAH الرقمية</p>
         </div>
-        <button class="btn btn-primary btn-action fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAddVendor">
-            <i class="fas fa-user-plus ms-2"></i> اعتماد مورد جديد
+        <button class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg border-0" 
+                style="background: var(--royal-p);" data-bs-toggle="modal" data-bs-target="#addVendorModal">
+            <i class="fas fa-plus-circle ms-2"></i> تفعيل هوية مورد جديد
         </button>
     </div>
 
-    <div class="card card-royal overflow-hidden">
-        <div class="card-header bg-white py-3 border-bottom">
-            <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-shield-alt ms-2"></i> سجل الموردين النشطين</h5>
+    <div class="card master-table-card">
+        <div class="card-header bg-white p-4 border-0">
+            <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-shield-virus text-primary ms-2"></i> سجل الموردين المعتمدين والمراقبين</h5>
         </div>
         <div class="table-responsive">
-            <table class="table align-middle mb-0 text-center table-hover">
+            <table class="table table-hover align-middle mb-0 text-center">
                 <thead>
                     <tr>
-                        <th>المورد / العلامة التجارية</th>
+                        <th>الهوية والبراند</th>
                         <th>المسؤول المباشر</th>
-                        <th>الهاتف</th>
+                        <th>رقم التواصل</th>
                         <th>المحفظة (MAH ID)</th>
-                        <th>الرصيد</th>
-                        <th>الحالة السيادية</th>
-                        <th>الإجراءات</th>
+                        <th>الرصيد المتاح</th>
+                        <th>الحالة الرقابية</th>
+                        <th>إدارة الحساب</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for v in vendors %}
-                    <tr>
+                    <tr class="{% if v.status == 'blocked' %}blocked-style{% endif %}">
                         <td>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <div class="avatar-sm bg-primary text-white rounded-circle ms-3">
-                                    {{ v.brand_name[0] }}
-                                </div>
+                            <div class="vendor-identity justify-content-center">
+                                {% if v.profile_image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + v.profile_image) }}" class="v-img">
+                                {% else %}
+                                    <div class="v-avatar-default">{{ v.brand_name[0] }}</div>
+                                {% endif %}
                                 <div class="text-end">
                                     <h6 class="mb-0 fw-bold">{{ v.brand_name }}</h6>
                                     <small class="text-muted">@{{ v.username }}</small>
@@ -60,33 +181,43 @@
                             </div>
                         </td>
                         <td>{{ v.employee_name }}</td>
-                        <td>{{ v.phone_number }}</td>
+                        <td class="font-monospace text-primary fw-bold">{{ v.phone_number }}</td>
+                        <td><span class="mah-wallet"><i class="fas fa-link ms-1"></i> {{ v.wallet_address }}</span></td>
+                        <td><h6 class="mb-0 fw-bold text-success">{{ "%.2f"|format(v.balance) }} MAH</h6></td>
                         <td>
-                            <span class="badge bg-dark-purple font-monospace px-3 py-2">
-                                <i class="fas fa-wallet ms-1 text-warning"></i> {{ v.wallet_address }}
-                            </span>
-                        </td>
-                        <td class="fw-bold text-success">{{ "%.2f"|format(v.balance) }} MAH</td>
-                        <td>
-                            <span class="badge rounded-pill bg-success-light text-success px-3">
-                                <i class="fas fa-check-circle ms-1"></i> نشط
-                            </span>
+                            {% if v.status == 'active' or not v.status %}
+                                <span class="s-badge s-active"><i class="fas fa-check-circle"></i> نشط</span>
+                            {% elif v.status == 'review' %}
+                                <span class="s-badge s-review"><i class="fas fa-search-plus"></i> تحت الرقابة</span>
+                            {% elif v.status == 'restricted' %}
+                                <span class="s-badge s-restricted"><i class="fas fa-hand-paper"></i> مقيد</span>
+                            {% else %}
+                                <span class="s-badge s-blocked"><i class="fas fa-user-slash"></i> محظور</span>
+                            {% endif %}
                         </td>
                         <td>
                             <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-pill" data-bs-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v"></i>
+                                <button class="btn-manage shadow-sm" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog ms-1"></i> الإجراءات
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-                                    <li><a class="dropdown-item text-primary" href="#"><i class="fas fa-edit ms-2"></i> تعديل البيانات</a></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-ban ms-2"></i> حظر الحساب</a></li>
+                                <ul class="dropdown-menu dropdown-menu-royal shadow border-0">
+                                    <li><a class="dropdown-item py-2 fw-bold text-success" href="#"><i class="fas fa-check-double ms-2"></i> تفعيل (نشط)</a></li>
+                                    <li><a class="dropdown-item py-2 fw-bold text-warning" href="#"><i class="fas fa-eye ms-2"></i> وضع تحت الرقابة</a></li>
+                                    <li><a class="dropdown-item py-2 fw-bold text-info" href="#"><i class="fas fa-lock ms-2"></i> تقييد الصلاحيات</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 fw-bold text-danger" href="#"><i class="fas fa-ban ms-2"></i> حظر الحساب نهائياً</a></li>
                                 </ul>
                             </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="py-5 text-muted">لا يوجد موردون معتمدون حالياً. ابدأ بإضافة أول مورد!</td>
+                        <td colspan="7" class="py-5">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-folder-open fa-3x mb-3 opacity-25"></i>
+                                <p class="fw-bold">لا يوجد موردون مسجلون في النظام حالياً.</p>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -95,46 +226,51 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalAddVendor" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow-lg">
-            <div class="modal-header border-0 bg-dark-purple text-white rounded-top-4 py-3">
-                <h5 class="modal-title fw-bold"><i class="fas fa-key ms-2 text-warning"></i> إنشاء هوية سيادية للمورد</h5>
+<div class="modal fade" id="addVendorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-royal-content shadow-lg">
+            <div class="modal-royal-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold"><i class="fas fa-key ms-2 text-warning"></i> اعتماد مورد سيادي جديد</h4>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('admin_add_vendor') }}" method="POST">
-                <div class="modal-body p-4">
-                    <div class="row g-3">
+            <form action="{{ url_for('admin_add_vendor') }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-5">
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small">اسم الدخول (Username)</label>
-                            <input type="text" name="v_username" class="form-control rounded-3 bg-light border-0" placeholder="مثلاً: ali_shop" required>
+                            <label class="form-label fw-bold">اسم المستخدم (Login)</label>
+                            <input type="text" name="v_username" class="form-control-royal form-control" placeholder="username_shop" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small">كلمة المرور المؤقتة</label>
-                            <input type="password" name="v_password" class="form-control rounded-3 bg-light border-0" required>
+                            <label class="form-label fw-bold">كلمة المرور المؤقتة</label>
+                            <input type="password" name="v_password" class="form-control-royal form-control" required>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold small">اسم العلامة التجارية (البراند)</label>
-                            <input type="text" name="v_brand" class="form-control rounded-3 bg-light border-0" placeholder="مثلاً: محجوب تيك لقطع الغيار" required>
+                            <label class="form-label fw-bold">اسم العلامة التجارية (البراند)</label>
+                            <input type="text" name="v_brand" class="form-control-royal form-control" placeholder="مثلاً: محجوب تيك لقطع الغيار" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small">اسم الموظف المسؤول</label>
-                            <input type="text" name="v_name" class="form-control rounded-3 bg-light border-0" placeholder="الاسم الكامل" required>
+                            <label class="form-label fw-bold">اسم المسؤول المباشر</label>
+                            <input type="text" name="v_name" class="form-control-royal form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small">رقم التواصل (واتساب)</label>
-                            <input type="text" name="v_phone" class="form-control rounded-3 bg-light border-0" placeholder="77xxxxxxx" required>
+                            <label class="form-label fw-bold">رقم الهاتف (واتساب)</label>
+                            <input type="text" name="v_phone" class="form-control-royal form-control" placeholder="77xxxxxxx" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">رفع صورة الهوية / الشعار</label>
+                            <input type="file" name="v_image" class="form-control p-3 rounded-4" accept="image/*">
                         </div>
                     </div>
-                    <div class="mt-4 p-3 bg-warning-light rounded-3 border-dashed-warning text-center">
-                        <small class="text-dark fw-bold">
-                            <i class="fas fa-info-circle ms-1"></i> سيقوم النظام تلقائياً بتوليد محفظة تبدأ بـ <strong>MAH-</strong> عند الحفظ.
-                        </small>
+                    <div class="mt-4 p-4 rounded-4" style="background: #fff8e1; border: 1px dashed #ffc107;">
+                        <p class="mb-0 text-dark fw-bold small">
+                            <i class="fas fa-robot ms-2"></i> ملاحظة: بمجرد الحفظ، سيقوم بروتوكول MAH بتوليد محفظة مشفرة فريدة لهذا المورد تلقائياً.
+                        </p>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow">
-                        تفعيل المورد ومنح الهوية الرقمية 🚀
+                <div class="modal-footer p-4 border-0">
+                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg" 
+                            style="background: var(--royal-p); font-size: 1.1rem;">
+                        تفعيل الهوية الرقمية ومنح الاعتماد 🚀
                     </button>
                 </div>
             </form>
