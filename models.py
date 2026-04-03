@@ -14,7 +14,7 @@ class Vendor(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     
-    # بيانات الدخول للموظف (مثلاً: username: moshtaq)
+    # بيانات الدخول للموظف (مثلاً: username: mushtaq)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     
@@ -22,13 +22,13 @@ class Vendor(db.Model):
     employee_name = db.Column(db.String(120), nullable=True) 
     brand_name = db.Column(db.String(120), nullable=False)    
     
-    # --- إضافة للمدير (علي) ---
-    is_active = db.Column(db.Boolean, default=True) # يسمح لك بتعطيل المورد
+    # --- صلاحيات المدير العام ---
+    is_active = db.Column(db.Boolean, default=True) # تجميد أو تفعيل المورد
     
     # الهوية الرقمية اللامركزية للمؤسسة
     wallet_address = db.Column(db.String(255), unique=True, default=generate_mah_wallet)
     
-    # توكن الربط الخارجي
+    # توكن الربط الخارجي (Qomra وغيره)
     qomra_access_token = db.Column(db.Text, nullable=True)
     
     # علاقة المنتجات
@@ -49,26 +49,35 @@ class Product(db.Model):
     currency = db.Column(db.String(10), default='YER') 
     stock = db.Column(db.Integer, default=1)           
     
-    # المحتوى والوسائط (تم تعديل image_file ليدعم ميديا متعددة)
+    # المحتوى والوسائط
     description = db.Column(db.Text)
-    image_file = db.Column(db.Text) # نص طويل يخزن مسارات الصور والفيديو مفصولة بفاصلة
+    image_file = db.Column(db.Text) # يخزن مسارات الصور والفيديو
     
-    # --- حقول التحكم الإداري (علي) ---
-    # الحالة: pending (انتظار)، approved (مقبول)، rejected (مرفوض)
-    status = db.Column(db.String(20), default='pending') 
+    # --- حقول التحكم الإداري (صبري) ---
+    status = db.Column(db.String(20), default='pending') # pending, approved, rejected
     is_published = db.Column(db.Boolean, default=False)
     
     # الربط التقني
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id')) 
     vendor_username = db.Column(db.String(80))                    
-    created_at = db.Column(db.DateTime, default=datetime.utcnow) # تاريخ الإضافة
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Product {self.name} - Status: {self.status}>'
 
-# --- جدول اختياري للمدير العام (علي) لزيادة الأمان ---
 class AdminUser(db.Model):
+    """جدول الإدارة المركزية - برج المراقبة"""
     __tablename__ = 'admin_user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
+
+# --- دالة مساعدة لحقن بياناتك (صبري) تلقائياً ---
+def seed_admin():
+    """تأكد من وجود حساب صبري في قاعدة البيانات"""
+    admin = AdminUser.query.filter_by(username='صبري').first()
+    if not admin:
+        new_admin = AdminUser(username='صبري', password='123')
+        db.session.add(new_admin)
+        db.session.commit()
+        print("✅ تم تفعيل حساب المدير العام: صبري")
