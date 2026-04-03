@@ -1,18 +1,51 @@
+import os
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import check_password_hash
+
+# --- 1. استيراد المحركات والبيانات السيادية ---
+from config import Config
+from database import db, init_db
+from models import Product, Vendor, AdminUser, seed_admin
+
+# --- 2. تعريف التطبيق وتأمين الإعدادات ---
+app = Flask(__name__)
+app.config.from_object(Config)
+
+# إعدادات رفع الوسائط (الميديا)
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# --- 3. تهيئة القاعدة وحقن الهوية التشغيلية ---
+init_db(app)
+
+with app.app_context():
+    # تحديث الجداول في Railway تلقائياً
+    db.create_all()
+    # حقن بيانات "علي محجوب" مشفرة بكلمة 123
+    seed_admin()
+
+# --- 4. توابع التحقق من الجلسات (Security Guards) ---
+def is_logged_in():
+    return session.get('role') == 'vendor' and 'user_id' in session
+
+def is_admin_logged_in():
+    return session.get('role') == 'admin' and 'admin_id' in session
+
 # ==========================================
-# --- 1. التوجيه الرئيسي (Home Redirect) ---
+# --- 5. المسارات (Routes) المضبوطة بدقة ---
 # ==========================================
+
+# --- التوجيه الرئيسي ---
 @app.route('/')
 def home_redirect():
-    """توجيه المستخدم بناءً على هويته المسجلة"""
     if is_admin_logged_in(): 
         return redirect(url_for('admin_dashboard_route'))
     if is_logged_in(): 
         return redirect(url_for('dashboard'))
     return redirect(url_for('login_page'))
 
-# ==========================================
-# --- 2. بوابة دخول المورد (Login) ---
-# ==========================================
+# --- بوابة دخول المورد ---
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     if is_logged_in(): return redirect(url_for('dashboard'))
@@ -22,30 +55,27 @@ def login_page():
         p = request.form.get('password', '').strip()
         
         if not u or not p:
-            flash("يرجى إدخال اسم المستخدم وكلمة المرور.", "warning")
+            flash("يرجى إدخال البيانات لتأمين الدخول.", "warning")
             return redirect(url_for('login_page'))
 
-        # منطق التحقق المباشر
         vendor = Vendor.query.filter_by(username=u).first()
         if not vendor:
             flash("تنبيه: اسم المستخدم هذا غير مسجل في المنصة اللامركزية.", "danger")
         elif not check_password_hash(vendor.password, p):
             flash("فشل تأمين البوابة: كلمة المرور غير صحيحة.", "danger")
         elif vendor.status == 'blocked':
-            flash("وصول مرفوض: الحساب موقف بقرار سيادي.", "danger")
+            flash("وصول مرفوض بقرار سيادي.", "danger")
         else:
             session.clear()
             session['user_id'] = vendor.id
             session['username'] = vendor.username
             session['role'] = 'vendor'
-            flash(f"أهلاً بك يا سيد {vendor.employee_name} في سوقك الذكي.", "success")
+            flash(f"أهلاً بك يا سيد {vendor.employee_name}.", "success")
             return redirect(url_for('dashboard'))
             
     return render_template('login.html')
 
-# ==========================================
-# --- 3. لوحة تحكم المورد (Dashboard) ---
-# ==========================================
+# --- لوحة تحكم المورد ---
 @app.route('/dashboard')
 def dashboard():
     if not is_logged_in(): return redirect(url_for('login_page'))
@@ -58,9 +88,7 @@ def dashboard():
     products_list = Product.query.filter_by(vendor_id=vendor_data.id).all()
     return render_template('dashboard.html', vendor=vendor_data, products=products_list)
 
-# ==========================================
-# --- 4. بوابة دخول الإدارة (Admin Login) ---
-# ==========================================
+# --- بوابة دخول الإدارة ---
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login_route():
     if is_admin_logged_in(): return redirect(url_for('admin_dashboard_route'))
@@ -81,9 +109,7 @@ def admin_login_route():
             
     return render_template('admin_login.html')
 
-# ==========================================
-# --- 5. لوحة تحكم الإدارة (Admin Dashboard) ---
-# ==========================================
+# --- لوحة تحكم الإدارة ---
 @app.route('/admin/dashboard')
 def admin_dashboard_route():
     if not is_admin_logged_in(): return redirect(url_for('admin_login_route'))
@@ -92,11 +118,14 @@ def admin_dashboard_route():
     pending_items = Product.query.filter_by(status='pending').all()
     return render_template('admin_dashboard.html', vendors=all_vendors, pending_items=pending_items)
 
-# ==========================================
-# --- 6. تأمين الخروج (Logout) ---
-# ==========================================
+# --- تأمين الخروج ---
 @app.route('/logout')
 def logout_route():
     session.clear()
-    flash("تم تأمين البوابات بنجاح. في أمان الله.", "info")
+    flash("تم تأمين البوابات بنجاح.", "info")
     return redirect(url_for('login_page'))
+
+# --- 6. تشغيل المحرك ---
+if __name__ == '__main__':
+    # تشغيل المنصة على المنفذ المعتمد لـ Railway
+    app.run(host='0.0.0.0', port=8080, debug=True)
