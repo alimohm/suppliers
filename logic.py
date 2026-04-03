@@ -3,40 +3,28 @@ from werkzeug.security import check_password_hash
 from models import Vendor
 
 def login_vendor(username, password):
-    """
-    التحقق من بيانات دخول الموردين وتأمين الجلسة.
-    مطابق لهيكل جدول vendor في قاعدة البيانات.
-    """
-    # البحث عن المورد باستخدام اسم المستخدم
+    """منطق دخول الموردين مع رسائل خطأ دقيقة"""
+    # البحث عن المورد
     vendor = Vendor.query.filter_by(username=username).first()
     
-    if vendor and check_password_hash(vendor.password, password):
-        # التحقق من أن الحساب نشط (تجنب خطأ نقص العمود في القاعدة)
-        # تأكد من تنفيذ ALTER TABLE لإضافة status
-        if hasattr(vendor, 'status') and vendor.status != 'active':
-            return False, "عذراً، هذا الحساب غير مفعل حالياً."
-            
-        # إنشاء جلسة دخول نظيفة وآمنة
-        session.clear()
-        session['user_id'] = vendor.id
-        session['username'] = vendor.username
-        session['brand_name'] = vendor.brand_name
-        session['role'] = 'vendor' # تحديد الرتبة لمنع تداخل الصلاحيات مع الإدارة
-        
-        return True, f"أهلاً بك في نظام {vendor.brand_name}."
+    # 1. إذا كان المستخدم غير موجود أصلاً
+    if not vendor:
+        return False, "عذراً، هذا الحساب غير مسجل في المنصة اللامركزية (محجوب أونلاين)."
     
-    return False, "خطأ في اسم المستخدم أو كلمة المرور."
+    # 2. إذا وجد المستخدم ولكن كلمة المرور خطأ
+    if not check_password_hash(vendor.password, password):
+        return False, "كلمة المرور غير صحيحة، يرجى التأكد من مفاتيح الدخول الخاصة بك."
+    
+    # 3. إذا كان الحساب غير نشط (اختياري)
+    if hasattr(vendor, 'status') and vendor.status != 'active':
+        return False, "هذا الحساب معلق حالياً في الشبكة."
+
+    # نجاح الدخول
+    session.clear()
+    session['user_id'] = vendor.id
+    session['role'] = 'vendor'
+    session['username'] = vendor.username
+    return True, f"تم الاتصال بنجاح. أهلاً بك يا {vendor.brand_name}."
 
 def is_logged_in():
-    """
-    التحقق من أن المستخدم الحالي هو مورد وليس مسؤول إدارة.
-    """
     return session.get('role') == 'vendor' and 'user_id' in session
-
-def get_current_vendor():
-    """
-    جلب بيانات المورد الحالي من قاعدة البيانات بناءً على الجلسة.
-    """
-    if is_logged_in():
-        return Vendor.query.get(session.get('user_id'))
-    return None
