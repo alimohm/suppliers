@@ -1,13 +1,28 @@
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    if not is_admin_logged_in():
-        return redirect(url_for('admin_login_route'))
+from flask import session
+
+def is_admin_logged_in():
+    """
+    التحقق مما إذا كان المستخدم الحالي هو المدير العام (علي)
+    يتم فحص وجود قيمة True للمفتاح 'is_admin' في الجلسة.
+    """
+    return session.get('is_admin', False)
+
+def verify_admin_credentials(username, password):
+    """
+    التحقق من بيانات الدخول الإدارية لبرج المراقبة.
+    يمكنك تغيير هذه القيم هنا لتحديث بيانات دخولك.
+    """
+    # بيانات المدير العام للمنصة
+    ADMIN_USER = "ali_admin"
+    ADMIN_PASS = "Ali_2026_Secure" 
     
-    # جلب كل الموردين من الجدول الذي حدثناه
-    all_vendors = Vendor.query.all()
-    # جلب كل المنتجات التي تنتظر الموافقة (Pending)
-    pending_products = Product.query.filter_by(status='pending').all()
-    
-    return render_template('admin_dashboard.html', 
-                           vendors=all_vendors, 
-                           pending_count=len(pending_products))
+    if username == ADMIN_USER and password == ADMIN_PASS:
+        return True
+    return False
+
+def logout_admin():
+    """
+    تسجيل الخروج الخاص بالمدير فقط وتطهير الجلسة.
+    """
+    session.pop('is_admin', None)
+    return True
