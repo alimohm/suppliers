@@ -2,30 +2,30 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
 
-# --- 1. استيراد المحركات والبيانات السيادية ---
+# --- 1. استيراد المحركات والبيانات ---
 from config import Config
 from database import db, init_db
 from models import Product, Vendor, AdminUser, seed_admin
 
-# --- 2. تعريف التطبيق وتأمين الإعدادات ---
+# --- 2. تعريف التطبيق ---
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# إعدادات رفع الوسائط (الميديا)
+# إعداد مجلد الرفع
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- 3. تهيئة القاعدة وحقن الهوية التشغيلية ---
+# --- 3. تهيئة القاعدة وتحديثها ---
 init_db(app)
 
 with app.app_context():
-    # تحديث الجداول في Railway تلقائياً
+    # هذا السطر سيقوم بإنشاء أي أعمدة ناقصة تسببت في الخطأ الأخير
     db.create_all()
-    # حقن بيانات "علي محجوب" مشفرة بكلمة 123
+    # حقن حساب "علي محجوب" السيادي
     seed_admin()
 
-# --- 4. توابع التحقق من الجلسات (Security Guards) ---
+# --- 4. حراس البوابات (Security Guards) ---
 def is_logged_in():
     return session.get('role') == 'vendor' and 'user_id' in session
 
@@ -33,10 +33,9 @@ def is_admin_logged_in():
     return session.get('role') == 'admin' and 'admin_id' in session
 
 # ==========================================
-# --- 5. المسارات (Routes) المضبوطة بدقة ---
+# --- 5. المسارات المضبوطة (Routes) ---
 # ==========================================
 
-# --- التوجيه الرئيسي ---
 @app.route('/')
 def home_redirect():
     if is_admin_logged_in(): 
@@ -55,22 +54,23 @@ def login_page():
         p = request.form.get('password', '').strip()
         
         if not u or not p:
-            flash("يرجى إدخال البيانات لتأمين الدخول.", "warning")
+            flash("يرجى إدخال البيانات كاملة.", "warning")
             return redirect(url_for('login_page'))
 
         vendor = Vendor.query.filter_by(username=u).first()
+        
         if not vendor:
-            flash("تنبيه: اسم المستخدم هذا غير مسجل في المنصة اللامركزية.", "danger")
+            flash("تنبيه: اسم المستخدم غير مسجل.", "danger")
         elif not check_password_hash(vendor.password, p):
-            flash("فشل تأمين البوابة: كلمة المرور غير صحيحة.", "danger")
+            flash("كلمة المرور غير صحيحة.", "danger")
         elif vendor.status == 'blocked':
-            flash("وصول مرفوض بقرار سيادي.", "danger")
+            flash("الحساب موقف بقرار سيادي.", "danger")
         else:
             session.clear()
             session['user_id'] = vendor.id
             session['username'] = vendor.username
             session['role'] = 'vendor'
-            flash(f"أهلاً بك يا سيد {vendor.employee_name}.", "success")
+            flash(f"أهلاً بك يا سيد {vendor.employee_name}", "success")
             return redirect(url_for('dashboard'))
             
     return render_template('login.html')
@@ -103,9 +103,10 @@ def admin_login_route():
             session['admin_id'] = admin.id
             session['admin_user'] = admin.username
             session['role'] = 'admin'
+            flash("مرحباً بك في برج المراقبة.", "success")
             return redirect(url_for('admin_dashboard_route'))
         else:
-            flash("بيانات دخول برج المراقبة غير صحيحة.", "danger")
+            flash("بيانات دخول الإدارة غير صحيحة.", "danger")
             
     return render_template('admin_login.html')
 
@@ -118,14 +119,13 @@ def admin_dashboard_route():
     pending_items = Product.query.filter_by(status='pending').all()
     return render_template('admin_dashboard.html', vendors=all_vendors, pending_items=pending_items)
 
-# --- تأمين الخروج ---
+# --- تسجيل الخروج ---
 @app.route('/logout')
 def logout_route():
     session.clear()
-    flash("تم تأمين البوابات بنجاح.", "info")
+    flash("تم تسجيل الخروج بنجاح.", "info")
     return redirect(url_for('login_page'))
 
 # --- 6. تشغيل المحرك ---
 if __name__ == '__main__':
-    # تشغيل المنصة على المنفذ المعتمد لـ Railway
     app.run(host='0.0.0.0', port=8080, debug=True)
