@@ -1,14 +1,14 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 
-# --- 1. تعريف التطبيق والتهيئة ---
+# --- 1. تهيئة التطبيق والقضاء على NameError ---
 app = Flask(__name__)
 
 from config import Config
 from database import db, init_db
 from models import Product, Vendor, AdminUser, seed_admin
 
-# استيراد المنطق (قاعدتنا: admin للإدارة، وما دونه للمورد)
+# استيراد المنطق (قاعدتنا: أي شيء admin للإدارة، وما دونه للمورد)
 from logic import login_vendor, is_logged_in 
 from admin_logic import verify_admin_credentials, is_admin_logged_in
 
@@ -16,7 +16,7 @@ app.config.from_object(Config)
 init_db(app)
 
 with app.app_context():
-    db.create_all() # تحديث الجداول فوراً
+    db.create_all() # تحديث الجداول (status, wallet_address)
     seed_admin()    # حقن بيانات علي محجوب (123)
 
 # ==========================================
@@ -48,7 +48,7 @@ def admin_login():
         return redirect(url_for('admin_dashboard'))
     
     if request.method == 'POST':
-        # لاحظ الأسماء هنا يجب أن تطابق ملف admin_login.html
+        # يجب أن تطابق الأسماء في admin_login.html (admin_user, admin_pass)
         u = request.form.get('admin_user', '').strip()
         p = request.form.get('admin_pass', '').strip()
         
@@ -64,24 +64,30 @@ def admin_login():
 # --- لوحات التحكم (Dashboards) ---
 # ==========================================
 
-# لوحة المورد
+# لوحة المورد (بدون admin)
 @app.route('/dashboard')
 def vendor_dashboard():
     if not is_logged_in(): 
         return redirect(url_for('login_page'))
+    # جلب بيانات المورد الحالي من الجلسة
     vendor = Vendor.query.get(session.get('user_id'))
-    return render_template('dashboard.html', vendor=vendor)
+    if not vendor: return redirect(url_for('logout'))
+    products = Product.query.filter_by(vendor_id=vendor.id).all()
+    return render_template('dashboard.html', vendor=vendor, products=products)
 
-# لوحة الإدارة
+# لوحة الإدارة (برج المراقبة)
 @app.route('/admin/dashboard')
 def admin_dashboard():
     if not is_admin_logged_in(): 
         return redirect(url_for('admin_login'))
     all_vendors = Vendor.query.all()
-    return render_template('admin_dashboard.html', vendors=all_vendors)
+    pending_products = Product.query.filter_by(status='pending').all()
+    return render_template('admin_dashboard.html', 
+                           vendors=all_vendors, 
+                           pending_count=len(pending_products))
 
 # ==========================================
-# --- الهيكل العام والتوجيه ---
+# --- التوجيه العام والخروج ---
 # ==========================================
 
 @app.route('/')
@@ -93,7 +99,7 @@ def index():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash("تم تأمين الخروج بنجاح.", "info")
+    flash("تم تأمين كافة الأنظمة اللامركزية.", "info")
     return redirect(url_for('login_page'))
 
 if __name__ == '__main__':
