@@ -124,7 +124,7 @@
         <p class="text-muted">سوقك الذكي | المنصة اللامركزية الأولى في اليمن</p>
     </div>
 
-    <form id="productForm" method="POST" enctype="multipart/form-data">
+    <form id="productForm" action="{{ url_for('add_product') }}" method="POST" enctype="multipart/form-data">
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <label class="form-label">اسم المنتج</label>
@@ -133,8 +133,8 @@
             <div class="col-md-6">
                 <label class="form-label">اسم المستخدم مربوط بالعلامة التجارية أو المورد</label>
                 <input type="text" id="pBrandDisplay" class="premium-input locked-identity" 
-                       value="{{ vendor.username }} | {{ vendor.brand_name }}" readonly>
-                <input type="hidden" name="brand" value="{{ vendor.brand_name }}">
+                       value="{{ session.get('username', 'محجوب أونلاين') }} | {{ vendor.brand_name if vendor else 'الشركة الرسمية' }}" readonly>
+                <input type="hidden" name="brand" value="{{ vendor.brand_name if vendor else 'Mahjoub Online' }}">
             </div>
         </div>
 
@@ -213,7 +213,6 @@
         target.value = result;
     }
 
-    // دالة المعاينة الجديدة
     function previewMedia() {
         const preview = document.getElementById('mediaPreview');
         const files = document.getElementById('mediaInput').files;
