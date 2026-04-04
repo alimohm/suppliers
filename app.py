@@ -2,11 +2,9 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from config import Config
 from database import db, init_db
-
-# استيراد النماذج (Models)
 import models
 
-# استيراد منطق الأعمال (Logic)
+# استيراد منطق الدخول من الملفات التي تظهر في صورك
 from vendor_logic import login_vendor
 from admin_logic import verify_admin_credentials
 
@@ -14,33 +12,28 @@ app = Flask(__name__)
 app.config.from_object(Config)
 init_db(app)
 
-# --- [ منطقة السيادة: تهيئة البنية التحتية ] ---
+# --- [ تهيئة البنية التحتية عند الإقلاع ] ---
 with app.app_context():
     try:
-        # ملاحظة: قم بتعطيل db.drop_all() بعد أول تشغيل ناجح للحفاظ على بياناتك
+        # ملاحظة: اترك db.drop_all() مفعلة لمرة واحدة فقط لتصحيح الجداول
         db.drop_all() 
         db.create_all() 
         models.seed_system()
-        print("✅ تم تطهير قاعدة البيانات وبناء الهيكل الجديد وحقن البيانات بنجاح.")
+        print("✅ تم بناء قاعدة البيانات وحقن بيانات 'علي محجوب' بنجاح.")
     except Exception as e:
-        print(f"❌ خطأ في تهيئة القاعدة: {e}")
+        print(f"❌ خطأ في القاعدة: {e}")
 
-# --- [ المسارات العامة ] ---
-@app.route('/')
-def index():
-    return redirect(url_for('vendor_login'))
-
-# --- [ بوابة الموردين والموظفين ] ---
+# --- [ مسارات الموردين ] ---
 @app.route('/vendor/login', methods=['GET', 'POST'])
 def vendor_login():
     if request.method == 'POST':
         u = request.form.get('username', '').strip()
         p = request.form.get('password', '').strip()
         
+        # استدعاء دالة المورد
         success, msg = login_vendor(u, p)
         if success:
             flash(msg, "success")
-            # التوجيه الصارم لدشبورد المورد
             return redirect(url_for('vendor_dashboard'))
         
         flash(msg, "danger")
@@ -48,25 +41,23 @@ def vendor_login():
 
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
-    # حماية المسار: يجب أن يكون الدور يحتوي على 'vendor'
+    # التأكد من أن المستخدم مورد (مالك أو موظف)
     if 'role' not in session or 'vendor' not in session.get('role'):
-        flash("يرجى تسجيل الدخول للوصول إلى لوحة الموردين.", "warning")
         return redirect(url_for('vendor_login'))
     
-    # تحديد صلاحية رؤية المحفظة (للمالك فقط)
     show_wallet = (session.get('role') == 'vendor_owner')
     return render_template('vendor_dashboard.html', 
                            username=session.get('username'), 
                            show_wallet=show_wallet)
 
-# --- [ بوابة الإدارة العليا: علي محجوب ] ---
+# --- [ مسارات الإدارة العليا ] ---
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         u = request.form.get('username', '').strip()
         p = request.form.get('password', '').strip()
         
-        # استخدام المنطق من admin_logic
+        # استدعاء الدالة من admin_logic
         success, msg = verify_admin_credentials(u, p)
         if success:
             flash(msg, "success")
@@ -77,28 +68,19 @@ def admin_login():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    # حماية المسار: لمدير النظام فقط
     if session.get('role') != 'super_admin':
-        flash("هذه المنطقة مخصصة للإدارة العليا فقط.", "danger")
         return redirect(url_for('admin_login'))
     return render_template('admin_dashboard.html', username=session.get('username'))
 
-# --- [ مسارات إضافية للمنتجات ] ---
-@app.route('/vendor/add-product')
-def add_product():
-    if 'role' not in session:
-        return redirect(url_for('vendor_login'))
-    return render_template('vendor_add_product.html')
+@app.route('/')
+def index():
+    return redirect(url_for('vendor_login'))
 
-# --- [ الخروج وتأمين الجلسة ] ---
 @app.route('/logout')
 def logout():
     session.clear()
-    flash("تم تسجيل الخروج بنجاح.", "info")
     return redirect(url_for('vendor_login'))
 
-# --- [ إقلاع المحرك ] ---
 if __name__ == '__main__':
-    # التوافق مع بيئة Railway المتغيرة
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port)
