@@ -24,6 +24,11 @@ with app.app_context():
 # --- [ التوجيهات العامة ] ---
 @app.route('/')
 def index():
+    # توجيه ذكي بناءً على الجلسة الحالية
+    if 'role' in session:
+        if session['role'] == 'super_admin':
+            return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('vendor_dashboard'))
     return redirect(url_for('vendor_login'))
 
 @app.route('/logout')
@@ -40,18 +45,16 @@ def admin_dashboard():
         flash("🚫 محاولة دخول غير مصرحة لبرج المراقبة!", "danger")
         return redirect(url_for('admin_login'))
     
-    # جلب جميع الموردين لعرضهم في جدول الاعتماد
     all_vendors = models.Vendor.query.all()
+    # تم تغيير اسم القالب هنا ليكون متوافقاً مع الهيكل الإداري الجديد إذا كنت قد فصلتهم
     return render_template('admin_accounts.html', 
                            username=session.get('username'), 
                            vendors=all_vendors)
 
-# الإصلاح الجوهري: إضافة المسار الذي طلبه ملف layout.html
 @app.route('/admin/manage-vendors')
 def manage_vendors():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
-    # توجيه تلقائي إلى لوحة التحكم الرئيسية للموردين
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/create-vendor', methods=['POST'])
@@ -66,13 +69,12 @@ def create_vendor():
         flash("⚠️ اسم المستخدم هذا موجود مسبقاً في النظام.", "warning")
     else:
         try:
-            # إنشاء المورد الجديد
             new_v = models.Vendor(username=u, brand_name=b, password=p)
             db.session.add(new_v)
             db.session.flush() 
 
-            # توليد المحفظة السيادية آلياً
             import random
+            # توليد رقم محفظة MAH فريد
             wallet_num = f"MAH-{random.randint(100,999)}-{random.randint(1000,9999)}"
             new_wallet = models.Wallet(wallet_number=wallet_num, balance=0.0, vendor_id=new_v.id)
             db.session.add(new_wallet)
@@ -85,7 +87,26 @@ def create_vendor():
             
     return redirect(url_for('admin_dashboard'))
 
-# --- [ بوابة الموردين: إضافة وحفظ المنتجات ] ---
+# --- [ بوابة الموردين: إدارة المنتجات ] ---
+
+@app.route('/vendor/dashboard')
+def vendor_dashboard():
+    allowed_roles = ['vendor_owner', 'vendor_staff']
+    if 'role' not in session or session.get('role') not in allowed_roles:
+        return redirect(url_for('vendor_login'))
+    
+    vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
+    
+    # استخراج البيانات بدقة لتتوافق مع تصميم المحفظة البنفسجية
+    wallet_no = vendor_data.wallet.wallet_number if vendor_data and vendor_data.wallet else "MAH-000-0000"
+    balance = vendor_data.wallet.balance if vendor_data and vendor_data.wallet else 0.0
+    
+    return render_template('vendor_dashboard.html', 
+                           username=session.get('username'),
+                           vendor=vendor_data,
+                           wallet_no=wallet_no, # هذا المتغير الذي يستخدمه كود المحفظة
+                           balance=balance)
+
 @app.route('/vendor/add-product', methods=['GET', 'POST'])
 def add_product():
     allowed_roles = ['vendor_owner', 'vendor_staff']
@@ -117,23 +138,8 @@ def add_product():
 
     return render_template('vendor_add_product.html', vendor=vendor_data)
 
-# --- [ مراجعة المنتجات واعتمادها ] ---
-@app.route('/admin/approve-products')
-def approve_products():
-    if session.get('role') != 'super_admin': return redirect(url_for('admin_login'))
-    pending_items = models.Product.query.filter_by(status='pending').all()
-    return render_template('admin_approve.html', products=pending_items)
+# --- [ بوابات تسجيل الدخول ] ---
 
-@app.route('/admin/action-product/<int:product_id>/<string:action>')
-def product_action(product_id, action):
-    if session.get('role') != 'super_admin': return redirect(url_for('admin_login'))
-    product = models.Product.query.get_or_404(product_id)
-    product.status = 'approved' if action == 'approve' else 'rejected'
-    db.session.commit()
-    flash(f"✅ تم تحديث حالة المنتج: {product.name}", "success")
-    return redirect(url_for('approve_products'))
-
-# --- [ بوابة تسجيل الدخول ] ---
 @app.route('/vendor/login', methods=['GET', 'POST'])
 def vendor_login():
     if request.method == 'POST':
@@ -147,23 +153,6 @@ def vendor_login():
             return redirect(url_for('vendor_dashboard'))
         flash(msg, "danger")
     return render_template('login_vendor.html')
-
-@app.route('/vendor/dashboard')
-def vendor_dashboard():
-    allowed_roles = ['vendor_owner', 'vendor_staff']
-    if 'role' not in session or session.get('role') not in allowed_roles:
-        return redirect(url_for('vendor_login'))
-    
-    vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
-    wallet_no = vendor_data.wallet.wallet_number if vendor_data and vendor_data.wallet else "غير متوفر"
-    balance = vendor_data.wallet.balance if vendor_data and vendor_data.wallet else 0.0
-    
-    return render_template('vendor_dashboard.html', 
-                           username=session.get('username'),
-                           vendor=vendor_data,
-                           wallet_no=wallet_no,
-                           balance=balance,
-                           show_wallet=(session.get('role') == 'vendor_owner'))
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
