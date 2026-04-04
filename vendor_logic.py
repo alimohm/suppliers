@@ -2,15 +2,15 @@ from flask import session
 from models import Vendor, VendorStaff
 
 def login_vendor(u, p):
-    # 1. فحص الملاك
+    # 1. فحص الملاك (الموردين)
     vendor = Vendor.query.filter_by(username=u).first()
     if vendor and vendor.password == p:
         session.clear()
         session['user_id'] = vendor.id
-        session['role'] = 'vendor_owner'
+        session['role'] = 'vendor_owner' # هذا هو المفتاح للدخول للدشبورد
         session['username'] = vendor.username
         session['brand'] = vendor.brand_name
-        return True, "مرحباً بك يا سيد السوق الذكي."
+        return True, "مرحباً بك في محجوب أونلاين."
 
     # 2. فحص الموظفين
     staff = VendorStaff.query.filter_by(username=u).first()
@@ -22,4 +22,4 @@ def login_vendor(u, p):
         session['brand'] = staff.owner.brand_name
         return True, "تم دخول الموظف بنجاح."
         
-    return False, "اسم المستخدم أو كلمة المرور غير صحيحة."
+    return False, "بيانات الدخول غير صحيحة."
