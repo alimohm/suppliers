@@ -114,3 +114,37 @@ def logout():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
+
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        # جلب البيانات من الحقول التي سميناها (username, password) في الـ HTML
+        u = request.form.get('username', '').strip()
+        p = request.form.get('password', '').strip()
+        
+        # التحقق من دالة admin_logic
+        success, msg = verify_admin_credentials(u, p)
+        
+        if success:
+            session['username'] = u
+            session['role'] = 'super_admin'  # تثبيت الهوية كمدير أعلى
+            flash(msg, "success")
+            
+            # --- التوجيه الصارم لبرج المراقبة ---
+            return redirect(url_for('admin_dashboard'))
+        
+        # في حال الفشل نعود لصفحة الدخول مع رسالة الخطأ
+        flash(msg, "danger")
+        
+    return render_template('login_admin.html')
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    # طبقة حماية إضافية: منع أي شخص غير المدير من الدخول حتى لو كتب الرابط يدوياً
+    if session.get('role') != 'super_admin':
+        flash("🚫 محاولة دخول غير مصرحة لبرج المراقبة!", "danger")
+        return redirect(url_for('admin_login'))
+        
+    # استدعاء الهيكل الذي صممناه (layout.html) مع محتوى الإدارة
+    return render_template('admin_dashboard_content.html', username=session.get('username'))
