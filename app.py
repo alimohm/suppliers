@@ -46,6 +46,14 @@ def admin_dashboard():
                            username=session.get('username'), 
                            vendors=all_vendors)
 
+# الإصلاح الجوهري: إضافة المسار الذي طلبه ملف layout.html
+@app.route('/admin/manage-vendors')
+def manage_vendors():
+    if session.get('role') != 'super_admin':
+        return redirect(url_for('admin_login'))
+    # توجيه تلقائي إلى لوحة التحكم الرئيسية للموردين
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/admin/create-vendor', methods=['POST'])
 def create_vendor():
     if session.get('role') != 'super_admin': return redirect(url_for('admin_login'))
@@ -61,7 +69,7 @@ def create_vendor():
             # إنشاء المورد الجديد
             new_v = models.Vendor(username=u, brand_name=b, password=p)
             db.session.add(new_v)
-            db.session.flush() # للحصول على ID المورد قبل الـ commit
+            db.session.flush() 
 
             # توليد المحفظة السيادية آلياً
             import random
