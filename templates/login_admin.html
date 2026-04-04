@@ -4,25 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>برج المراقبة | دخول الإدارة المركزية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root {
-            --p-color: #1a0033; 
+            --p-color: #1a0033; /* أرجواني داكن للهيبة */
             --royal-purple: #4b0082;
             --gold: #FFD700;
         }
 
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; display: flex; height: 100vh; font-family: 'Cairo', sans-serif; background: var(--p-color); overflow: hidden; }
+        body { 
+            margin: 0; padding: 0; display: flex; height: 100vh; 
+            font-family: 'Cairo', sans-serif; background: var(--p-color); 
+            overflow: hidden; 
+        }
 
+        /* القسم الأيمن: العلامة التجارية */
         .brand-section { 
             flex: 1.2; background: #ffffff; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; text-align: center; 
             color: #333; padding: 40px; order: 2;
         }
 
+        /* القسم الأيسر: نموذج الدخول */
         .login-section { 
             flex: 1; background: linear-gradient(135deg, var(--p-color) 0%, var(--royal-purple) 100%); 
             display: flex; flex-direction: column; 
@@ -32,42 +38,52 @@
 
         .login-card { width: 100%; max-width: 380px; text-align: center; }
         .login-card h2 { font-size: 32px; color: white; margin-bottom: 10px; font-weight: 700; }
-        .login-card .admin-badge { background: var(--gold); color: black; padding: 4px 15px; border-radius: 50px; font-size: 12px; font-weight: 700; margin-bottom: 20px; display: inline-block; }
+        .admin-badge { 
+            background: var(--gold); color: black; padding: 4px 15px; 
+            border-radius: 50px; font-size: 12px; font-weight: 900; 
+            margin-bottom: 20px; display: inline-block; 
+        }
         
+        /* التنبيهات */
         .alert { 
-            background: rgba(255, 77, 77, 0.15); color: #ff4d4d; padding: 12px; border: 1px solid rgba(255, 77, 77, 0.3); border-radius: 10px; 
+            background: rgba(255, 77, 77, 0.15); color: #ff4d4d; padding: 12px; 
+            border: 1px solid rgba(255, 77, 77, 0.3); border-radius: 10px; 
             margin-bottom: 20px; font-size: 14px; text-align: right; display: flex; align-items: center;
         }
         .alert i { margin-left: 10px; }
 
+        /* المدخلات */
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group input { 
             width: 100%; padding: 18px 50px 18px 15px; border: 1px solid rgba(255,255,255,0.2); 
-            border-radius: 12px; background: rgba(255,255,255,0.1); color: white; font-size: 16px; font-family: 'Cairo'; 
+            border-radius: 12px; background: rgba(255,255,255,0.1); color: white; 
+            font-size: 16px; font-family: 'Cairo'; transition: 0.3s;
         }
-        .input-group input:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,0.15); }
+        .input-group input:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,0.2); }
         .input-group i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 18px; }
 
         .btn-login { 
             width: 100%; padding: 18px; background: var(--gold); color: black; 
-            border: none; border-radius: 12px; font-weight: 700; font-size: 18px; cursor: pointer; transition: 0.3s; 
+            border: none; border-radius: 12px; font-weight: 900; font-size: 18px; 
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
-        .btn-login:hover { background: white; transform: scale(1.02); }
+        .btn-login:hover { background: white; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
 
-        .logo { width: 140px; margin-bottom: 20px; border-radius: 20px; }
-        .brand-section h1 { font-size: 40px; color: var(--royal-purple); margin: 0; font-weight: 700; }
+        .logo { width: 150px; margin-bottom: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .brand-section h1 { font-size: 42px; color: var(--royal-purple); margin: 0; font-weight: 900; }
         .brand-section .slogan { font-size: 18px; color: #666; margin-bottom: 40px; }
 
+        .feature-list { width: 100%; max-width: 400px; }
         .feature-item { 
-            background: #f8f9fa; padding: 15px; margin: 8px; border-radius: 12px; 
-            width: 90%; display: flex; align-items: center; border: 1px solid #eee; text-align: right;
+            background: #f8f9fa; padding: 15px; margin-bottom: 10px; border-radius: 12px; 
+            display: flex; align-items: center; border: 1px solid #eee; text-align: right;
         }
         .feature-item i { color: var(--royal-purple); margin-left: 15px; font-size: 20px; }
-        .feature-item span { color: #444; font-weight: 600; font-size: 15px; }
+        .feature-item span { color: #444; font-weight: 700; font-size: 15px; }
 
         @media (max-width: 850px) {
             body { flex-direction: column; overflow-y: auto; }
-            .brand-section { order: 1; width: 100%; padding: 40px 20px; min-height: auto; }
+            .brand-section { order: 1; width: 100%; padding: 40px 20px; }
             .login-section { order: 2; width: 100%; padding: 40px 20px; border-left: none; border-top: 4px solid var(--gold); }
         }
     </style>
@@ -75,26 +91,28 @@
 <body>
 
     <div class="brand-section">
-        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo">
+        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo" alt="محجوب أونلاين">
         <h1>محجوب أونلاين</h1>
-        <p class="slogan">برج المراقبة: الإدارة السيادية للمنصة</p>
+        <p class="slogan">برج المراقبة: السيادة الرقمية والحوكمة</p>
         
-        <div class="feature-item"><i class="fas fa-user-shield"></i> <span>التحكم الكامل في حسابات الموردين والكيانات</span></div>
-        <div class="feature-item"><i class="fas fa-check-double"></i> <span>مراجعة واعتماد المنتجات المرفوعة للمنصة</span></div>
-        <div class="feature-item"><i class="fas fa-server"></i> <span>مراقبة استقرار الأنظمة وسلاسل الإمداد الرقمية</span></div>
+        <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-shield-alt"></i> <span>تأمين القنوات والاتصالات المشفرة</span></div>
+            <div class="feature-item"><i class="fas fa-database"></i> <span>إدارة الكيانات والموردين المعتمدين</span></div>
+            <div class="feature-item"><i class="fas fa-chart-pie"></i> <span>تحليل مؤشرات الأداء والنمو اللحظي</span></div>
+        </div>
     </div>
 
     <div class="login-section">
         <div class="login-card">
-            <div class="admin-badge">نظام الإدارة المركزية</div>
+            <div class="admin-badge">نظام الإدارة السيادية</div>
             <h2>دخول المدير</h2>
-            <p>مرحباً بك يا سيد علي في لوحة التحكم</p>
+            <p style="opacity: 0.8; margin-bottom: 30px;">مرحباً بك يا سيد علي في مركز العمليات</p>
             
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert" style="background: rgba({{ '255, 77, 77' if category == 'danger' else '77, 255, 77' }}, 0.15); color: {{ '#ff4d4d' if category == 'danger' else '#2ecc71' }};">
-                            <i class="fas {{ 'fa-exclamation-circle' if category == 'danger' else 'fa-check-circle' }}"></i>
+                        <div class="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -103,16 +121,19 @@
 
             <form method="POST" action="{{ url_for('admin_login') }}">
                 <div class="input-group">
-                    <i class="fas fa-id-badge"></i>
-                    <input type="text" name="username" placeholder="معرف الإدارة" required>
+                    <i class="fas fa-user-tie"></i>
+                    <input type="text" name="username" placeholder="معرف المدير" required autofocus>
                 </div>
                 <div class="input-group">
-                    <i class="fas fa-key"></i>
+                    <i class="fas fa-lock"></i>
                     <input type="password" name="password" placeholder="كلمة المرور المركزية" required>
                 </div>
-                <button type="submit" class="btn-login">تفعيل الدخول 🚀</button>
+                <button type="submit" class="btn-login">تفعيل السيادة 🚀</button>
             </form>
-            <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 50px;">حوكمة رقمية سيادية © 2026</p>
+            
+            <p style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 40px; letter-spacing: 1px;">
+                MAHJOUB ONLINE • SECURE ACCESS • 2026
+            </p>
         </div>
     </div>
 
