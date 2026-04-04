@@ -4,8 +4,7 @@ from config import Config
 from database import db, init_db
 import models
 
-# استدعاء المنطق من الملفات الموجودة في Git لديك
-# تأكد أن هذه الدوال تبحث في الجداول الصحيحة (AdminUser, Vendor, VendorStaff)
+# استدعاء المنطق البرمجي المطور
 from vendor_logic import login_vendor 
 from admin_logic import verify_admin_credentials
 
@@ -13,14 +12,14 @@ app = Flask(__name__)
 app.config.from_object(Config)
 init_db(app)
 
-# --- [ منطقة السيادة: إعادة بناء القاعدة وحقن البيانات ] ---
+# --- [ منطقة السيادة: بناء القاعدة وحقن البيانات ] ---
 with app.app_context():
     try:
-        # ملاحظة: drop_all ستمسح البيانات القديمة، استخدمها فقط عند تحديث الهيكل (Models)
+        # ملاحظة: فعل drop_all فقط إذا قمت بتغيير جذري في الهيكل وتريد تصفير البيانات
         # db.drop_all() 
         db.create_all() 
-        models.seed_system() # سيحقن (علي، علي محمد، الموظف التجريبي) بكلمة مرور 123
-        print("✅ تم تطهير القاعدة وحقن بيانات النظام بنجاح.")
+        models.seed_system() # يحقن (علي، علي محمد، الموظف التجريبي) والمحافظ تلقائياً
+        print("✅ تم فحص القاعدة وتوليد المحافظ السيادية بنجاح.")
     except Exception as e:
         print(f"❌ خطأ في القاعدة: {e}")
 
@@ -31,7 +30,7 @@ def vendor_login():
         u = request.form.get('username', '').strip()
         p = request.form.get('password', '').strip()
         
-        # دالة login_vendor يجب أن تبحث في جدولي Vendor و VendorStaff
+        # المنطق المطور الذي يفحص (الحالة، كلمة السر، وجود الحساب)
         success, msg, role = login_vendor(u, p) 
         
         if success:
@@ -45,16 +44,35 @@ def vendor_login():
 
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
-    # التحقق من الصلاحية: يجب أن يكون المورد أو موظفه مسجل دخول
+    # 1. التحقق من الهوية: هل يملك رتبة مورد أو موظف؟
     allowed_roles = ['vendor_owner', 'vendor_staff']
     if 'role' not in session or session.get('role') not in allowed_roles:
         return redirect(url_for('vendor_login'))
     
-    # ميزة الإدارة: المالك فقط يرى المحفظة، الموظف لا يراها
+    # 2. جلب كائن المورد من القاعدة لجلب بيانات المحفظة
+    # نبحث أولاً في جدول الموردين
+    vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
+    
+    # إذا لم يجده، فهذا يعني أنه "موظف"، فنبحث عنه في جدول الموظفين لنجلب بيانات "رئيسه"
+    if not vendor_data:
+        staff_member = models.VendorStaff.query.filter_by(username=session.get('username')).first()
+        vendor_data = staff_member.owner if staff_member else None
+
+    # 3. استخراج بيانات المحفظة (MAH-) بأمان لتجنب الانهيار
+    wallet_no = "غير متوفر"
+    balance = 0.0
+    if vendor_data and vendor_data.wallet:
+        wallet_no = vendor_data.wallet.wallet_number
+        balance = vendor_data.wallet.balance
+
+    # 4. المالك فقط يرى المحفظة (علي محمد)، أما الموظف فلا يراها
     show_wallet = (session.get('role') == 'vendor_owner')
     
     return render_template('vendor_dashboard.html', 
-                           username=session.get('username'), 
+                           username=session.get('username'),
+                           vendor=vendor_data,
+                           wallet_no=wallet_no,
+                           balance=balance,
                            show_wallet=show_wallet)
 
 # --- [ بوابة الإدارة العليا ] ---
@@ -64,11 +82,10 @@ def admin_login():
         u = request.form.get('username', '').strip()
         p = request.form.get('password', '').strip()
         
-        # استخدام دالة التحقق من جدول AdminUser
         success, msg = verify_admin_credentials(u, p)
         if success:
             session['username'] = u
-            session['role'] = 'super_admin' # تثبيت رتبة المدير
+            session['role'] = 'super_admin'
             flash(msg, "success")
             return redirect(url_for('admin_dashboard'))
         
@@ -77,9 +94,8 @@ def admin_login():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    # حماية لوحة الإدارة: علي فقط من يدخل هنا
     if session.get('role') != 'super_admin':
-        flash("عذراً، هذه المنطقة للإدارة العليا فقط.", "warning")
+        flash("عذراً، هذه المنطقة لبرج المراقبة فقط.", "warning")
         return redirect(url_for('admin_login'))
         
     return render_template('admin_dashboard.html', username=session.get('username'))
@@ -87,16 +103,14 @@ def admin_dashboard():
 # --- [ التوجيهات العامة ] ---
 @app.route('/')
 def index():
-    # توجيه الزائر تلقائياً لبوابة الموردين كبداية
     return redirect(url_for('vendor_login'))
 
 @app.route('/logout')
 def logout():
     session.clear()
-    flash("تم تسجيل الخروج بنجاح.", "info")
+    flash("تم الخروج من النظام السيادي.", "info")
     return redirect(url_for('vendor_login'))
 
 if __name__ == '__main__':
-    # استخدام 8080 لتجنب التعارض مع المنافذ المحجوزة
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
