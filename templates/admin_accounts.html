@@ -1,8 +1,62 @@
 {% extends "layout.html" %}
-{% block title %}برج المراقبة{% endblock %}
+
+{% block title %}إدارة الحسابات | محجوب أونلاين{% endblock %}
+
 {% block content %}
-    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-        <h1 style="color: #1a0033;"><i class="fas fa-crown" style="color: #FFD700;"></i> أهلاً بك يا سيد علي في برج المراقبة</h1>
-        <p>المنصة الآن تحت إدارتك الكاملة لعام 2026.</p>
+<style>
+    .admin-container { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
+    .card-royal { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #eee; }
+    .form-group { margin-bottom: 15px; }
+    .input-royal { width: 100%; padding: 12px; border: 1.5px solid #edf2f7; border-radius: 12px; font-family: 'Cairo'; }
+    .btn-create { background: var(--royal-p); color: white; border: none; padding: 12px; width: 100%; border-radius: 12px; font-weight: 800; cursor: pointer; }
+    
+    .v-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .v-table th { text-align: right; color: #888; padding: 15px; font-size: 13px; border-bottom: 2px solid #f4f7f6; }
+    .v-table td { padding: 15px; border-bottom: 1px solid #f4f7f6; font-weight: 600; }
+    .wallet-badge { background: #fff9e6; color: #b8860b; padding: 4px 10px; border-radius: 8px; font-size: 11px; border: 1px solid #ffeeba; }
+</style>
+
+<div class="admin-container" dir="rtl">
+    <div class="card-royal">
+        <h3 style="color: var(--royal-p); margin-top: 0;"><i class="fas fa-user-plus"></i> اعتماد مورد جديد</h3>
+        <p style="font-size: 12px; color: #666;">سيتم توليد محفظة رقمية تلقائياً فور الاعتماد.</p>
+        
+        <form action="#" method="POST"> <div class="form-group">
+                <label style="font-weight: 700;">اسم المستخدم (الدخول)</label>
+                <input type="text" name="username" class="input-royal" placeholder="مثلاً: ali_2026" required>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: 700;">اسم العلامة التجارية</label>
+                <input type="text" name="brand_name" class="input-royal" placeholder="مثلاً: شركة الثقة" required>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: 700;">كلمة المرور</label>
+                <input type="password" name="password" class="input-royal" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-create">تفعيل الحساب والسيادة ✨</button>
+        </form>
     </div>
+
+    <div class="card-royal">
+        <h3 style="color: var(--royal-p); margin-top: 0;"><i class="fas fa-users"></i> الموردون المعتمدون في النظام</h3>
+        <table class="v-table">
+            <thead>
+                <tr>
+                    <th>المورد</th>
+                    <th>العلامة التجارية</th>
+                    <th>رقم المحفظة</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>علي محجوب</td>
+                    <td>المركز الرئيسي</td>
+                    <td><span class="wallet-badge">MAH-77022XXXX</span></td>
+                    <td style="color: #27ae60;"><i class="fas fa-check-circle"></i> نشط</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
