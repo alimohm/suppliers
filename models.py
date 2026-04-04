@@ -9,6 +9,8 @@ def generate_mah_wallet():
     suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
     return f"MAH-{suffix}"
 
+# --- النماذج (Models) ---
+
 class Vendor(db.Model):
     __tablename__ = 'vendor'
     id = db.Column(db.Integer, primary_key=True)
@@ -37,33 +39,38 @@ class Product(db.Model):
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+# --- دالة حقن البيانات (Seed Function) ---
+
 def seed_admin():
-    """حقن الأسماء العربية الرسمية لـ محجوب أونلاين وتأمين الدخول"""
+    """إنشاء الحسابات الافتراضية للنظام"""
     try:
+        # كلمة مرور افتراضية (يفضل تغييرها لاحقاً)
         secure_pw = generate_password_hash('123')
         
-        # 🏛️ حساب الإدارة المركزية (علي محجوب)
-        admin_username = "علي محجوب"
-        admin = AdminUser.query.filter_by(username=admin_username).first()
-        if not admin:
-            new_admin = AdminUser(username=admin_username, password=secure_pw)
+        # 1. إنشاء حساب الإدارة المركزية (علي محجوب)
+        admin_name = "علي محجوب"
+        if not AdminUser.query.filter_by(username=admin_name).first():
+            new_admin = AdminUser(
+                username=admin_name, 
+                password=secure_pw
+            )
             db.session.add(new_admin)
-            print(f"✅ تم إنشاء حساب الإدارة: {admin_username}")
+            print(f"✅ تم بنجاح إنشاء المسؤول: {admin_name}")
         
-        # 📦 حساب المورد الرسمي (محجوب أونلاين)
-        vendor_username = "محجوب أونلاين"
-        vendor = Vendor.query.filter_by(username=vendor_username).first()
-        if not vendor:
+        # 2. إنشاء حساب المورد الرسمي (محجوب أونلاين)
+        vendor_name = "محجوب أونلاين"
+        if not Vendor.query.filter_by(username=vendor_name).first():
             new_vendor = Vendor(
-                username=vendor_username, 
+                username=vendor_name, 
                 password=secure_pw, 
-                brand_name='Mahjoub Online', 
+                brand_name='Mahjoub Online',
+                employee_name='إدارة محجوب',
                 status='active'
             )
             db.session.add(new_vendor)
-            print(f"✅ تم إنشاء حساب المورد: {vendor_username}")
+            print(f"✅ تم بنجاح إنشاء المورد الرسمي: {vendor_name}")
             
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        print(f"❌ Seed Error: {e}")
+        print(f"⚠️ خطأ أثناء تحديث البيانات: {e}")
