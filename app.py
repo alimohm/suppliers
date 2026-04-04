@@ -25,6 +25,7 @@ with app.app_context():
 # --- [ التوجيهات العامة ] ---
 @app.route('/')
 def index():
+    # توجيه ذكي: إذا كان المستخدم مسجلاً، ارفعه للوحة تحكمه فوراً
     if 'role' in session:
         if session['role'] == 'super_admin':
             return redirect(url_for('admin_dashboard'))
@@ -46,7 +47,6 @@ def admin_dashboard():
         return redirect(url_for('admin_login'))
     
     all_vendors = models.Vendor.query.all()
-    # يتم تمرير اسم القالب الجديد admin_accounts.html
     return render_template('admin_accounts.html', 
                            username=session.get('username'), 
                            vendors=all_vendors)
@@ -67,13 +67,13 @@ def create_vendor():
             db.session.add(new_v)
             db.session.flush() 
 
-            # توليد رقم محفظة MAH فريد بصيغة رسمية
+            # توليد رقم محفظة MAH فريد (نظام سوقك الذكي)
             wallet_num = f"MAH-{random.randint(100,999)}-{random.randint(1000,9999)}"
             new_wallet = models.Wallet(wallet_number=wallet_num, balance=0.0, vendor_id=new_v.id)
             db.session.add(new_wallet)
             
             db.session.commit()
-            flash(f"✅ تم اعتماد المورد '{b}' وتفعيل محفظته السيادية.", "success")
+            flash(f"✅ تم اعتماد المورد '{b}' وتفعيل محفظته بنجاح.", "success")
         except Exception as e:
             db.session.rollback()
             flash(f"❌ فشل الاعتماد: {str(e)}", "danger")
@@ -84,58 +84,53 @@ def create_vendor():
 
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
+    # التحقق من الصلاحيات (مورد أو موظف مورد)
     allowed_roles = ['vendor_owner', 'vendor_staff']
     if 'role' not in session or session.get('role') not in allowed_roles:
         return redirect(url_for('vendor_login'))
     
+    # جلب بيانات المورد ومحفظته من قاعدة البيانات
     vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
     
-    # استخراج البيانات بدقة لتتوافق مع تصميم المحفظة (vendor_dashboard.html)
-    wallet_no = "MAH-000-0000"
-    balance = 0.0
-    
-    if vendor_data and vendor_data.wallet:
-        wallet_no = vendor_data.wallet.wallet_number
-        balance = vendor_data.wallet.balance
+    # تحضير بيانات المحفظة للعرض في القالب البنفسجي
+    wallet_no = vendor_data.wallet.wallet_number if vendor_data and vendor_data.wallet else "MAH-000-0000"
+    balance = vendor_data.wallet.balance if vendor_data and vendor_data.wallet else 0.0
     
     return render_template('vendor_dashboard.html', 
                            username=session.get('username'),
                            vendor=vendor_data,
-                           wallet_no=wallet_no, 
+                           wallet_no=wallet_no,
                            balance=balance)
 
 @app.route('/vendor/add-product', methods=['GET', 'POST'])
 def add_product():
-    allowed_roles = ['vendor_owner', 'vendor_staff']
-    if 'role' not in session or session.get('role') not in allowed_roles:
-        flash("🚫 يرجى تسجيل الدخول كمورد للوصول لهذه الصفحة", "danger")
+    if 'role' not in session or session.get('role') not in ['vendor_owner', 'vendor_staff']:
+        flash("🚫 يرجى تسجيل الدخول للوصول لصفحة الرفع", "danger")
         return redirect(url_for('vendor_login'))
     
     vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
 
     if request.method == 'POST':
         try:
-            # استلام البيانات من فورم "رفع المنتج" المطور
+            # ربط المنتج بهوية المورد المسجل آلياً
             new_product = models.Product(
                 name=request.form.get('name'),
-                # البراند يتم جلبه تلقائياً من بيانات المورد لضمان السيادة
                 brand=vendor_data.brand_name if vendor_data else "محجوب أونلاين",
                 price=float(request.form.get('price', 0)),
                 currency=request.form.get('currency'),
                 stock=int(request.form.get('stock', 1)),
                 description=request.form.get('description'),
-                vendor_id=vendor_data.id if vendor_data else None,
+                vendor_id=vendor_data.id,
                 status='pending'
             )
             db.session.add(new_product)
             db.session.commit()
-            flash("🚀 تم رفع المنتج بنجاح! هو الآن بانتظار مراجعة الإدارة العليا.", "success")
+            flash("🚀 تم رفع المنتج بنجاح! هو الآن بانتظار المراجعة السيادية.", "success")
             return redirect(url_for('vendor_dashboard'))
         except Exception as e:
             db.session.rollback()
-            flash(f"❌ حدث خطأ أثناء الرفع: {str(e)}", "danger")
+            flash(f"❌ حدث خطأ في البيانات: {str(e)}", "danger")
 
-    # توجيه للقالب الجديد vendor_add_product.html
     return render_template('vendor_add_product.html', vendor=vendor_data)
 
 # --- [ بوابات تسجيل الدخول ] ---
@@ -147,9 +142,9 @@ def vendor_login():
         p = request.form.get('password', '').strip()
         success, msg, role = login_vendor(u, p) 
         if success:
-            session.permanent = True # الحفاظ على الجلسة
             session['username'] = u
             session['role'] = role
+            session.permanent = True # تفعيل الجلسة الدائمة لراحة المورد
             flash(msg, "success")
             return redirect(url_for('vendor_dashboard'))
         flash(msg, "danger")
@@ -162,7 +157,6 @@ def admin_login():
         p = request.form.get('password', '').strip()
         success, msg = verify_admin_credentials(u, p)
         if success:
-            session.permanent = True
             session['username'] = u
             session['role'] = 'super_admin'
             flash(msg, "success")
@@ -171,6 +165,5 @@ def admin_login():
     return render_template('login_admin.html')
 
 if __name__ == '__main__':
-    # تشغيل السيرفر على البورت المخصص للبيئة السحابية
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
