@@ -1,2 +1,3 @@
-# (يحتوي على جداول AdminUser, Vendor, VendorStaff, Product)
-# مع دالة seed_system() لحقن "علي محجوب" و "محجوب أونلاين"
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
+def init_db(app): db.init_app(app)
