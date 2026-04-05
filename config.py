@@ -1,11 +1,8 @@
 import os
 
 class Config:
-    # مفتاح الأمان لتشفير الجلسات (Sessions) وحماية البيانات
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'MAHJOUB_SUPER_2026_KEY'
-    
-    # ربط النظام بقاعدة بيانات SQLite (ستنشأ تلقائياً باسم mahjoub_database.db)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///mahjoub_database.db'
-    
-    # تحسين الأداء عبر إيقاف تنبيهات التعديل غير الضرورية
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'MAHJOUB_SMART_MARKET_2026_SECURE'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///mahjoub_market.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = os.path.join('static', 'uploads')
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # حد أقصى 16 ميجا للصور
