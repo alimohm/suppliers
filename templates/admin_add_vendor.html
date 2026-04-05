@@ -1,0 +1,25 @@
+{% extends "admin_layout.html" %}
+{% block content %}
+<div class="container py-4" dir="rtl">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h3><i class="fas fa-plus-circle text-success"></i> إضافة مورد جديد للنظام</h3>
+            <form action="{{ url_for('admin_add_vendor_post') }}" method="POST">
+                <div class="mb-3">
+                    <label>اسم الشركة / المحل</label>
+                    <input type="text" name="brand_name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>اسم المستخدم (للدخول)</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>كلمة المرور المؤقتة</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">حفظ المورد وتفعيل محفظته</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
