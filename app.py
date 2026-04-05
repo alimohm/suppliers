@@ -13,7 +13,7 @@ from admin_logic import (
     get_admin_stats
 )
 
-# 1. تعريف التطبيق (يجب أن يكون هنا خارج أي دالة ليراه السيرفر)
+# 1. تعريف التطبيق (أساسي في هذا الموقع ليتمكن Gunicorn من العثور عليه)
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -57,7 +57,7 @@ def admin_login():
         flash(msg, "danger")
     return render_template('login_admin.html')
 
-# الرابط 1: الإحصائيات فقط (admin_main.html)
+# الرابط 1: لوحة التحكم (إحصائيات فقط)
 @app.route('/admin/dashboard')
 def admin_dashboard():
     if session.get('role') != 'super_admin':
@@ -68,7 +68,7 @@ def admin_dashboard():
                            username=session.get('username'), 
                            stats=stats)
 
-# الرابط 2: الاعتماد وإدارة الموردين (admin_accounts.html)
+# الرابط 2: صفحة اعتماد الموردين (المستقلة)
 @app.route('/admin/vendors-accreditation')
 def vendors_accreditation():
     if session.get('role') != 'super_admin':
@@ -79,7 +79,7 @@ def vendors_accreditation():
                            username=session.get('username'), 
                            vendors=all_vendors)
 
-# الرابط 3: معالج إنشاء الحسابات
+# الرابط 3: معالج إنشاء حسابات الموردين
 @app.route('/admin/create-vendor', methods=['POST'])
 def create_vendor_route():
     if session.get('role') != 'super_admin': 
@@ -87,6 +87,7 @@ def create_vendor_route():
     
     success, msg = create_vendor_logic()
     flash(msg, "success" if success else "danger")
+    # العودة لصفحة الاعتماد بعد التنفيذ
     return redirect(url_for('vendors_accreditation'))
 
 # --- [ بوابة الموردين ] ---
@@ -136,7 +137,7 @@ def vendor_dashboard():
                            wallet_no=wallet.wallet_number if wallet else "N/A", 
                            balance=wallet.balance if wallet else 0.0)
 
-# --- [ الخروج ] ---
+# --- [ الخروج الآمن ] ---
 @app.route('/logout')
 def logout():
     role = session.get('role')
@@ -144,7 +145,7 @@ def logout():
     flash("تم تسجيل الخروج آلياً.", "info")
     return redirect(url_for('admin_login' if role == 'super_admin' else 'vendor_login'))
 
-# 3. تشغيل التطبيق
+# 3. التشغيل
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
