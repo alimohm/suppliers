@@ -1,87 +1,150 @@
-from flask import session, request, redirect, url_for
-from models import AdminUser, Vendor, Wallet, db
+import os
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from config import Config
+from database import db, init_db
+import models
 
-def verify_admin_credentials(u, p):
-    """
-    تحقق منطقي ذكي لدخول المسؤول
-    """
-    clean_username = u.strip() if u else ""
-    
-    if not clean_username or not p:
-        return False, "يرجى إدخال بيانات الدخول كاملة."
+# استدعاء المنطق البرمجي (تأكد من مطابقة الأسماء في admin_logic.py)
+from vendor_logic import login_vendor 
+from admin_logic import (
+    verify_admin_credentials, 
+    manage_accounts_logic, 
+    create_vendor_logic, 
+    get_admin_stats
+)
 
-    admin = AdminUser.query.filter_by(username=clean_username).first()
-    
-    if not admin:
-        return False, "هذا الاسم غير مسجل في المنصة اللامركزية."
+# 1. تعريف التطبيق (يجب أن يكون هنا خارج أي دالة ليراه السيرفر)
+app = Flask(__name__)
+app.config.from_object(Config)
 
-    if admin.password != p:
-        return False, "كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى."
+# 2. تهيئة قاعدة البيانات
+init_db(app)
 
-    session.clear()
-    session['admin_id'] = admin.id
-    session['role'] = 'super_admin'
-    session['username'] = admin.username
-    
-    return True, "تم التحقق بنجاح. مرحباً بك في مركز القيادة."
-
-def get_admin_stats():
-    """
-    دالة الإحصائيات المخصصة للوحة الرئيسية (Dashboard)
-    تظهر الأرقام فقط وتمنع الانهيار عند طلب admin_main.html
-    """
+# --- [ منطقة السيادة: بناء الهيكل وحقن البيانات ] ---
+with app.app_context():
     try:
-        return {
-            'total_vendors': Vendor.query.count(),
-            'active_wallets': Wallet.query.count()
-        }
+        db.create_all() 
+        models.seed_system()
+        print("✅ نظام محجوب أونلاين: القاعدة جاهزة والمحافظ السيادية مُفعلة.")
     except Exception as e:
-        print(f"Error fetching stats: {e}")
-        return {'total_vendors': 0, 'active_wallets': 0}
+        print(f"❌ خطأ في تهيئة النظام: {e}")
 
-def manage_accounts_logic():
-    """
-    جلب كافة الموردين لعرضهم في لوحة الاعتماد حصراً
-    """
-    vendors = Vendor.query.order_by(Vendor.id.desc()).all()
-    return vendors
+# --- [ التوجيهات العامة ] ---
+@app.route('/')
+def index():
+    role = session.get('role')
+    if role == 'super_admin':
+        return redirect(url_for('admin_dashboard'))
+    elif role in ['vendor_owner', 'vendor_staff']:
+        return redirect(url_for('vendor_dashboard'))
+    return redirect(url_for('vendor_login'))
 
-def create_vendor_logic():
-    """
-    المنطق السيادي لإنشاء مورد وتفعيل محفظته تلقائياً (MAH-XXXX)
-    يتم استدعاؤه من صفحة الاعتماد فقط
-    """
+# --- [ بوابة الإدارة: برج المراقبة ] ---
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if session.get('role') == 'super_admin':
+        return redirect(url_for('admin_dashboard'))
+
     if request.method == 'POST':
-        username = request.form.get('username')
-        brand_name = request.form.get('brand_name')
-        password = request.form.get('password')
-
-        # فحص التكرار لضمان فرادة الحساب
-        if Vendor.query.filter_by(username=username).first():
-            return False, "اسم المستخدم هذا محجوز مسبقاً."
-
-        # 1. إنشاء سجل المورد
-        new_vendor = Vendor(
-            username=username,
-            brand_name=brand_name,
-            password=password, 
-            status="نشط",
-            is_active=True
-        )
+        u = request.form.get('username', '').strip()
+        p = request.form.get('password', '').strip()
         
-        try:
-            db.session.add(new_vendor)
-            db.session.flush() # الحصول على ID قبل الحفظ النهائي
+        success, msg = verify_admin_credentials(u, p)
+        if success:
+            flash(msg, "success")
+            return redirect(url_for('admin_dashboard'))
+        flash(msg, "danger")
+    return render_template('login_admin.html')
 
-            # 2. توليد المحفظة السيادية تلقائياً
-            new_wallet = Wallet(vendor_id=new_vendor.id)
-            db.session.add(new_wallet)
-            
-            db.session.commit()
-            return True, f"تم اعتماد {brand_name} وتفعيل السيادة المالية."
-            
-        except Exception as e:
-            db.session.rollback()
-            return False, f"حدث خطأ فني: {str(e)}"
+# الرابط 1: الإحصائيات فقط (admin_main.html)
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if session.get('role') != 'super_admin':
+        return redirect(url_for('admin_login'))
+    
+    stats = get_admin_stats()
+    return render_template('admin_main.html', 
+                           username=session.get('username'), 
+                           stats=stats)
 
-    return False, "طلب غير صالح."
+# الرابط 2: الاعتماد وإدارة الموردين (admin_accounts.html)
+@app.route('/admin/vendors-accreditation')
+def vendors_accreditation():
+    if session.get('role') != 'super_admin':
+        return redirect(url_for('admin_login'))
+    
+    all_vendors = manage_accounts_logic() 
+    return render_template('admin_accounts.html', 
+                           username=session.get('username'), 
+                           vendors=all_vendors)
+
+# الرابط 3: معالج إنشاء الحسابات
+@app.route('/admin/create-vendor', methods=['POST'])
+def create_vendor_route():
+    if session.get('role') != 'super_admin': 
+        return redirect(url_for('admin_login'))
+    
+    success, msg = create_vendor_logic()
+    flash(msg, "success" if success else "danger")
+    return redirect(url_for('vendors_accreditation'))
+
+# --- [ بوابة الموردين ] ---
+
+@app.route('/vendor/login', methods=['GET', 'POST'])
+def vendor_login():
+    if session.get('role') in ['vendor_owner', 'vendor_staff']:
+        return redirect(url_for('vendor_dashboard'))
+
+    if request.method == 'POST':
+        u = request.form.get('username', '').strip()
+        p = request.form.get('password', '').strip()
+        
+        success, msg, role = login_vendor(u, p) 
+        if success:
+            session.clear()
+            session.permanent = True
+            session['username'] = u
+            session['role'] = role
+            flash(msg, "success")
+            return redirect(url_for('vendor_dashboard'))
+        flash(msg, "danger")
+    return render_template('login_vendor.html')
+
+@app.route('/vendor/dashboard')
+def vendor_dashboard():
+    role = session.get('role')
+    username = session.get('username')
+
+    if role not in ['vendor_owner', 'vendor_staff']:
+        return redirect(url_for('vendor_login'))
+    
+    if role == 'vendor_owner':
+        vendor_data = models.Vendor.query.filter_by(username=username).first()
+    else:
+        staff = models.VendorStaff.query.filter_by(username=username).first()
+        vendor_data = staff.vendor if staff else None
+    
+    if not vendor_data:
+        session.clear()
+        return redirect(url_for('vendor_login'))
+
+    wallet = vendor_data.wallet
+    return render_template('vendor_dashboard.html', 
+                           username=username,
+                           vendor=vendor_data,
+                           wallet_no=wallet.wallet_number if wallet else "N/A", 
+                           balance=wallet.balance if wallet else 0.0)
+
+# --- [ الخروج ] ---
+@app.route('/logout')
+def logout():
+    role = session.get('role')
+    session.clear()
+    flash("تم تسجيل الخروج آلياً.", "info")
+    return redirect(url_for('admin_login' if role == 'super_admin' else 'vendor_login'))
+
+# 3. تشغيل التطبيق
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
