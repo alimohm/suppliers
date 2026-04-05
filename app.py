@@ -5,7 +5,7 @@ from config import Config
 from database import db, init_db
 import models
 
-# استيراد طبقات المنطق الموزع لضمان نظافة الكود
+# استيراد طبقات المنطق الموزع
 import admin_logic
 import vendor_logic
 
@@ -15,10 +15,10 @@ app.config.from_object(Config)
 # 1. تهيئة قاعدة البيانات وربطها بالتطبيق (Postgres)
 init_db(app)
 
-# 2. بناء الجداول وزرع بيانات الإدارة العليا عند الإقلاع
+# 2. بناء الجداول وزرع بيانات الإدارة العليا (علي محجوب) عند الإقلاع
 with app.app_context():
     db.create_all()
-    models.seed_initial_data() # تتأكد من وجود حساب علي محجوب
+    models.seed_initial_data()
 
 # --- [ بوابة التوجيه الذكية ] ---
 @app.route('/')
@@ -53,20 +53,24 @@ def admin_dashboard():
     stats = admin_logic.get_admin_stats()
     return render_template('admin_main.html', stats=stats)
 
+# التعديل هنا: ضمان جلب البيانات وتمريرها للملف الصحيح
 @app.route('/admin/vendors-accreditation')
 def vendors_accreditation():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
-    # جلب قائمة الموردين للمراجعة والاعتماد
-    vendors = admin_logic.get_dashboard_data()
-    return render_template('admin_accounts.html', vendors=vendors)
+    
+    # جلب قائمة الموردين (تأكد أن admin_logic.get_dashboard_data تعيد قائمة)
+    all_vendors = admin_logic.get_dashboard_data()
+    
+    # تمرير القائمة باسم 'vendors' ليتوافق مع الملف admin_accounts.html
+    return render_template('admin_accounts.html', vendors=all_vendors)
 
 @app.route('/admin/approve/<int:vendor_id>', methods=['POST'])
 def approve_vendor(vendor_id):
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
-    action = request.form.get('action') # 'approve' أو 'reject' أو 'block'
+    action = request.form.get('action') 
     success, msg = admin_logic.approve_vendor_logic(vendor_id, action)
     flash(msg, "success" if success else "danger")
     return redirect(url_for('vendors_accreditation'))
@@ -76,7 +80,6 @@ def admin_add_vendor_post():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
-    # إضافة مورد جديد وتفعيل محفظة MAH وكشف الحساب يدوياً
     try:
         new_v = models.Vendor(
             brand_name=request.form.get('brand_name'),
@@ -89,15 +92,13 @@ def admin_add_vendor_post():
             is_active=True
         )
         db.session.add(new_v)
-        db.session.flush() # الحصول على ID المورد قبل إكمال الربط المالي
+        db.session.flush() 
         
-        # تدشين المحفظة السيادية
         wallet_no = f"MAH-{random.randint(100000, 999999)}"
         new_w = models.Wallet(wallet_number=wallet_no, vendor_id=new_v.id)
         db.session.add(new_w)
         db.session.flush()
         
-        # تسجيل أول حركة في كشف الحساب
         admin_logic.log_system_tx(new_w.id, 0.0, "تدشين المحفظة يدوياً من الإدارة")
         
         db.session.commit()
@@ -125,7 +126,6 @@ def vendor_login():
             session['role'] = role
             return redirect(url_for('vendor_dashboard'))
         
-        # التعامل مع الرسائل في حال كان user_obj نصاً (مثل رسالة الحظر)
         flash(user_obj if isinstance(user_obj, str) else "خطأ في بيانات الدخول", "danger")
     return render_template('login_vendor.html')
 
@@ -137,7 +137,7 @@ def vendor_dashboard():
     v_id = session.get('vendor_id')
     wallet = vendor_logic.get_wallet_details(v_id)
     products = vendor_logic.get_my_products(v_id)
-    statement = vendor_logic.get_vendor_statement(v_id) # كشف الحساب التاريخي
+    statement = vendor_logic.get_vendor_statement(v_id) 
     
     return render_template('vendor_dashboard.html', 
                            wallet=wallet, 
@@ -160,6 +160,5 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # دعم التشغيل على Railway (المنفذ 8080)
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
