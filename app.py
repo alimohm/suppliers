@@ -4,26 +4,29 @@ from config import Config
 from database import db, init_db
 import models
 
-# استدعاء المنطق البرمجي (المعزز بالأداء العالي)
+# استدعاء المنطق البرمجي (المطابق لملف admin_logic المصلح)
 from vendor_logic import login_vendor 
 from admin_logic import (
     verify_admin_credentials, 
     manage_accounts_logic, 
     create_vendor_logic, 
     get_admin_stats,
-    approve_vendor_logic # الدالة الجديدة التي تدعم كشف الحساب
+    approve_vendor_logic,
+    get_dashboard_data
 )
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# تهيئة قاعدة البيانات - هنا تبدأ السيادة التقنية
+# تهيئة قاعدة البيانات - نقطة انطلاق القوة التقنية
 init_db(app)
 
 with app.app_context():
     try:
+        # بناء الجداول النظيفة (تأكد من تنفيذ DROP CASCADE يدوياً أولاً)
         db.create_all() 
-        # زرع بيانات المؤسس (علي محجوب) إذا لم تكن موجودة
+        
+        # زرع بيانات المالك (علي محجوب) كجذر للنظام
         if not models.AdminUser.query.filter_by(username="ali_mahjoub").first():
             models.seed_initial_data()
         print("✅ نظام محجوب أونلاين: السيادة التقنية جاهزة وقاعدة البيانات متصلة.")
@@ -77,9 +80,8 @@ def vendors_accreditation():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
-    # دعم الفلترة (طلبات التفعيل مقابل الكل)
+    # استخدام الدالة المصلحة لجلب الموردين
     filter_type = request.args.get('filter')
-    from admin_logic import get_dashboard_data
     all_vendors = get_dashboard_data(filter_type)
     
     stats = get_admin_stats()
@@ -87,11 +89,8 @@ def vendors_accreditation():
                            vendors=all_vendors, 
                            pending_count=stats.get('pending', 0))
 
-# --- [ زر التفعيل السيادي - القبول والتحقق ] ---
-
 @app.route('/admin/approve/<int:vendor_id>', methods=['POST'])
 def approve_vendor(vendor_id):
-    """تفعيل الحساب، توليد محفظة MAH، وتسجيل أول حركة في كشف الحساب"""
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
@@ -129,14 +128,12 @@ def vendor_dashboard():
     if role not in ['vendor', 'staff']:
         return redirect(url_for('vendor_login'))
     
-    # جلب بيانات المورد والمحفظة (مؤندكس وسريع)
     vendor_data = models.Vendor.query.filter_by(username=username).first()
     if not vendor_data:
         session.clear()
         return redirect(url_for('vendor_login'))
 
     wallet = vendor_data.wallet
-    # جلب آخر 5 حركات من كشف الحساب (الحركة الكاملة)
     recent_transactions = []
     if wallet:
         recent_transactions = models.Transaction.query.filter_by(wallet_id=wallet.id)\
@@ -146,8 +143,6 @@ def vendor_dashboard():
                            vendor=vendor_data,
                            wallet=wallet,
                            transactions=recent_transactions)
-
-# --- [ مسار كشف الحساب الكامل للمورد ] ---
 
 @app.route('/vendor/statement')
 def vendor_statement():
@@ -159,7 +154,6 @@ def vendor_statement():
         flash("المحفظة غير مفعلة بعد.", "warning")
         return redirect(url_for('vendor_dashboard'))
     
-    # جلب الحركة الكاملة
     transactions = models.Transaction.query.filter_by(wallet_id=vendor.wallet.id)\
                    .order_by(models.Transaction.created_at.desc()).all()
                    
@@ -171,7 +165,7 @@ def vendor_statement():
 def logout():
     role = session.get('role')
     session.clear()
-    flash("تم تسجيل الخروج من نظام محجوب أونلاين بنجاح.", "info")
+    flash("تم تسجيل الخروج بنجاح من محجوب أونلاين.", "info")
     return redirect(url_for('admin_login' if role == 'super_admin' else 'vendor_login'))
 
 if __name__ == '__main__':
