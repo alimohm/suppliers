@@ -1,89 +1,56 @@
 {% extends "admin_layout.html" %}
-
 {% block content %}
-<div class="container-fluid">
-    <div class="row g-4">
+<div class="container-fluid py-4">
+    <div class="row g-4 mb-4">
         <div class="col-md-4">
-            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #f39c12 !important;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">إجمالي الشركاء (الموردين)</h6>
-                        <h2 class="fw-bold mb-0 text-white">{{ vendors_count }}</h2>
-                    </div>
-                    <div class="icon-box bg-warning bg-opacity-10 p-3 rounded-3 text-warning">
-                        <i class="fas fa-store fa-2x"></i>
-                    </div>
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <i class="fas fa-store fa-3x text-warning mb-3"></i>
+                    <h6 class="text-muted small uppercase">إجمالي الموردين</h6>
+                    <h2 class="fw-bold text-white">{{ vendors|length }}</h2>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4">
-            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #27ae60 !important;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">إجمالي سيولة MAH في النظام</h6>
-                        <h2 class="fw-bold mb-0 text-success">{{ "{:,.2f}".format(total_mah) }}</h2>
-                    </div>
-                    <div class="icon-box bg-success bg-opacity-10 p-3 rounded-3 text-success">
-                        <i class="fas fa-vault fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #3498db !important;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">العمليات المعلقة</h6>
-                        <h2 class="fw-bold mb-0 text-info">{{ pending_count }}</h2>
-                    </div>
-                    <div class="icon-box bg-info bg-opacity-10 p-3 rounded-3 text-info">
-                        <i class="fas fa-clock fa-2x"></i>
+        <div class="col-md-8">
+            <div class="card bg-dark border-warning shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted small uppercase">السيولة النقدية المتداولة</h6>
+                            <h1 class="fw-bold text-warning mb-0">{{ "{:,.2f}".format(total_mah) }} <small>MAH</small></h1>
+                        </div>
+                        <i class="fas fa-coins fa-4x text-warning opacity-25"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card bg-dark border-secondary p-4 rounded-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="m-0"><i class="fas fa-history me-2 text-warning"></i>آخر العمليات في النظام</h5>
-                    <button class="btn btn-sm btn-outline-warning">عرض الكل</button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle">
-                        <thead class="text-muted">
-                            <tr>
-                                <th>رقم المحفظة</th>
-                                <th>نوع العملية</th>
-                                <th>المبلغ</th>
-                                <th>التفاصيل</th>
-                                <th>التوقيت</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for tx in recent_transactions %}
-                            <tr>
-                                <td class="text-warning fw-bold">{{ tx.wallet.wallet_number if tx.wallet else 'نظام' }}</td>
-                                <td>
-                                    <span class="badge bg-secondary opacity-75">{{ tx.tx_type }}</span>
-                                </td>
-                                <td class="text-white">{{ tx.amount }} MAH</td>
-                                <td class="text-muted small">{{ tx.description }}</td>
-                                <td>{{ tx.created_at.strftime('%Y-%m-%d | %H:%M') }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">لا توجد عمليات مسجلة حالياً</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="card bg-dark border-secondary">
+        <div class="card-header bg-transparent border-secondary py-3">
+            <h5 class="mb-0 text-white"><i class="fas fa-list-ul me-2"></i>قائمة الشركاء النشطين</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+                <thead class="table-light text-dark">
+                    <tr>
+                        <th>المتجر</th>
+                        <th>المحفظة</th>
+                        <th>الرصيد المتاح</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vendors %}
+                    <tr>
+                        <td class="fw-bold">{{ v.brand_name }}</td>
+                        <td class="text-info">{{ v.wallet.wallet_number }}</td>
+                        <td class="text-success fw-bold">{{ v.wallet.balance }} MAH</td>
+                        <td><span class="badge bg-success">نشط</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
