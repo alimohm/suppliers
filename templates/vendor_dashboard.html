@@ -1,89 +1,49 @@
-{% extends "admin_layout.html" %} {% block content %}
-<div class="container-fluid">
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #f39c12 !important;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">رصيد محفظتك المتاح</h6>
-                        <h2 class="fw-bold mb-0 text-warning">{{ "{:,.2f}".format(wallet.balance) if wallet else '0.00' }} <small style="font-size: 1rem;">MAH</small></h2>
-                        <p class="text-muted small mt-2 mb-0">رقم المحفظة: <span class="text-white">{{ wallet.wallet_number if wallet else 'غير مفعلة' }}</span></p>
-                    </div>
-                    <div class="icon-box bg-warning bg-opacity-10 p-3 rounded-3 text-warning">
-                        <i class="fas fa-wallet fa-3x"></i>
-                    </div>
-                </div>
-            </div>
+{% extends "vendor_layout.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4 mb-5">
+        <div class="col-md-5">
+            {% include "wallet_card.html" %}
         </div>
-
-        <div class="col-md-6">
-            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #3498db !important;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-2">إجمالي المنتجات المعروضة</h6>
-                        <h2 class="fw-bold mb-0 text-info">{{ products|length }}</h2>
-                        <p class="text-muted small mt-2 mb-0">الحالة: <span class="text-success">متصل بنظام محجوب</span></p>
-                    </div>
-                    <div class="icon-box bg-info bg-opacity-10 p-3 rounded-3 text-info">
-                        <i class="fas fa-box-open fa-3x"></i>
-                    </div>
+        <div class="col-md-7">
+            <div class="card h-100 bg-dark border-info shadow-sm">
+                <div class="card-body p-4 text-white">
+                    <h5 class="text-info mb-4"><i class="fas fa-paper-plane me-2"></i>تحويل MAH سريع</h5>
+                    <form action="/action/transfer" method="POST">
+                        <div class="mb-3">
+                            <input type="text" name="target" class="form-control bg-dark text-white border-secondary" placeholder="رقم محفظة المستلم" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="number" step="0.01" name="amount" class="form-control bg-dark text-white border-secondary" placeholder="المبلغ" required>
+                            <span class="input-group-text bg-info border-info text-black fw-bold">MAH</span>
+                        </div>
+                        <button type="submit" class="btn btn-info w-100 fw-bold">تأكيد الإرسال</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card bg-dark border-secondary p-4 rounded-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="m-0"><i class="fas fa-list me-2 text-warning"></i>منتجاتك النشطة</h5>
-                    <button class="btn btn-warning btn-sm fw-bold px-3">
-                        <i class="fas fa-plus me-1"></i> إضافة منتج جديد
-                    </button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle">
-                        <thead class="text-muted">
-                            <tr>
-                                <th>المنتج</th>
-                                <th>السعر الحالي</th>
-                                <th>الكمية المتوفرة</th>
-                                <th>تاريخ الإضافة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for product in products %}
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="{{ product.image_url or 'https://via.placeholder.com/40' }}" class="rounded me-3" width="40">
-                                        <span class="text-white">{{ product.name }}</span>
-                                    </div>
-                                </td>
-                                <td class="text-warning fw-bold">{{ product.price }} MAH</td>
-                                <td>
-                                    {% if product.stock < 10 %}
-                                    <span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-1"></i>{{ product.stock }}</span>
-                                    {% else %}
-                                    <span class="text-white">{{ product.stock }}</span>
-                                    {% endif %}
-                                </td>
-                                <td class="small text-muted">{{ product.created_at.strftime('%Y-%m-%d') }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-light"><i class="fas fa-eye"></i></button>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">لم تقم بإضافة أي منتجات بعد. ابدأ الآن!</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-warning">مخزنك التجاري</h4>
+        <button class="btn btn-warning btn-sm fw-bold px-4" data-bs-toggle="modal" data-bs-target="#addProductModal">إضافة منتج</button>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for p in products %}
+        <div class="col">
+            <div class="card h-100 bg-dark border-secondary">
+                <img src="{{ p.image_url }}" class="card-img-top" style="height: 160px; object-fit: cover;">
+                <div class="card-body text-center">
+                    <h6 class="text-white">{{ p.name }}</h6>
+                    <p class="text-warning fw-bold mb-0">{{ p.price }} MAH</p>
+                    <small class="text-muted">الكمية: {{ p.stock }}</small>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
 </div>
+
+{% include "vendor_add_product.html" %}
 {% endblock %}
