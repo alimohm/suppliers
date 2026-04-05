@@ -6,6 +6,8 @@ import logic
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# تهيئة قاعدة البيانات عند التشغيل
 init_db(app)
 
 @app.route('/')
