@@ -10,8 +10,8 @@
     
     <style>
         :root {
-            --p-color: #1a0033; 
-            --gold: #FFD700;
+            --p-color: #1a0033; /* البنفسجي الملكي */
+            --gold: #FFD700;    /* الذهب */
             --white: #ffffff;
             --soft-bg: #f4f7f6;
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -26,7 +26,7 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar - القائمة الجانبية الذكية */
+        /* Sidebar - القائمة الجانبية السيادية */
         .sidebar {
             width: 260px;
             background: var(--p-color);
@@ -44,25 +44,23 @@
         .sidebar-header {
             padding: 30px 15px;
             text-align: center;
-            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* لوجو النظام - متغير عبر CSS Filter */
         .logo-img {
-            width: 110px;
+            width: 100px;
             height: auto;
             filter: brightness(0) invert(1); 
-            margin-bottom: 15px;
-            transition: 0.3s;
+            margin-bottom: 10px;
         }
 
-        .nav-links { flex: 1; padding: 25px 0; }
+        .nav-links { flex: 1; padding: 20px 0; }
         
         .nav-link {
             display: flex;
             align-items: center;
             padding: 14px 25px;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
             transition: 0.3s;
             margin: 4px 15px;
@@ -71,21 +69,20 @@
         }
 
         .nav-link:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 215, 0, 0.05);
             color: var(--white);
         }
 
-        /* الحالة النشطة: تتغير ديناميكياً */
         .nav-link.active {
             background: rgba(255, 215, 0, 0.15);
             color: var(--gold);
             font-weight: 700;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-right: 4px solid var(--gold);
         }
 
         .nav-link i { margin-left: 15px; font-size: 18px; width: 25px; text-align: center; }
 
-        /* المحتوى الرئيسي */
+        /* Main Content Wrapper */
         .main-wrapper {
             margin-right: 260px;
             flex: 1;
@@ -96,41 +93,34 @@
         }
 
         .top-bar {
-            height: 80px;
+            height: 70px;
             background: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 40px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+            padding: 0 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
             position: sticky;
             top: 0;
             z-index: 999;
         }
 
         .content-area {
-            padding: 35px;
+            padding: 30px;
             flex: 1;
-            animation: fadeIn 0.6s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* معلومات المستخدم (متغيرات) */
+        /* User Identity Badge */
         .user-badge {
             display: flex;
             align-items: center;
-            gap: 15px;
-            background: #fafafa;
-            padding: 8px 15px;
-            border-radius: 15px;
+            gap: 12px;
+            background: #f8f9fa;
+            padding: 6px 15px;
+            border-radius: 12px;
             border: 1px solid #eee;
         }
 
-        /* زر الخروج */
         .logout-section {
             padding: 20px;
             border-top: 1px solid rgba(255,255,255,0.05);
@@ -143,18 +133,17 @@
             align-items: center;
             font-weight: 700;
             padding: 12px 25px;
-            transition: 0.3s;
             border-radius: 10px;
+            transition: 0.3s;
         }
 
         .logout-link:hover { background: rgba(255, 107, 107, 0.1); }
 
-        /* التجاوب مع الهواتف */
         @media (max-width: 992px) {
-            .sidebar { width: 85px; }
+            .sidebar { width: 80px; }
             .sidebar span, .sidebar-header h3 { display: none; }
-            .main-wrapper { margin-right: 85px; }
-            .nav-link { justify-content: center; margin: 8px; }
+            .main-wrapper { margin-right: 80px; }
+            .nav-link { justify-content: center; margin: 5px; padding: 15px; }
             .nav-link i { margin-left: 0; }
         }
     </style>
@@ -165,29 +154,31 @@
         <div class="sidebar-header">
             <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" 
                  class="logo-img" alt="محجوب أونلاين">
-            <h3 style="font-size: 12px; color: var(--gold); margin: 0; font-weight: 800;">برج المراقبة</h3>
+            <h3 style="font-size: 11px; color: var(--gold); margin: 5px 0 0; text-transform: uppercase; letter-spacing: 1px;">برج المراقبة السيادي</h3>
         </div>
 
         <nav class="nav-links">
-            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
-                <i class="fas fa-th-large"></i> 
-                <span>لوحة التحكم</span>
+            <a href="{{ url_for('admin_dashboard') }}" 
+               class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i> 
+                <span>الإحصائيات العامة</span>
             </a>
 
-            <a href="{{ url_for('vendors_accreditation') }}" class="nav-link {% if request.endpoint == 'vendors_accreditation' %}active{% endif %}">
+            <a href="{{ url_for('vendors_accreditation') }}" 
+               class="nav-link {% if request.endpoint == 'vendors_accreditation' %}active{% endif %}">
                 <i class="fas fa-user-shield"></i> 
                 <span>اعتماد الموردين</span>
             </a>
 
             <a href="#" class="nav-link">
-                <i class="fas fa-wallet"></i> 
-                <span>العمليات المالية</span>
+                <i class="fas fa-exchange-alt"></i> 
+                <span>الرقابة المالية</span>
             </a>
         </nav>
 
         <div class="logout-section">
             <a href="{{ url_for('logout') }}" class="logout-link">
-                <i class="fas fa-sign-out-alt" style="margin-left: 10px;"></i> 
+                <i class="fas fa-power-off" style="margin-left: 10px;"></i> 
                 <span>خروج آمن</span>
             </a>
         </div>
@@ -195,25 +186,35 @@
 
     <div class="main-wrapper">
         <header class="top-bar">
-            <div style="font-weight: 900; color: var(--p-color); font-size: 18px; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-broadcast-tower" style="color: var(--gold);"></i>
-                <span>نظام محجوب أونلاين <small style="font-size: 10px; opacity: 0.5;">v3.0</small></span>
+            <div style="font-weight: 800; color: var(--p-color); font-size: 16px;">
+                <i class="fas fa-bars me-3 d-lg-none"></i>
+                <span class="d-none d-sm-inline">نظام الإدارة المركزي <span style="color: var(--gold);">●</span> محجوب أونلاين</span>
             </div>
             
             <div class="user-badge">
-                <div style="text-align: left; line-height: 1.2;">
-                    <div style="font-weight: 800; font-size: 14px; color: var(--p-color);">{{ username }}</div>
-                    <span style="font-size: 9px; color: #777; font-weight: 700;">مدير سيادي</span>
+                <div style="text-align: left; line-height: 1.1;">
+                    <div style="font-weight: 800; font-size: 13px; color: var(--p-color);">{{ username if username else 'علي محجوب' }}</div>
+                    <span style="font-size: 9px; color: #888; font-weight: bold;">مدير النظام</span>
                 </div>
-                <div style="width: 35px; height: 35px; background: var(--p-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gold);">
-                    <i class="fas fa-crown" style="font-size: 14px;"></i>
+                <div style="width: 32px; height: 32px; background: var(--p-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gold);">
+                    <i class="fas fa-crown" style="font-size: 12px;"></i>
                 </div>
             </div>
         </header>
         
-        <div class="content-area">
+        <main class="content-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} shadow-sm" role="alert" style="border-radius: 10px; margin-bottom: 20px; padding: 15px; background: white; border-right: 5px solid {% if category=='success' %}#28a745{% else %}#dc3545{% endif %};">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
             {% block content %}{% endblock %}
-        </div>
+        </main>
     </div>
 
 </body>
