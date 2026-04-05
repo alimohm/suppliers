@@ -9,91 +9,92 @@
     
     <style>
         :root {
-            --admin-bg: #f4f7f6;
-            --sidebar-color: #1a0033; /* أرجواني داكن سيادي */
-            --royal-purple: #4b0082;
+            --p-color: #1a0033; /* البنفسجي العميق الذي اخترناه */
             --gold: #FFD700;
-            --text-dark: #333;
             --white: #ffffff;
+            --soft-bg: #f4f7f6;
         }
 
         body {
             font-family: 'Cairo', sans-serif;
             margin: 0;
+            background: var(--soft-bg);
             display: flex;
-            background-color: var(--admin-bg);
             min-height: 100vh;
         }
 
-        /* --- القائمة الجانبية (Sidebar) --- */
+        /* Sidebar - القائمة الجانبية الموحدة */
         .sidebar {
-            width: 280px;
-            background: var(--sidebar-color);
+            width: 260px;
+            background: var(--p-color);
             color: white;
+            position: fixed;
+            height: 100vh;
+            right: 0;
+            z-index: 1000;
             display: flex;
             flex-direction: column;
-            position: fixed;
-            height: 100%;
-            right: 0;
-            transition: 0.3s;
-            z-index: 1000;
-            border-left: 4px solid var(--gold);
+            border-left: 3px solid var(--gold);
         }
 
         .sidebar-header {
-            padding: 30px;
+            padding: 30px 20px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .sidebar-header img {
-            width: 80px;
-            border-radius: 15px;
-            margin-bottom: 10px;
-            border: 2px solid var(--gold);
+        /* اللوجو الأبيض الديناميكي */
+        .logo-container {
+            margin-bottom: 15px;
+        }
+        
+        .logo-img {
+            width: 120px;
+            height: auto;
+            /* سر الحركة الديناميكية واللون الأبيض */
+            filter: brightness(0) invert(1); 
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-img:hover {
+            transform: scale(1.05);
         }
 
-        .sidebar-menu {
-            flex: 1;
-            padding: 20px 0;
-        }
-
-        .sidebar-menu a {
+        .nav-links { flex: 1; padding: 10px 0; }
+        
+        /* النافذة الواحدة المركزية */
+        .nav-links a.active {
             display: flex;
             align-items: center;
             padding: 15px 25px;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: 0.3s;
-            font-weight: 600;
-        }
-
-        .sidebar-menu a i {
-            margin-left: 15px;
-            font-size: 18px;
-            width: 25px;
-            text-align: center;
-        }
-
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 215, 0, 0.1);
             color: var(--gold);
-            border-right: 4px solid var(--gold);
+            text-decoration: none;
+            border-right: 5px solid var(--gold);
+            font-weight: 700;
+            font-size: 16px;
         }
 
-        /* --- المحتوى الرئيسي --- */
-        .main-content {
-            margin-right: 280px; /* مساحة للـ Sidebar */
-            flex: 1;
+        .nav-links a i { margin-left: 15px; font-size: 18px; }
+
+        .logout-link {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #ff4d4d;
+            text-decoration: none;
             display: flex;
-            flex-direction: column;
-            width: calc(100% - 280px);
+            align-items: center;
+            font-weight: 700;
         }
 
-        /* شريط علوي */
-        .top-nav {
+        /* المنطقة الرئيسية */
+        .main-wrapper {
+            margin-right: 260px;
+            width: 100%;
+        }
+
+        .top-bar {
             height: 70px;
-            background: var(--white);
+            background: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -101,41 +102,13 @@
             box-shadow: 0 2px 15px rgba(0,0,0,0.05);
         }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .content-area { padding: 30px; }
 
-        .user-profile .badge {
-            background: var(--gold);
-            color: black;
-            padding: 2px 10px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 900;
-        }
-
-        .content-body {
-            padding: 30px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logout-btn {
-            margin-top: auto;
-            background: #ff4d4d;
-            color: white !important;
-        }
-
-        @media (max-width: 992px) {
+        @media (max-width: 768px) {
             .sidebar { width: 80px; }
-            .sidebar-header h3, .sidebar-menu span { display: none; }
-            .main-content { margin-right: 80px; width: calc(100% - 80px); }
+            .sidebar span, .sidebar-header h3 { display: none; }
+            .main-wrapper { margin-right: 80px; }
+            .logo-img { width: 50px; }
         }
     </style>
 </head>
@@ -143,70 +116,46 @@
 
     <aside class="sidebar">
         <div class="sidebar-header">
-            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" alt="Logo">
-            <h3 style="font-size: 18px; margin: 10px 0;">برج المراقبة</h3>
+            <div class="logo-container">
+                <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" 
+                     class="logo-img" alt="محجوب أونلاين">
+            </div>
+            <h3 style="font-size: 16px; color: var(--gold); margin: 0; font-weight: 900;">برج المراقبة</h3>
         </div>
-        
-        <nav class="sidebar-menu">
+
+        <nav class="nav-links">
             <a href="{{ url_for('admin_dashboard') }}" class="active">
-                <i class="fas fa-chart-line"></i>
-                <span>لوحة التحكم</span>
-            </a>
-            <a href="#">
-                <i class="fas fa-users-cog"></i>
-                <span>إدارة الموردين</span>
-            </a>
-            <a href="#">
-                <i class="fas fa-check-circle"></i>
-                <span>طلبات الاعتماد</span>
-            </a>
-            <a href="#">
-                <i class="fas fa-wallet"></i>
-                <span>الرقابة المالية</span>
-            </a>
-            <a href="#">
-                <i class="fas fa-cog"></i>
-                <span>إعدادات المنصة</span>
-            </a>
-            
-            <a href="{{ url_for('logout') }}" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>تسجيل الخروج</span>
+                <i class="fas fa-shield-alt"></i> 
+                <span>التحكم السيادي</span>
             </a>
         </nav>
+
+        <a href="{{ url_for('logout') }}" class="logout-link">
+            <i class="fas fa-power-off" style="margin-left: 10px;"></i> 
+            <span>خروج من النظام</span>
+        </a>
     </aside>
 
-    <main class="main-content">
-        <header class="top-nav">
-            <div class="search-bar">
-                <i class="fas fa-search" style="color: #ccc;"></i>
-                <span style="color: #999; margin-right: 10px; font-size: 14px;">نظام سوقك الذكي 2026</span>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <div class="page-title">
+                <span style="color: #888; font-size: 14px;">نظام سوقك الذكي 2026</span>
+                <h4 style="margin: 0; color: var(--p-color); font-weight: 900;">إدارة الاعتماد المالي</h4>
             </div>
             
-            <div class="user-profile">
+            <div class="user-info" style="display: flex; align-items: center; gap: 12px;">
                 <div style="text-align: left;">
-                    <div style="font-weight: 700; font-size: 14px;">{{ username }}</div>
-                    <span class="badge">مدير النظام</span>
+                    <div style="font-weight: 900; color: var(--p-color);">{{ username }}</div>
+                    <div style="background: var(--gold); padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-align: center;">مدير النظام</div>
                 </div>
-                <i class="fas fa-user-circle" style="font-size: 35px; color: var(--royal-purple);"></i>
+                <i class="fas fa-user-circle fa-2x" style="color: var(--p-color);"></i>
             </div>
         </header>
-
-        <section class="content-body">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div style="padding: 15px; border-radius: 10px; margin-bottom: 20px; background: {{ '#d4edda' if category == 'success' else '#f8d7da' }}; color: {{ '#155724' if category == 'success' else '#721c24' }}; border: 1px solid {{ '#c3e6cb' if category == 'success' else '#f5c6cb' }};">
-                            <i class="fas {{ 'fa-check-circle' if category == 'success' else 'fa-exclamation-circle' }}"></i>
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
+        
+        <div class="content-area">
             {% block content %}{% endblock %}
-        </section>
-    </main>
+        </div>
+    </div>
 
 </body>
 </html>
