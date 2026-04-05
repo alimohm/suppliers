@@ -123,24 +123,24 @@ def vendor_dashboard():
     if 'role' not in session or session.get('role') not in ['vendor_owner', 'vendor_staff']:
         return redirect(url_for('vendor_login'))
     
-    # جلب بيانات المورد ومحفظته
+    # جلب بيانات المورد ومحفظته بشكل صحيح
     vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
     
     if not vendor_data:
-        flash("خطأ في جلب بيانات الحساب.", "danger")
+        flash("خطأ في استعادة بيانات الجلسة، يرجى إعادة الدخول.", "danger")
         return redirect(url_for('vendor_login'))
 
-    # استخراج البيانات مع الحماية من قيم None
-    wallet_no = vendor_data.wallet.wallet_number if vendor_data.wallet else "جاري الربط..."
+    # استخراج البيانات بدقة لتجنب خطأ 500 في القالب
+    wallet_no = vendor_data.wallet.wallet_number if vendor_data.wallet else "N/A"
     balance = vendor_data.wallet.balance if vendor_data.wallet else 0.0
     
+    # تمرير المتغيرات بشكل صريح ليتعرف عليها قالب vendor_dashboard.html
     return render_template('vendor_dashboard.html', 
                            username=session.get('username'),
                            vendor=vendor_data,
                            wallet_no=wallet_no, 
                            balance=balance)
 
-# سيتم إضافة مسار إضافة المنتج هنا لاحقاً
 @app.route('/vendor/add-product')
 def add_product():
     if 'role' not in session or session.get('role') not in ['vendor_owner', 'vendor_staff']:
@@ -159,5 +159,6 @@ def logout():
     return redirect(url_for('vendor_login'))
 
 if __name__ == '__main__':
+    # تهيئة المنفذ لـ Railway
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
