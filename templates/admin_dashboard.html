@@ -1,167 +1,71 @@
 {% extends "admin_layout.html" %}
-
-{% block title %}التحكم السيادي في الحسابات | محجوب أونلاين{% endblock %}
-
 {% block content %}
-<style>
-    /* تحسينات التصميم للنافذة السيادية */
-    .sovereign-grid { 
-        display: grid; 
-        grid-template-columns: 1fr 2fr; 
-        gap: 30px; 
-        animation: fadeIn 0.5s ease-in;
-    }
-
-    .card-royal { 
-        background: white; 
-        border-radius: 25px; 
-        padding: 30px; 
-        box-shadow: 0 15px 45px rgba(26, 0, 51, 0.05); 
-        border: 1px solid rgba(255, 215, 0, 0.2); 
-        position: relative;
-    }
-
-    .card-royal::before {
-        content: "";
-        position: absolute;
-        top: 0; right: 0;
-        width: 100%; height: 5px;
-        background: linear-gradient(to left, var(--gold), var(--p-color));
-        border-radius: 25px 25px 0 0;
-    }
-
-    .form-group { margin-bottom: 20px; }
-    
-    .input-royal { 
-        width: 100%; padding: 14px; 
-        border: 2px solid #f1f1f1; 
-        border-radius: 15px; 
-        font-family: 'Cairo', sans-serif;
-        transition: 0.3s;
-        box-sizing: border-box;
-    }
-    
-    .input-royal:focus { 
-        border-color: var(--gold); 
-        outline: none; 
-        background: #fffdf5;
-    }
-
-    .btn-sovereign { 
-        background: var(--p-color); 
-        color: var(--gold); 
-        border: 2px solid var(--gold); 
-        padding: 15px; 
-        width: 100%; 
-        border-radius: 15px; 
-        font-weight: 900; 
-        cursor: pointer;
-        transition: 0.4s;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .btn-sovereign:hover { 
-        background: var(--gold); 
-        color: var(--p-color); 
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(255, 214, 0, 0.2);
-    }
-
-    /* جدول الموردين المعتمدين */
-    .v-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-    .v-table th { color: #888; padding: 15px; font-size: 13px; text-align: right; }
-    .v-table td { 
-        padding: 20px; 
-        background: #fafafa; 
-        border-top: 1px solid #f0f0f0; 
-        border-bottom: 1px solid #f0f0f0;
-    }
-    .v-table tr td:first-child { border-right: 1px solid #f0f0f0; border-radius: 0 15px 15px 0; }
-    .v-table tr td:last-child { border-left: 1px solid #f0f0f0; border-radius: 15px 0 0 15px; }
-
-    .wallet-badge { 
-        background: var(--p-color); 
-        color: var(--gold); 
-        padding: 8px 15px; 
-        border-radius: 10px; 
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
-        font-size: 14px;
-        display: inline-block;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    @media (max-width: 1100px) { .sovereign-grid { grid-template-columns: 1fr; } }
-</style>
-
-<div class="sovereign-grid" dir="rtl">
-    <div class="card-royal">
-        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-            <div style="background: var(--p-color); color: var(--gold); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
-                <i class="fas fa-shield-alt fa-lg"></i>
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-secondary">إجمالي الشركاء</h6>
+                    <h2 class="fw-bold">{{ vendors_count if vendors_count else 0 }}</h2>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                    <i class="fas fa-store fa-2x"></i>
+                </div>
             </div>
-            <h3 style="margin: 0; color: var(--p-color);">اعتماد مورد جديد</h3>
+            <div class="mt-3 text-success small">▲ 12% منذ الشهر الماضي</div>
         </div>
-        
-        <form action="{{ url_for('create_vendor_route') }}" method="POST">
-            <div class="form-group">
-                <label style="font-weight: 700; color: #444; display: block; margin-bottom: 8px;">معرف الدخول السياسي</label>
-                <input type="text" name="username" class="input-royal" placeholder="اسم المستخدم الفريد" required>
-            </div>
-            <div class="form-group">
-                <label style="font-weight: 700; color: #444; display: block; margin-bottom: 8px;">العلامة التجارية</label>
-                <input type="text" name="brand_name" class="input-royal" placeholder="اسم الكيان التجاري" required>
-            </div>
-            <div class="form-group">
-                <label style="font-weight: 700; color: #444; display: block; margin-bottom: 8px;">مفتاح المرور</label>
-                <input type="password" name="password" class="input-royal" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn-sovereign">تفعيل السيادة والاعتماد ✨</button>
-        </form>
     </div>
 
-    <div class="card-royal">
-        <h3 style="color: var(--p-color); margin-top: 0; margin-bottom: 20px;"><i class="fas fa-network-wired"></i> الموردون المعتمدون في الشبكة</h3>
-        
-        <div style="overflow-x: auto;">
-            <table class="v-table">
-                <thead>
-                    <tr>
-                        <th>الكيان التجاري</th>
-                        <th>المحفظة السيادية</th>
-                        <th>الحالة الميدانية</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for vendor in vendors %}
-                    <tr>
-                        <td style="font-weight: 900;">{{ vendor.brand_name }}</td>
-                        <td>
-                            {% if vendor.wallet %}
-                                <span class="wallet-badge"><i class="fas fa-wallet" style="font-size: 10px;"></i> {{ vendor.wallet.wallet_number }}</span>
-                            {% else %}
-                                <span style="color: #bbb; font-size: 12px;">جاري الربط...</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span style="color: #27ae60; font-weight: 900; font-size: 13px;">
-                                <i class="fas fa-check-circle"></i> معتمد ونشط
-                            </span>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 50px; color: #999;">
-                            <i class="fas fa-info-circle" style="display:block; font-size: 30px; margin-bottom: 10px;"></i>
-                            لا يوجد موردين في الشبكة حالياً.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-secondary">سيولة MAH المتداولة</h6>
+                    <h2 class="fw-bold">{{ total_balance if total_balance else '0.00' }}</h2>
+                </div>
+                <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                    <i class="fas fa-coins fa-2x"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-muted small">نظام محجوب للضمان</div>
         </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm border-start border-warning" style="border-right: 5px solid #ffc107 !important;">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-secondary">طلبات معلقة</h6>
+                    <h2 class="fw-bold text-warning">{{ pending_count if pending_count else 0 }}</h2>
+                </div>
+                <div class="bg-danger bg-opacity-10 p-3 rounded-circle text-danger">
+                    <i class="fas fa-clock fa-2x"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('vendors_accreditation') }}" class="mt-3 d-block text-decoration-none small text-gold">عرض الطلبات الآن ←</a>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5 card bg-dark border-secondary p-4 rounded-4">
+    <h5 class="mb-4">آخر النشاطات السيادية</h5>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>التوقيت</th>
+                    <th>الحدث</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>منذ 5 دقائق</td>
+                    <td>تسجيل مورد جديد: متجر الأمل</td>
+                    <td><span class="badge bg-success">ناجح</span></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
