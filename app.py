@@ -5,22 +5,23 @@ from config import Config
 from database import db, init_db
 import models
 
-# استيراد طبقات المنطق الموزع
+# استيراد طبقات المنطق الموزع (Business Logic)
 import admin_logic
 import vendor_logic
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# 1. تهيئة قاعدة البيانات وربطها بالتطبيق (Postgres)
+# 1. تهيئة قاعدة البيانات (PostgreSQL)
 init_db(app)
 
-# 2. بناء الجداول وزرع بيانات الإدارة العليا (علي محجوب) عند الإقلاع
+# 2. بناء الجداول وزرع البيانات الأولية عند الإقلاع
 with app.app_context():
     db.create_all()
+    # تأكد أن هذه الدالة في models.py تنشئ حساب "علي محجوب" الافتراضي
     models.seed_initial_data()
 
-# --- [ بوابة التوجيه الذكية ] ---
+# --- [ نظام التوجيه الذكي (Routing Gateway) ] ---
 @app.route('/')
 def index():
     if session.get('role') == 'super_admin':
@@ -30,7 +31,7 @@ def index():
     return redirect(url_for('admin_login'))
 
 # ==========================================
-# 🛡️ قسم الإدارة العليا (برج المراقبة السيادي)
+# 🛡️ قسم الإدارة العليا (برج المراقبة)
 # ==========================================
 
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -40,7 +41,7 @@ def admin_login():
         p = request.form.get('password')
         ok, msg = admin_logic.verify_admin_credentials(u, p)
         if ok:
-            session.clear() # تأمين الجلسة
+            session.clear()
             session['username'] = u
             session['role'] = 'super_admin'
             return redirect(url_for('admin_dashboard'))
@@ -49,39 +50,42 @@ def admin_login():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    """ لوحة الإحصائيات العامة (Index) """
+    """ 
+    لوحة الإحصائيات (Index): مرتبطة بربط مباشر مع قاعدة البيانات 
+    لإظهار الأرقام الحقيقية في الكروت والعدادات.
+    """
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
-    # جلب الإحصائيات الحقيقية من admin_logic
+    # ربط منطقي: جلب الأرقام الحية
     vendors_count = models.Vendor.query.count()
     pending_count = models.Vendor.query.filter_by(status='قيد الانتظار').count()
     
-    # حساب سيولة MAH الإجمالية في النظام
-    total_balance = db.session.query(db.func.sum(models.Wallet.balance)).scalar() or 0.0
+    # حساب إجمالي سيولة MAH في النظام
+    total_mah = db.session.query(db.func.sum(models.Wallet.balance)).scalar() or 0.0
     
-    # جلب آخر 5 عمليات مسجلة في النظام للجدول المختصر
+    # جلب آخر 5 عمليات مالية لجدول الرقابة
     recent_tx = models.Transaction.query.order_by(models.Transaction.created_at.desc()).limit(5).all()
 
     return render_template('admin_dashboard.html', 
                            vendors_count=vendors_count, 
                            pending_count=pending_count, 
-                           total_balance=total_balance,
+                           total_mah=total_mah,
                            recent_transactions=recent_tx)
 
 @app.route('/admin/vendors-accreditation')
 def vendors_accreditation():
-    """ إدارة واعتماد الموردين (الجداول والنوافذ) """
+    """ صفحة إدارة الموردين: تدعم عرض الأيقونات والتنسيق المتجاوب """
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
-    # جلب قائمة الموردين كاملة
+    # جلب كافة الموردين مرتبين حسب الأحدث
     all_vendors = models.Vendor.query.order_by(models.Vendor.created_at.desc()).all()
-    
     return render_template('admin_accounts.html', vendors=all_vendors)
 
 @app.route('/admin/approve/<int:vendor_id>', methods=['POST'])
 def approve_vendor(vendor_id):
+    """ مسار اتخاذ القرار (تفعيل أو حظر) """
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
@@ -92,45 +96,45 @@ def approve_vendor(vendor_id):
 
 @app.route('/admin/add-vendor/post', methods=['POST'])
 def admin_add_vendor_post():
-    """ إضافة مورد جديد يدوياً من الإدارة وتدشين محفظة MAH """
+    """ 
+    إضافة مورد يدوياً: يربط المورد بمحفظة MAH فوراً 
+    ويخزن البيانات في قاعدة البيانات بشكل دائم.
+    """
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
     try:
-        # إنشاء كائن المورد
+        # إنشاء المورد
         new_v = models.Vendor(
             brand_name=request.form.get('brand_name'),
             username=request.form.get('username'),
-            password=request.form.get('password'),
+            password=request.form.get('password'), # يفضل تشفيرها بـ werkzeug.security
             phone=request.form.get('phone'),
-            address=request.form.get('address'),
-            official_id=request.form.get('official_id'),
-            status='نشط', # يتم التنشيط الفوري عند الإضافة اليدوية
+            status='نشط',
             is_active=True
         )
         db.session.add(new_v)
-        db.session.flush() # الحصول على ID المورد قبل الـ commit
+        db.session.flush() # الحصول على ID قبل الحفظ النهائي
         
-        # تدشين المحفظة السيادية MAH
+        # إنشاء المحفظة المالية المرتبطة (Infrastructure Link)
         wallet_no = f"MAH-{random.randint(100000, 999999)}"
         new_w = models.Wallet(wallet_number=wallet_no, vendor_id=new_v.id, balance=0.0)
         db.session.add(new_w)
-        db.session.flush()
         
-        # تسجيل عملية التدشين في كشف الحساب
-        admin_logic.log_system_tx(new_w.id, 0.0, f"تم تدشين الكيان {new_v.brand_name} بنجاح")
+        # تسجيل عملية التدشين في سجلات النظام
+        log = models.Transaction(wallet_id=new_w.id, amount=0.0, tx_type='system', description="تدشين محفظة سيادية")
+        db.session.add(log)
         
         db.session.commit()
-        flash(f"تم تسجيل {new_v.brand_name} بنجاح. رقم المحفظة: {wallet_no}", "success")
-    
+        flash(f"تم إنشاء الكيان {new_v.brand_name} بنجاح محفظة رقم: {wallet_no}", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"فشل التسجيل: {str(e)}", "danger")
+        flash(f"خطأ في البنية التحتية: {str(e)}", "danger")
         
     return redirect(url_for('vendors_accreditation'))
 
 # ==========================================
-# 🏪 بوابة الموردين (الشركاء التجاريين)
+# 🏪 بوابة الموردين (الشركاء)
 # ==========================================
 
 @app.route('/vendor/login', methods=['GET', 'POST'])
@@ -138,7 +142,6 @@ def vendor_login():
     if request.method == 'POST':
         u = request.form.get('username')
         p = request.form.get('password')
-        
         ok, user_obj, role = vendor_logic.login_vendor(u, p)
         if ok:
             session.clear()
@@ -146,41 +149,28 @@ def vendor_login():
             session['username'] = u
             session['role'] = role
             return redirect(url_for('vendor_dashboard'))
-        
-        flash(user_obj if isinstance(user_obj, str) else "خطأ في بيانات الدخول", "danger")
+        flash("خطأ في بيانات الدخول", "danger")
     return render_template('login_vendor.html')
 
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
+    """ لوحة المورد: مرتبطة بمحفظته ومنتجاته فقط """
     if session.get('role') not in ['vendor_owner', 'vendor_staff']:
         return redirect(url_for('vendor_login'))
     
     v_id = session.get('vendor_id')
-    wallet = vendor_logic.get_wallet_details(v_id)
-    products = vendor_logic.get_my_products(v_id)
-    statement = vendor_logic.get_vendor_statement(v_id) 
+    wallet = models.Wallet.query.filter_by(vendor_id=v_id).first()
+    products = models.Product.query.filter_by(vendor_id=v_id).all()
     
-    return render_template('vendor_dashboard.html', 
-                           wallet=wallet, 
-                           products=products, 
-                           statement=statement)
+    return render_template('vendor_dashboard.html', wallet=wallet, products=products)
 
-@app.route('/vendor/add-product', methods=['POST'])
-def vendor_add_product():
-    if session.get('role') not in ['vendor_owner', 'vendor_staff']:
-        return redirect(url_for('vendor_login'))
-    
-    success, msg = vendor_logic.add_new_product(session.get('vendor_id'), request.form)
-    flash(msg, "success" if success else "warning")
-    return redirect(url_for('vendor_dashboard'))
-
-# --- [ نظام الخروج الآمن ] ---
+# --- [ نظام الخروج والإنهاء ] ---
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # التشغيل على بورت 8080 ليتوافق مع Cloud Run أو البيئات السحابية
+    # بورت 8080 للبيئات السحابية
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
