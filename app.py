@@ -5,20 +5,20 @@ from config import Config
 from database import db, init_db
 import models
 
-# استيراد المنطق الموزع
+# استيراد طبقات المنطق الموزع لضمان نظافة الكود
 import admin_logic
 import vendor_logic
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# 1. تهيئة قاعدة البيانات Postgres وربطها بالتطبيق
+# 1. تهيئة قاعدة البيانات وربطها بالتطبيق (Postgres)
 init_db(app)
 
-# 2. بناء الجداول وتأمين البيانات الأولية (بما في ذلك حساب علي محجوب)
+# 2. بناء الجداول وزرع بيانات الإدارة العليا عند الإقلاع
 with app.app_context():
     db.create_all()
-    models.seed_initial_data()
+    models.seed_initial_data() # تتأكد من وجود حساب علي محجوب
 
 # --- [ بوابة التوجيه الذكية ] ---
 @app.route('/')
@@ -57,6 +57,7 @@ def admin_dashboard():
 def vendors_accreditation():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
+    # جلب قائمة الموردين للمراجعة والاعتماد
     vendors = admin_logic.get_dashboard_data()
     return render_template('admin_accounts.html', vendors=vendors)
 
@@ -75,37 +76,36 @@ def admin_add_vendor_post():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
-    # استلام البيانات الشاملة
-    data = {
-        'brand_name': request.form.get('brand_name'),
-        'username': request.form.get('username'),
-        'password': request.form.get('password'),
-        'phone': request.form.get('phone'),
-        'address': request.form.get('address'),
-        'official_id': request.form.get('official_id')
-    }
-    
-    # إضافة المورد وتفعيل محفظة MAH وكشف الحساب فوراً
-    # تم دمج هذا في دالة مخصصة لضمان التزامن المالي
-    new_v = models.Vendor(
-        brand_name=data['brand_name'], username=data['username'],
-        password=data['password'], phone=data['phone'],
-        address=data['address'], official_id=data['official_id'],
-        status='نشط', is_active=True
-    )
-    db.session.add(new_v)
-    db.session.flush()
-    
-    wallet_no = f"MAH-{random.randint(100000, 999999)}"
-    new_w = models.Wallet(wallet_number=wallet_no, vendor_id=new_v.id)
-    db.session.add(new_w)
-    db.session.flush()
-    
-    # تسجيل افتتاح الحساب في جدول الترانزكشن
-    admin_logic.log_system_tx(new_w.id, 0.0, "تدشين المحفظة السيادية يدوياً")
-    
-    db.session.commit()
-    flash(f"تم إضافة {data['brand_name']} بنجاح برقم محفظة {wallet_no}", "success")
+    # إضافة مورد جديد وتفعيل محفظة MAH وكشف الحساب يدوياً
+    try:
+        new_v = models.Vendor(
+            brand_name=request.form.get('brand_name'),
+            username=request.form.get('username'),
+            password=request.form.get('password'),
+            phone=request.form.get('phone'),
+            address=request.form.get('address'),
+            official_id=request.form.get('official_id'),
+            status='نشط', 
+            is_active=True
+        )
+        db.session.add(new_v)
+        db.session.flush() # الحصول على ID المورد قبل إكمال الربط المالي
+        
+        # تدشين المحفظة السيادية
+        wallet_no = f"MAH-{random.randint(100000, 999999)}"
+        new_w = models.Wallet(wallet_number=wallet_no, vendor_id=new_v.id)
+        db.session.add(new_w)
+        db.session.flush()
+        
+        # تسجيل أول حركة في كشف الحساب
+        admin_logic.log_system_tx(new_w.id, 0.0, "تدشين المحفظة يدوياً من الإدارة")
+        
+        db.session.commit()
+        flash(f"تم إضافة المورد بنجاح بمحفظة: {wallet_no}", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"خطأ أثناء الإضافة: {str(e)}", "danger")
+        
     return redirect(url_for('vendors_accreditation'))
 
 # ==========================================
@@ -124,7 +124,9 @@ def vendor_login():
             session['username'] = u
             session['role'] = role
             return redirect(url_for('vendor_dashboard'))
-        flash(user_obj if isinstance(user_obj, str) else "خطأ في الدخول", "danger")
+        
+        # التعامل مع الرسائل في حال كان user_obj نصاً (مثل رسالة الحظر)
+        flash(user_obj if isinstance(user_obj, str) else "خطأ في بيانات الدخول", "danger")
     return render_template('login_vendor.html')
 
 @app.route('/vendor/dashboard')
@@ -135,7 +137,7 @@ def vendor_dashboard():
     v_id = session.get('vendor_id')
     wallet = vendor_logic.get_wallet_details(v_id)
     products = vendor_logic.get_my_products(v_id)
-    statement = vendor_logic.get_vendor_statement(v_id) # كشف الحساب
+    statement = vendor_logic.get_vendor_statement(v_id) # كشف الحساب التاريخي
     
     return render_template('vendor_dashboard.html', 
                            wallet=wallet, 
@@ -147,8 +149,7 @@ def vendor_add_product():
     if session.get('role') not in ['vendor_owner', 'vendor_staff']:
         return redirect(url_for('vendor_login'))
     
-    data = request.form
-    success, msg = vendor_logic.add_new_product(session.get('vendor_id'), data)
+    success, msg = vendor_logic.add_new_product(session.get('vendor_id'), request.form)
     flash(msg, "success" if success else "warning")
     return redirect(url_for('vendor_dashboard'))
 
@@ -159,6 +160,6 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # التشغيل المتوافق مع Railway و Render
+    # دعم التشغيل على Railway (المنفذ 8080)
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
