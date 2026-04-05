@@ -1,13 +1,21 @@
 {% extends "vendor_layout.html" %}
 
 {% block content %}
-{% endblock %}
 <style>
+    /* تحسين المتغيرات لضمان التوافق مع الهيكل الملكي */
+    :root {
+        --vendor-primary: #1a0033;
+        --gold: #FFD700;
+        --white: #ffffff;
+        --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .vendor-stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 25px;
         margin-bottom: 40px;
+        padding: 10px;
     }
 
     .stat-card {
@@ -22,7 +30,11 @@
         transition: var(--transition);
     }
 
-    .stat-card:hover { transform: translateY(-5px); border-color: var(--gold); }
+    .stat-card:hover { 
+        transform: translateY(-5px); 
+        border-color: var(--gold);
+        box-shadow: 0 15px 30px rgba(26, 0, 51, 0.1);
+    }
 
     .stat-info h3 { margin: 0; font-size: 32px; color: var(--vendor-primary); font-weight: 800; }
     .stat-info p { margin: 5px 0 0; color: #718096; font-size: 14px; font-weight: 600; }
@@ -35,11 +47,12 @@
         font-size: 24px; color: var(--vendor-primary);
     }
 
-    /* قسم المحفظة الخاصة */
+    /* قسم المحفظة الخاصة - الهوية الملكية لعلي محجوب */
     .wallet-section {
-        background: linear-gradient(135deg, var(--vendor-primary) 0%, #34495e 100%);
+        background: linear-gradient(135deg, var(--vendor-primary) 0%, #4b0082 100%);
         color: white; padding: 40px; border-radius: 25px;
         margin-bottom: 40px; position: relative; overflow: hidden;
+        border: 1px solid rgba(255, 215, 0, 0.2);
     }
 
     .wallet-section::after {
@@ -49,48 +62,57 @@
     }
 
     .wallet-balance { font-size: 45px; font-weight: 900; margin: 15px 0; color: var(--gold); }
-    .wallet-num { font-family: monospace; opacity: 0.8; letter-spacing: 2px; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 10px; }
+    .wallet-num { font-family: monospace; opacity: 0.8; letter-spacing: 2px; background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 10px; color: var(--gold); }
 
     .btn-add-p {
         background: var(--gold); color: var(--vendor-primary);
         padding: 15px 30px; border-radius: 15px; text-decoration: none;
         font-weight: 800; display: inline-block; transition: 0.3s;
+        border: none; cursor: pointer;
     }
-    .btn-add-p:hover { background: white; transform: scale(1.05); }
+    .btn-add-p:hover { background: white; transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 </style>
 
-<div class="wallet-section">
-    <p style="margin: 0; font-weight: 600;">رصيد محفظة السيادة الرقمية</p>
-    <div class="wallet-balance">MAH {{ "{:,.2f}".format(balance) }}</div>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span class="wallet-num">{{ wallet_no }}</span>
-        <span style="font-size: 12px; opacity: 0.7;">محفظة معتمدة من محجوب أونلاين</span>
-    </div>
-</div>
-
-<div class="vendor-stats">
-    <div class="stat-card">
-        <div class="stat-info">
-            <h3>0</h3>
-            <p>إجمالي المنتجات المعروضة</p>
+<div class="dashboard-wrapper" style="padding: 20px;">
+    <div class="wallet-section">
+        <p style="margin: 0; font-weight: 600; opacity: 0.9;">رصيد محفظة السيادة الرقمية (MAH)</p>
+        <div class="wallet-balance">
+            <span style="font-size: 20px; margin-left: 5px;">MAH</span>
+            {{ "{:,.2f}".format(balance if balance else 0.0) }}
         </div>
-        <div class="stat-icon"><i class="fas fa-boxes"></i></div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-info">
-            <h3>0</h3>
-            <p>الطلبات الجديدة</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <span class="wallet-num">ID: {{ wallet_no if wallet_no else 'MAH-XXXX-XXXX' }}</span>
+            <span style="font-size: 12px; opacity: 0.7;">نظام الدفع المعتمد - محجوب أونلاين 2026</span>
         </div>
-        <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+    </div>
+
+    <div class="vendor-stats">
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>0</h3>
+                <p>إجمالي المنتجات</p>
+            </div>
+            <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>0</h3>
+                <p>الطلبات الجديدة</p>
+            </div>
+            <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 25px; border: 2px dashed #e2e8f0;">
+        <div style="background: #f7fafc; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #cbd5e0;"></i>
+        </div>
+        <h2 style="color: var(--vendor-primary); font-weight: 800;">ابدأ رحلة مبيعاتك اليوم</h2>
+        <p style="color: #718096; margin-bottom: 30px; max-width: 400px; margin-left: auto; margin-right: auto;">ارفع منتجك الأول الآن في سوقك الذكي وابدأ في استقبال الطلبات عبر نظامنا السيادي الموحد.</p>
+        <a href="{{ url_for('add_product') }}" class="btn-add-p">
+            <i class="fas fa-plus-circle"></i> رفع منتج جديد الآن
+        </a>
     </div>
 </div>
-
-<div style="text-align: center; padding: 40px; background: white; border-radius: 20px; border: 2px dashed #e2e8f0;">
-    <i class="fas fa-plus-circle" style="font-size: 50px; color: #cbd5e0; margin-bottom: 20px;"></i>
-    <h2 style="color: var(--vendor-primary);">ابدأ رحلة مبيعاتك اليوم</h2>
-    <p style="color: #718096; margin-bottom: 30px;">قم بإضافة منتجك الأول لتبدأ في جني الأرباح عبر سوقك الذكي</p>
-    <a href="{{ url_for('add_product') }}" class="btn-add-p">رفع منتج جديد الآن</a>
-</div>
-
 {% endblock %}
