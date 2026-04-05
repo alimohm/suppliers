@@ -7,11 +7,11 @@ import logic
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# 1. تهيئة النظام وقاعدة البيانات
+# 1. تهيئة النظام وقاعدة البيانات (تأسيس حساب علي محجوب تلقائياً)
 init_db(app)
 
 # ---------------------------------------------------------
-# 2. منطق التوجيه الذكي
+# 2. منطق التوجيه الذكي (Smart Routing)
 # ---------------------------------------------------------
 @app.route('/')
 def index():
@@ -20,13 +20,14 @@ def index():
     return redirect(url_for('admin_dashboard' if session['role'] == 'admin' else 'vendor_dashboard'))
 
 # ---------------------------------------------------------
-# 3. بوابات الدخول (Admin & Vendor)
+# 3. بوابات الدخول (Admin & Vendor Login)
 # ---------------------------------------------------------
 @app.route('/login', methods=['GET', 'POST'])
 def login_admin():
     if request.method == 'POST':
         u = request.form.get('username')
         p = request.form.get('password')
+        # التحقق من بيانات المدير "علي محجوب" أو الموردين
         user = User.query.filter_by(username=u, password=p).first()
         if user:
             session.update({'user_id': user.id, 'username': u, 'role': user.role})
@@ -35,8 +36,10 @@ def login_admin():
     return render_template('login_admin.html')
 
 # ---------------------------------------------------------
-# 4. لوحة التحكم الإدارية (مركز القيادة)
+# 4. نوافذ الإدارة (Admin Command Center)
 # ---------------------------------------------------------
+
+# أ- نافذة الإحصائيات الرئيسية
 @app.route('/admin/dashboard')
 def admin_dashboard():
     if session.get('role') != 'admin': return redirect(url_for('login_admin'))
@@ -44,14 +47,39 @@ def admin_dashboard():
     total_mah = db.session.query(db.func.sum(Wallet.balance)).scalar() or 0
     return render_template('admin_dashboard.html', vendors=vendors, total_mah=total_mah)
 
+# ب- نافذة اعتماد الموردين (الحفظ والكشوفات)
 @app.route('/admin/accounts')
 def admin_accounts():
     if session.get('role') != 'admin': return redirect(url_for('login_admin'))
+    # جلب قائمة الموردين لعرضها في الكشوفات تحت نموذج الإدخال
     vendors = User.query.filter_by(role='vendor').all()
     return render_template('admin_accounts.html', vendors=vendors)
 
 # ---------------------------------------------------------
-# 5. لوحة تحكم المورد (بوابة الشريك)
+# 5. محركات العمليات والحفظ (Action Engines)
+# ---------------------------------------------------------
+
+# محرك إصدار التراخيص وحفظ الموردين في الكشوفات والحافظ
+@app.route('/action/add-vendor', methods=['POST'])
+def add_vendor():
+    if session.get('role') != 'admin': return "Unauthorized", 403
+    
+    brand = request.form.get('brand')
+    user_name = request.form.get('user')
+    pwd = request.form.get('pwd')
+    
+    # تنفيذ عملية الحفظ في قاعدة البيانات عبر المنطق البرمجي
+    success, wallet_no = logic.add_new_vendor(brand, user_name, pwd)
+    
+    if success:
+        flash(f"تم اعتماد الكيان {brand} بنجاح. رقم الحافظ المالي: {wallet_no}", "success")
+    else:
+        flash("خطأ: هذا المستخدم مسجل مسبقاً في النظام"، "danger")
+        
+    return redirect(url_for('admin_accounts'))
+
+# ---------------------------------------------------------
+# 6. لوحة المورد (Vendor Portal)
 # ---------------------------------------------------------
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
@@ -60,46 +88,7 @@ def vendor_dashboard():
     return render_template('vendor_dashboard.html', wallet=user.wallet, products=user.products)
 
 # ---------------------------------------------------------
-# 6. محركات العمليات والحفظ (The Engine)
-# ---------------------------------------------------------
-
-# محرك تسجيل وحفظ المورد الجديد (هذا يحل مشكلة الـ Internal Error)
-@app.route('/action/add-vendor', methods=['POST'])
-def add_vendor():
-    if session.get('role') != 'admin': return "Unauthorized", 403
-    
-    try:
-        brand = request.form.get('brand')
-        user_name = request.form.get('user')
-        pwd = request.form.get('pwd')
-        
-        # استدعاء المنطق من logic.py وتأكيد الحفظ في DB
-        success, wallet_no = logic.add_new_vendor(brand, user_name, pwd)
-        
-        if success:
-            flash(f"تم اعتماد المورد {brand} بنجاح. رقم المحفظة: {wallet_no}", "success")
-        else:
-            flash("فشل في التسجيل، قد يكون اسم المستخدم مكرر", "danger")
-            
-    except Exception as e:
-        flash(f"حدث خطأ تقني أثناء الحفظ: {str(e)}", "danger")
-        
-    return redirect(url_for('admin_accounts'))
-
-# محرك إضافة المنتجات للمورد
-@app.route('/action/add-product', methods=['POST'])
-def add_product():
-    if session.get('role') != 'vendor': return redirect(url_for('index'))
-    
-    name = request.form.get('name')
-    price = request.form.get('price')
-    # حفظ المنتج في قاعدة البيانات
-    logic.add_vendor_product(session['user_id'], name, price)
-    flash("تم إضافة المنتج لمتجرك بنجاح", "success")
-    return redirect(url_for('vendor_dashboard'))
-
-# ---------------------------------------------------------
-# 7. نظام الخروج الأمن
+# 7. الخروج والنظام
 # ---------------------------------------------------------
 @app.route('/logout')
 def logout():
@@ -107,5 +96,5 @@ def logout():
     return redirect(url_for('login_admin'))
 
 if __name__ == '__main__':
-    # التشغيل المتوافق مع Railway
-    app.run(host='0.0.0.0', port=os.getenv('PORT', 8080))
+    # تشغيل متوافق مع بيئة Railway بورت 8080
+    app.run(host='0.0.0.0', port=8080)
