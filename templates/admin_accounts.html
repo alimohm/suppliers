@@ -1,85 +1,78 @@
 {% extends "admin_layout.html" %}
+
+{% block title %}إدارة الموردين | محجوب أونلاين{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary fw-bold"><i class="fas fa-users-cog"></i> إدارة واعتماد الموردين</h2>
-        <span class="badge bg-info p-2 shadow-sm text-dark">إجمالي الطلبات: {{ vendors|length }}</span>
-    </div>
-
+<div class="container-fluid shadow-sm p-4 bg-white" style="border-radius: 20px;">
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-warning text-dark shadow-sm border-0">
-                <div class="card-body">
-                    <h5 class="small text-uppercase fw-bold">طلبات معلقة</h5>
-                    <h2 class="fw-bold mb-0">{{ pending_count }}</h2>
-                </div>
-            </div>
+        <div class="col">
+            <h2 class="fw-bold" style="color: var(--p-color);">
+                <i class="fas fa-shield-alt text-warning me-2"></i> نظام اعتماد الشركاء
+            </h2>
+            <p class="text-muted">هنا يمكنك مراجعة طلبات الانضمام وتفعيل حسابات الموردين يدوياً.</p>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-dark text-white">
-            <i class="fas fa-list me-2"></i> قائمة الموردين والشركاء
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>المورد / العلامة التجارية</th>
-                            <th>رقم المحفظة (MAH)</th>
-                            <th>الحالة</th>
-                            <th>الرصيد</th>
-                            <th class="text-center">الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for vendor in vendors %}
-                        <tr>
-                            <td>#{{ vendor.id }}</td>
-                            <td>
-                                <strong>{{ vendor.brand_name }}</strong><br>
-                                <small class="text-muted">@{{ vendor.username }}</small>
-                            </td>
-                            <td>
-                                {% if vendor.wallet %}
-                                <code class="text-primary fw-bold">{{ vendor.wallet.wallet_number }}</code>
-                                {% else %}
-                                <span class="badge bg-secondary">لم تنشأ بعد</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if vendor.is_active %}
-                                <span class="badge bg-success"><i class="fas fa-check-circle"></i> نشط</span>
-                                {% else %}
-                                <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> قيد الانتظار</span>
-                                {% endif %}
-                            </td>
-                            <td class="fw-bold">
-                                {% if vendor.wallet %}
-                                {{ "{:,.2f}".format(vendor.wallet.balance) }} ريال
-                                {% else %} 0.00 {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <form action="{{ url_for('approve_vendor', vendor_id=vendor.id) }}" method="POST" style="display:inline;">
-                                    {% if not vendor.is_active %}
-                                    <button type="submit" class="btn btn-sm btn-success shadow-sm">
-                                        <i class="fas fa-user-check"></i> تفعيل التردد
-                                    </button>
-                                    {% endif %}
-                                </form>
-                            </td>
-                        </tr>
+    <div class="table-responsive">
+        <table class="table table-hover border-0">
+            <thead class="table-dark">
+                <tr>
+                    <th class="rounded-start">اسم المورد</th>
+                    <th>العلامة التجارية</th>
+                    <th>الحالة التشغيلية</th>
+                    <th>رصيد المحفظة</th>
+                    <th class="text-center rounded-end">الإجراء السيادي</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                <tr class="align-middle">
+                    <td><strong>{{ vendor.username }}</strong></td>
+                    <td><span class="text-primary">{{ vendor.brand_name }}</span></td>
+                    <td>
+                        {% if vendor.is_active %}
+                        <span class="badge bg-success">نشط ومتصل</span>
                         {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center p-5 text-muted">لا توجد طلبات حالياً.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                        <span class="badge bg-warning text-dark">بانتظار التفعيل</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if vendor.wallet %}
+                        <span class="fw-bold text-success">{{ vendor.wallet.balance }} ريال</span>
+                        {% else %}
+                        <small class="text-muted">لا توجد محفظة</small>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if not vendor.is_active %}
+                        <form action="{{ url_for('approve_vendor', vendor_id=vendor.id) }}" method="POST">
+                            <button type="submit" class="btn btn-sm btn-gold px-4 shadow-sm" 
+                                    style="background: var(--gold); color: var(--p-color); font-weight: 800; border: none; border-radius: 8px;">
+                                <i class="fas fa-power-off me-1"></i> تفعيل
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-sm btn-outline-secondary disabled" style="border-radius: 8px;">
+                            <i class="fas fa-check-double"></i> مفعل مسبقاً
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">لا يوجد موردين مسجلين في النظام حالياً.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
+
+<style>
+    .btn-gold:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        transition: 0.3s;
+    }
+</style>
 {% endblock %}
