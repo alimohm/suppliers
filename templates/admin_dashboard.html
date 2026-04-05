@@ -88,6 +88,7 @@
         font-family: 'Courier New', monospace;
         font-weight: bold;
         font-size: 14px;
+        display: inline-block;
     }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -139,13 +140,13 @@
                         <td style="font-weight: 900;">{{ vendor.brand_name }}</td>
                         <td>
                             {% if vendor.wallet %}
-                                <span class="wallet-badge">{{ vendor.wallet.wallet_number }}</span>
+                                <span class="wallet-badge"><i class="fas fa-wallet" style="font-size: 10px;"></i> {{ vendor.wallet.wallet_number }}</span>
                             {% else %}
-                                <span style="color: #bbb;">جاري الربط...</span>
+                                <span style="color: #bbb; font-size: 12px;">جاري الربط...</span>
                             {% endif %}
                         </td>
                         <td>
-                            <span style="color: #27ae60; font-weight: 900;">
+                            <span style="color: #27ae60; font-weight: 900; font-size: 13px;">
                                 <i class="fas fa-check-circle"></i> معتمد ونشط
                             </span>
                         </td>
@@ -153,6 +154,7 @@
                     {% else %}
                     <tr>
                         <td colspan="3" style="text-align: center; padding: 50px; color: #999;">
+                            <i class="fas fa-info-circle" style="display:block; font-size: 30px; margin-bottom: 10px;"></i>
                             لا يوجد موردين في الشبكة حالياً.
                         </td>
                     </tr>
