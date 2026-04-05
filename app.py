@@ -171,3 +171,11 @@ def logout():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
+
+# أضف هذا الكود في نهاية ملف models.py
+def seed_initial_data():
+    from database import db
+    # إنشاء حساب علي محجوب كمدير سيادي
+    admin = AdminUser(username="ali_mahjoub", password="123") # يمكنك تغيير الباسورد لاحقاً
+    db.session.add(admin)
+    db.session.commit()
