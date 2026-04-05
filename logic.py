@@ -1,39 +1,47 @@
 import os, random
 from werkzeug.utils import secure_filename
-from database import db, Vendor, Wallet, Product, Transaction
+from database import db, User, Wallet, Product, Transaction
 
-def add_vendor_with_wallet(brand, user, pwd):
+def add_new_vendor(brand, user, pwd):
     try:
-        v = Vendor(brand_name=brand, username=user, password=pwd)
-        db.session.add(v)
+        new_v = User(username=user, password=pwd, brand_name=brand, role='vendor')
+        db.session.add(new_v)
         db.session.flush()
-        w_no = f"MAH-{random.randint(100000, 999999)}"
-        db.session.add(Wallet(wallet_number=w_no, vendor_id=v.id, balance=0.0))
+        
+        # إنشاء محفظة تلقائياً برصيد افتراضي 100 MAH
+        wallet_no = f"MAH-{random.randint(100000, 999999)}"
+        db.session.add(Wallet(wallet_number=wallet_no, user_id=new_v.id, balance=100.0))
+        
         db.session.commit()
-        return True, w_no
+        return True, wallet_no
     except:
         db.session.rollback()
         return False, None
 
-def process_transfer(s_wallet_id, r_wallet_no, amount, note):
-    sender = Wallet.query.get(s_wallet_id)
-    receiver = Wallet.query.filter_by(wallet_number=r_wallet_no).first()
-    if not sender or sender.balance < amount or not receiver:
-        return False, "فشل: رصيد غير كافٍ أو محفظة خاطئة"
+def execute_transfer(sender_id, receiver_wallet_no, amount, note):
+    sender_wallet = Wallet.query.filter_by(user_id=sender_id).first()
+    receiver_wallet = Wallet.query.filter_by(wallet_number=receiver_wallet_no).first()
     
-    sender.balance -= amount
-    receiver.balance += amount
-    db.session.add(Transaction(wallet_id=sender.id, tx_type='سحب', amount=-amount, description=f"إلى {r_wallet_no}: {note}"))
-    db.session.add(Transaction(wallet_id=receiver.id, tx_type='إيداع', amount=amount, description=f"من {sender.wallet_number}: {note}"))
+    if not sender_wallet or not receiver_wallet or sender_wallet.balance < amount:
+        return False, "الرصيد غير كافٍ أو رقم المحفظة خاطئ"
+    
+    sender_wallet.balance -= amount
+    receiver_wallet.balance += amount
+    
+    db.session.add(Transaction(wallet_id=sender_wallet.id, tx_type='سحب', amount=-amount, description=f"إلى {receiver_wallet_no}: {note}"))
+    db.session.add(Transaction(wallet_id=receiver_wallet.id, tx_type='إيداع', amount=amount, description=f"من {sender_wallet.wallet_number}: {note}"))
+    
     db.session.commit()
-    return True, "تم التحويل بنجاح"
+    return True, "تمت العملية بنجاح"
 
-def save_product(v_id, name, price, stock, file):
-    url = '/static/images/default.png'
+def add_vendor_product(v_id, name, price, stock, file, upload_folder):
+    img_url = '/static/images/default.png'
     if file:
-        os.makedirs('static/uploads', exist_ok=True)
+        os.makedirs(upload_folder, exist_ok=True)
         fname = secure_filename(f"v{v_id}_{file.filename}")
-        file.save(os.path.join('static/uploads', fname))
-        url = f'/static/uploads/{fname}'
-    db.session.add(Product(vendor_id=v_id, name=name, price=float(price), stock=int(stock), image_url=url))
+        file.save(os.path.join(upload_folder, fname))
+        img_url = f'/static/uploads/{fname}'
+    
+    p = Product(user_id=v_id, name=name, price=float(price), stock=int(stock), image_url=img_url)
+    db.session.add(p)
     db.session.commit()
