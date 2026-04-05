@@ -119,24 +119,31 @@ def vendor_login():
 
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
-    # حماية المسار
     if 'role' not in session or session.get('role') not in ['vendor_owner', 'vendor_staff']:
         return redirect(url_for('vendor_login'))
     
-    # جلب بيانات المورد ومحفظته بشكل صحيح
-    vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
+    username = session.get('username')
+    role = session.get('role')
+
+    # جلب البيانات بناءً على نوع المستخدم (مالك أم موظف)
+    if role == 'vendor_owner':
+        vendor_data = models.Vendor.query.filter_by(username=username).first()
+    else:
+        staff = models.VendorStaff.query.filter_by(username=username).first()
+        vendor_data = staff.vendor if staff else None
     
     if not vendor_data:
-        flash("خطأ في استعادة بيانات الجلسة، يرجى إعادة الدخول.", "danger")
+        session.clear()
+        flash("خطأ في استعادة بيانات السيادة، يرجى إعادة الدخول.", "danger")
         return redirect(url_for('vendor_login'))
 
-    # استخراج البيانات بدقة لتجنب خطأ 500 في القالب
-    wallet_no = vendor_data.wallet.wallet_number if vendor_data.wallet else "N/A"
-    balance = vendor_data.wallet.balance if vendor_data.wallet else 0.0
+    # جلب المحفظة بأمان لتجنب AttributeError
+    wallet = vendor_data.wallet
+    wallet_no = wallet.wallet_number if wallet else "N/A"
+    balance = wallet.balance if wallet else 0.0
     
-    # تمرير المتغيرات بشكل صريح ليتعرف عليها قالب vendor_dashboard.html
     return render_template('vendor_dashboard.html', 
-                           username=session.get('username'),
+                           username=username,
                            vendor=vendor_data,
                            wallet_no=wallet_no, 
                            balance=balance)
@@ -159,6 +166,6 @@ def logout():
     return redirect(url_for('vendor_login'))
 
 if __name__ == '__main__':
-    # تهيئة المنفذ لـ Railway
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # إيقاف debug في الإنتاج لزيادة الأمان
+    app.run(host='0.0.0.0', port=port, debug=False)
