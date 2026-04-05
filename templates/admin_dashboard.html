@@ -1,142 +1,165 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>برج المراقبة | محجوب أونلاين</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% extends "admin_layout.html" %}
+
+{% block title %}التحكم السيادي في الحسابات | محجوب أونلاين{% endblock %}
+
+{% block content %}
+<style>
+    /* تحسينات التصميم للنافذة السيادية */
+    .sovereign-grid { 
+        display: grid; 
+        grid-template-columns: 1fr 2fr; 
+        gap: 30px; 
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    .card-royal { 
+        background: white; 
+        border-radius: 25px; 
+        padding: 30px; 
+        box-shadow: 0 15px 45px rgba(26, 0, 51, 0.05); 
+        border: 1px solid rgba(255, 215, 0, 0.2); 
+        position: relative;
+    }
+
+    .card-royal::before {
+        content: "";
+        position: absolute;
+        top: 0; right: 0;
+        width: 100%; height: 5px;
+        background: linear-gradient(to left, var(--gold), var(--p-color));
+        border-radius: 25px 25px 0 0;
+    }
+
+    .form-group { margin-bottom: 20px; }
     
-    <style>
-        :root {
-            --p-color: #1a0033; 
-            --royal-purple: #4b0082;
-            --gold: #FFD700;
-            --white: #ffffff;
-            --soft-bg: #f8f9fa;
-        }
+    .input-royal { 
+        width: 100%; padding: 14px; 
+        border: 2px solid #f1f1f1; 
+        border-radius: 15px; 
+        font-family: 'Cairo', sans-serif;
+        transition: 0.3s;
+        box-sizing: border-box;
+    }
+    
+    .input-royal:focus { 
+        border-color: var(--gold); 
+        outline: none; 
+        background: #fffdf5;
+    }
 
-        body {
-            font-family: 'Cairo', sans-serif;
-            margin: 0;
-            background: var(--soft-bg);
-            display: flex;
-            min-height: 100vh;
-        }
+    .btn-sovereign { 
+        background: var(--p-color); 
+        color: var(--gold); 
+        border: 2px solid var(--gold); 
+        padding: 15px; 
+        width: 100%; 
+        border-radius: 15px; 
+        font-weight: 900; 
+        cursor: pointer;
+        transition: 0.4s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .btn-sovereign:hover { 
+        background: var(--gold); 
+        color: var(--p-color); 
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(255, 214, 0, 0.2);
+    }
 
-        /*Sidebar - القائمة الجانبية متجاوبة */
-        .sidebar {
-            width: 260px;
-            background: var(--p-color);
-            color: white;
-            position: fixed;
-            height: 100vh;
-            right: 0;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            border-left: 3px solid var(--gold);
-        }
+    /* جدول الموردين المعتمدين */
+    .v-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .v-table th { color: #888; padding: 15px; font-size: 13px; text-align: right; }
+    .v-table td { 
+        padding: 20px; 
+        background: #fafafa; 
+        border-top: 1px solid #f0f0f0; 
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .v-table tr td:first-child { border-right: 1px solid #f0f0f0; border-radius: 0 15px 15px 0; }
+    .v-table tr td:last-child { border-left: 1px solid #f0f0f0; border-radius: 15px 0 0 15px; }
 
-        .sidebar-header {
-            padding: 20px;
-            text-align: center;
-        }
+    .wallet-badge { 
+        background: var(--p-color); 
+        color: var(--gold); 
+        padding: 8px 15px; 
+        border-radius: 10px; 
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 14px;
+    }
 
-        /* اللوجو الأبيض المتناسق */
-        .logo-img {
-            width: 100px;
-            max-width: 100%;
-            height: auto;
-            filter: brightness(0) invert(1); /* تحويل اللوجو للأبيض بالكامل */
-            transition: 0.3s;
-        }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .nav-links { flex: 1; padding: 20px 0; }
-        .nav-links a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: 0.3s;
-            font-size: 15px;
-        }
+    @media (max-width: 1100px) { .sovereign-grid { grid-template-columns: 1fr; } }
+</style>
 
-        .nav-links a:hover, .nav-links a.active {
-            background: rgba(255,255,255,0.1);
-            color: var(--gold);
-            border-right: 4px solid var(--gold);
-        }
-
-        .nav-links a i { margin-left: 15px; width: 20px; text-align: center; }
-
-        /* Main Area - المنطقة الرئيسية */
-        .main-wrapper {
-            margin-right: 260px;
-            width: 100%;
-            transition: 0.3s;
-        }
-
-        .top-bar {
-            height: 70px;
-            background: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .content-area { padding: 25px; }
-
-        /* التجاوب مع الجوال (Media Queries) */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-            }
-            .sidebar span, .sidebar-header h3 { display: none; }
-            .logo-img { width: 40px; }
-            .main-wrapper { margin-right: 70px; }
-            .nav-links a { justify-content: center; padding: 15px 0; }
-            .nav-links a i { margin-left: 0; }
-        }
-
-        @media (max-width: 480px) {
-            .top-bar .user-info span { display: none; }
-        }
-    </style>
-</head>
-<body>
-
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-img" alt="Logo">
-            <h3 style="font-size: 14px; margin-top: 10px; color: var(--gold);">برج المراقبة</h3>
-        </div>
-        <nav class="nav-links">
-            <a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-th-large"></i> <span>الرئيسية</span></a>
-            <a href="#"><i class="fas fa-store"></i> <span>الموردين</span></a>
-            <a href="#"><i class="fas fa-box"></i> <span>المنتجات</span></a>
-            <a href="#"><i class="fas fa-wallet"></i> <span>المحافظ</span></a>
-            <a href="{{ url_for('logout') }}" style="color: #ff4d4d;"><i class="fas fa-power-off"></i> <span>خروج</span></a>
-        </nav>
-    </aside>
-
-    <div class="main-wrapper">
-        <header class="top-bar">
-            <div class="page-title"><strong style="color: var(--p-color);">سوقك الذكي 2026</strong></div>
-            <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-weight: 700;">{{ username }}</span>
-                <div style="background: var(--gold); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 900;">مدير النظام</div>
+<div class="sovereign-grid" dir="rtl">
+    <div class="card-royal">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+            <div style="background: var(--p-color); color: var(--gold); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                <i class="fas fa-shield-alt fa-lg"></i>
             </div>
-        </header>
-        
-        <div class="content-area">
-            {% block content %}{% endblock %}
+            <h3 style="margin: 0; color: var(--p-color);">اعتماد مورد جديد</h3>
         </div>
+        
+        <form action="{{ url_for('create_vendor_route') }}" method="POST">
+            <div class="form-group">
+                <label style="font-weight: 700; color: #444; display: block; margin-bottom: 8px;">معرف الدخول السياسي</label>
+                <input type="text" name="username" class="input-royal" placeholder="اسم المستخدم الفريد" required>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: 700; color: #444; display: block; margin-bottom: 8px;">العلامة التجارية</label>
+                <input type="text" name="brand_name" class="input-royal" placeholder="اسم الكيان التجاري" required>
+            </div>
+            <div class="form-group">
+                <label style="font-weight: 700; color: #444; display: block; margin-bottom: 8px;">مفتاح المرور</label>
+                <input type="password" name="password" class="input-royal" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-sovereign">تفعيل السيادة والاعتماد ✨</button>
+        </form>
     </div>
 
-</body>
-</html>
+    <div class="card-royal">
+        <h3 style="color: var(--p-color); margin-top: 0; margin-bottom: 20px;"><i class="fas fa-network-wired"></i> الموردون المعتمدون في الشبكة</h3>
+        
+        <div style="overflow-x: auto;">
+            <table class="v-table">
+                <thead>
+                    <tr>
+                        <th>الكيان التجاري</th>
+                        <th>المحفظة السيادية</th>
+                        <th>الحالة الميدانية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vendor in vendors %}
+                    <tr>
+                        <td style="font-weight: 900;">{{ vendor.brand_name }}</td>
+                        <td>
+                            {% if vendor.wallet %}
+                                <span class="wallet-badge">{{ vendor.wallet.wallet_number }}</span>
+                            {% else %}
+                                <span style="color: #bbb;">جاري الربط...</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="color: #27ae60; font-weight: 900;">
+                                <i class="fas fa-check-circle"></i> معتمد ونشط
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 50px; color: #999;">
+                            لا يوجد موردين في الشبكة حالياً.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
