@@ -1,71 +1,90 @@
 {% extends "admin_layout.html" %}
+
 {% block content %}
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h6 class="text-secondary">إجمالي الشركاء</h6>
-                    <h2 class="fw-bold">{{ vendors_count if vendors_count else 0 }}</h2>
-                </div>
-                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
-                    <i class="fas fa-store fa-2x"></i>
+<div class="container-fluid">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #f39c12 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">إجمالي الشركاء (الموردين)</h6>
+                        <h2 class="fw-bold mb-0 text-white">{{ vendors_count }}</h2>
+                    </div>
+                    <div class="icon-box bg-warning bg-opacity-10 p-3 rounded-3 text-warning">
+                        <i class="fas fa-store fa-2x"></i>
+                    </div>
                 </div>
             </div>
-            <div class="mt-3 text-success small">▲ 12% منذ الشهر الماضي</div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #27ae60 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">إجمالي سيولة MAH في النظام</h6>
+                        <h2 class="fw-bold mb-0 text-success">{{ "{:,.2f}".format(total_mah) }}</h2>
+                    </div>
+                    <div class="icon-box bg-success bg-opacity-10 p-3 rounded-3 text-success">
+                        <i class="fas fa-vault fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-dark border-0 shadow-sm p-4 rounded-4 position-relative overflow-hidden" style="border-right: 5px solid #3498db !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">العمليات المعلقة</h6>
+                        <h2 class="fw-bold mb-0 text-info">{{ pending_count }}</h2>
+                    </div>
+                    <div class="icon-box bg-info bg-opacity-10 p-3 rounded-3 text-info">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h6 class="text-secondary">سيولة MAH المتداولة</h6>
-                    <h2 class="fw-bold">{{ total_balance if total_balance else '0.00' }}</h2>
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-dark border-secondary p-4 rounded-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="m-0"><i class="fas fa-history me-2 text-warning"></i>آخر العمليات في النظام</h5>
+                    <button class="btn btn-sm btn-outline-warning">عرض الكل</button>
                 </div>
-                <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
-                    <i class="fas fa-coins fa-2x"></i>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead class="text-muted">
+                            <tr>
+                                <th>رقم المحفظة</th>
+                                <th>نوع العملية</th>
+                                <th>المبلغ</th>
+                                <th>التفاصيل</th>
+                                <th>التوقيت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in recent_transactions %}
+                            <tr>
+                                <td class="text-warning fw-bold">{{ tx.wallet.wallet_number if tx.wallet else 'نظام' }}</td>
+                                <td>
+                                    <span class="badge bg-secondary opacity-75">{{ tx.tx_type }}</span>
+                                </td>
+                                <td class="text-white">{{ tx.amount }} MAH</td>
+                                <td class="text-muted small">{{ tx.description }}</td>
+                                <td>{{ tx.created_at.strftime('%Y-%m-%d | %H:%M') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">لا توجد عمليات مسجلة حالياً</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="mt-3 text-muted small">نظام محجوب للضمان</div>
         </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card bg-dark border-secondary p-4 rounded-4 shadow-sm border-start border-warning" style="border-right: 5px solid #ffc107 !important;">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h6 class="text-secondary">طلبات معلقة</h6>
-                    <h2 class="fw-bold text-warning">{{ pending_count if pending_count else 0 }}</h2>
-                </div>
-                <div class="bg-danger bg-opacity-10 p-3 rounded-circle text-danger">
-                    <i class="fas fa-clock fa-2x"></i>
-                </div>
-            </div>
-            <a href="{{ url_for('vendors_accreditation') }}" class="mt-3 d-block text-decoration-none small text-gold">عرض الطلبات الآن ←</a>
-        </div>
-    </div>
-</div>
-
-<div class="mt-5 card bg-dark border-secondary p-4 rounded-4">
-    <h5 class="mb-4">آخر النشاطات السيادية</h5>
-    <div class="table-responsive">
-        <table class="table table-dark table-hover">
-            <thead>
-                <tr>
-                    <th>التوقيت</th>
-                    <th>الحدث</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>منذ 5 دقائق</td>
-                    <td>تسجيل مورد جديد: متجر الأمل</td>
-                    <td><span class="badge bg-success">ناجح</span></td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
 {% endblock %}
