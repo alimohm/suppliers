@@ -1,23 +1,23 @@
 {% extends "admin_layout.html" %}
 {% block content %}
-<div class="container py-4" dir="rtl">
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <h3><i class="fas fa-plus-circle text-success"></i> إضافة مورد جديد للنظام</h3>
+<div class="container py-5" dir="rtl">
+    <div class="card border-0 shadow-lg mx-auto" style="max-width: 600px; border-radius: 20px;">
+        <div class="card-body p-5">
+            <h4 class="fw-bold mb-4">تعبئة بيانات المورد الجديد</h4>
             <form action="{{ url_for('admin_add_vendor_post') }}" method="POST">
                 <div class="mb-3">
-                    <label>اسم الشركة / المحل</label>
-                    <input type="text" name="brand_name" class="form-control" required>
+                    <label class="form-label">اسم المتجر / العلامة التجارية</label>
+                    <input type="text" name="brand_name" class="form-control" placeholder="مثلاً: متجر الأمل" required>
                 </div>
                 <div class="mb-3">
-                    <label>اسم المستخدم (للدخول)</label>
-                    <input type="text" name="username" class="form-control" required>
+                    <label class="form-label">اسم المستخدم</label>
+                    <input type="text" name="username" class="form-control" placeholder="user123" required>
                 </div>
                 <div class="mb-3">
-                    <label>كلمة المرور المؤقتة</label>
+                    <label class="form-label">كلمة المرور</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary">حفظ المورد وتفعيل محفظته</button>
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2">حفظ واعتماد فوراً</button>
             </form>
         </div>
     </div>
