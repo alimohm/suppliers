@@ -5,7 +5,7 @@ from config import Config
 from database import db, init_db
 import models
 
-# استدعاء المنطق البرمجي (تأكد من وجود هذه الملفات في المستودع)
+# استدعاء المنطق البرمجي
 from vendor_logic import login_vendor 
 from admin_logic import verify_admin_credentials
 
@@ -63,7 +63,6 @@ def admin_dashboard():
         return redirect(url_for('admin_login'))
     
     all_vendors = models.Vendor.query.all()
-    # يتم استدعاء القالب الذي يرث من admin_layout.html
     return render_template('admin_dashboard.html', 
                            username=session.get('username'), 
                            vendors=all_vendors)
@@ -120,20 +119,33 @@ def vendor_login():
 
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
+    # حماية المسار
     if 'role' not in session or session.get('role') not in ['vendor_owner', 'vendor_staff']:
         return redirect(url_for('vendor_login'))
     
+    # جلب بيانات المورد ومحفظته
     vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
     
-    # استخراج بيانات المحفظة لعرضها في القالب الذي يرث من vendor_layout.html
-    wallet_no = vendor_data.wallet.wallet_number if vendor_data and vendor_data.wallet else "MAH-000-0000"
-    balance = vendor_data.wallet.balance if vendor_data and vendor_data.wallet else 0.0
+    if not vendor_data:
+        flash("خطأ في جلب بيانات الحساب.", "danger")
+        return redirect(url_for('vendor_login'))
+
+    # استخراج البيانات مع الحماية من قيم None
+    wallet_no = vendor_data.wallet.wallet_number if vendor_data.wallet else "جاري الربط..."
+    balance = vendor_data.wallet.balance if vendor_data.wallet else 0.0
     
     return render_template('vendor_dashboard.html', 
                            username=session.get('username'),
                            vendor=vendor_data,
-                           wallet_no=wallet_no,
+                           wallet_no=wallet_no, 
                            balance=balance)
+
+# سيتم إضافة مسار إضافة المنتج هنا لاحقاً
+@app.route('/vendor/add-product')
+def add_product():
+    if 'role' not in session or session.get('role') not in ['vendor_owner', 'vendor_staff']:
+        return redirect(url_for('vendor_login'))
+    return render_template('vendor_add_product.html')
 
 # --- [ نظام الخروج ] ---
 
@@ -147,25 +159,5 @@ def logout():
     return redirect(url_for('vendor_login'))
 
 if __name__ == '__main__':
-    # تشغيل السيرفر مع تفعيل Debug لمراقبة الأخطاء في Railway
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
-
-
-
-@app.route('/vendor/dashboard')
-def vendor_dashboard():
-    # حماية المسار
-    if 'role' not in session or session.get('role') not in ['vendor_owner', 'vendor_staff']:
-        return redirect(url_for('vendor_login'))
-    
-    # جلب بيانات المورد ومحفظته
-    vendor_data = models.Vendor.query.filter_by(username=session.get('username')).first()
-    
-    # إذا لم تكن المحفظة موجودة، نضع قيم افتراضية لمنع الخطأ
-    wallet_no = vendor_data.wallet.wallet_number if vendor_data.wallet else "جاري الربط..."
-    balance = vendor_data.wallet.balance if vendor_data.wallet else 0.0
-    
-    return render_template('vendor_dashboard.html', 
-                           wallet_no=wallet_no, 
-                           balance=balance)
