@@ -1,5 +1,6 @@
-from models import AdminUser, Vendor, Wallet, Transaction, db
-from flask import request
+from database import db
+from models import AdminUser, Vendor, Wallet, Transaction
+# بقية الكود...
 
 # 1. التحقق من بيانات المالك (هذه هي الدالة التي يطلبها السجل في صورك)
 def verify_admin_credentials(u, p):
