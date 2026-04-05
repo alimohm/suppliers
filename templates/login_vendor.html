@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول | سوقك الذكي - 2026</title>
+    <title>تسجيل الدخول | محجوب أونلاين - 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --p-color: #1a0033; /* تم تعميقه لزيادة الفخامة الملكية */
+            --p-color: #1a0033;
             --gold: #FFD700;
             --white: #ffffff;
             --soft-white: rgba(255, 255, 255, 0.08);
@@ -23,7 +23,6 @@
         .login-card h2 { font-size: 32px; color: white; margin-bottom: 5px; font-weight: 800; }
         .login-card p.intro { font-size: 14px; opacity: 0.8; margin-bottom: 25px; color: var(--gold); }
         
-        /* تحسين التنبيهات */
         .alert { 
             padding: 12px 15px; border-radius: 12px; margin-bottom: 20px; 
             font-size: 14px; text-align: right; display: flex; align-items: center; 
@@ -39,7 +38,7 @@
             font-family: 'Cairo'; transition: 0.3s;
         }
         .input-group input:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,0.12); box-shadow: 0 0 15px rgba(255,215,0,0.1); }
-        .input-group i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 18px; transition: 0.3s; }
+        .input-group i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 18px; }
         
         .btn-login { 
             width: 100%; padding: 18px; background: var(--gold); color: var(--p-color); 
@@ -55,17 +54,15 @@
         .feature-item { 
             background: #fdfdfd; padding: 16px; margin: 8px; border-radius: 15px; 
             width: 90%; display: flex; align-items: center; border: 1px solid #f0f0f0; 
-            text-align: right; transition: 0.3s;
+            transition: 0.3s;
         }
-        .feature-item:hover { transform: translateX(-5px); border-color: var(--gold); background: #fff; }
         .feature-item i { color: var(--p-color); margin-left: 15px; font-size: 20px; }
-        .feature-item span { color: #555; font-weight: 600; font-size: 14px; line-height: 1.4; }
-        
+        .feature-item span { color: #555; font-weight: 600; font-size: 14px; text-align: right; }
+
         @media (max-width: 850px) {
             body { flex-direction: column; overflow-y: auto; }
             .brand-section { order: 1; width: 100%; padding: 40px 20px; }
             .login-section { order: 2; width: 100%; padding: 40px 20px; border-left: none; border-top: 5px solid var(--gold); height: auto; }
-            .login-card { max-width: 100%; }
         }
     </style>
 </head>
@@ -106,12 +103,21 @@
                     <input type="password" name="password" placeholder="كلمة المرور" required autocomplete="current-password">
                     <i class="fas fa-lock"></i>
                 </div>
-                <button type="submit" class="btn-login">دخول للمنصة السيادية 🚀</button>
+                <button type="submit" class="btn-login" id="submitBtn">دخول للمنصة السيادية 🚀</button>
             </form>
 
             <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 50px; letter-spacing: 1px;">© 2026 محجوب أونلاين - سوقك الذكي</p>
         </div>
     </div>
 
+    <script>
+        // تغيير نص الزر عند الضغط لمنع تكرار الإرسال وإعطاء إيحاء بالسرعة
+        document.querySelector('form').onsubmit = function() {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+        };
+    </script>
 </body>
 </html>
