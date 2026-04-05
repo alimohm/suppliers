@@ -91,6 +91,34 @@ def vendor_dashboard():
     # سيتم ربط المنطق لاحقاً
     return render_template('vendor_dashboard.html')
 
+
+# 1. مسار عرض صفحة إضافة مورد يدوي
+@app.route('/admin/add-vendor')
+def admin_add_vendor():
+    return render_template('admin_add_vendor.html')
+
+# 2. معالجة الإضافة اليدوية (تفعيل فوري)
+@app.route('/admin/add-vendor/post', methods=['POST'])
+def admin_add_vendor_post():
+    brand = request.form.get('brand_name')
+    user = request.form.get('username')
+    pw = request.form.get('password')
+    
+    # إضافة المورد وتفعيله فوراً
+    new_v = models.Vendor(brand_name=brand, username=user, password=pw, is_active=True)
+    db.session.add(new_v)
+    db.session.commit()
+    
+    # إنشاء المحفظة MAH تلقائياً
+    import random
+    wallet_no = f"MAH-{random.randint(1000, 9999)}"
+    db.session.add(models.Wallet(wallet_number=wallet_no, vendor_id=new_v.id))
+    db.session.commit()
+    
+    flash(f"تم إضافة {brand} وتفعيل هويته المالية.", "success")
+    return redirect(url_for('vendors_accreditation'))
+    
+
 # --- [ نظام تسجيل الخروج ] ---
 
 @app.route('/logout')
