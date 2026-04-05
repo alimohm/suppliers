@@ -3,19 +3,21 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-white">🛡️ اعتماد الموردين الجدد</h2>
-        <span class="badge bg-primary">نظام محجوب أونلاين</span>
+        <h2 class="text-white">🛡️ إدارة واعتماد الموردين</h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVendorModal">
+            ➕ تسجيل مورد جديد
+        </button>
     </div>
 
     <div class="table-responsive bg-dark p-3 rounded shadow">
-        <table class="table table-hover table-dark">
+        <table class="table table-hover table-dark align-middle">
             <thead>
                 <tr>
-                    <th>المتجر (Brand)</th>
+                    <th>المتجر</th>
                     <th>المسؤول</th>
-                    <th>الهاتف</th>
                     <th>الحالة</th>
-                    <th>الإجراء السيادي</th>
+                    <th>المحفظة</th>
+                    <th>الإجراء</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,20 +26,17 @@
                     <tr>
                         <td><strong>{{ vendor.brand_name }}</strong></td>
                         <td>{{ vendor.username }}</td>
-                        <td>{{ vendor.phone }}</td>
                         <td>
-                            {% if vendor.status == 'نشط' %}
-                                <span class="badge bg-success">نشط</span>
-                            {% elif vendor.status == 'قيد الانتظار' %}
-                                <span class="badge bg-warning text-dark">قيد الانتظار</span>
-                            {% else %}
-                                <span class="badge bg-danger">{{ vendor.status }}</span>
-                            {% endif %}
+                            <span class="badge {% if vendor.status == 'نشط' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                {{ vendor.status }}
+                            </span>
                         </td>
+                        <td>{{ vendor.wallet.wallet_number if vendor.wallet else '---' }}</td>
                         <td>
                             <form action="{{ url_for('approve_vendor', vendor_id=vendor.id) }}" method="POST" class="d-inline">
-                                <button type="submit" name="action" value="approve" class="btn btn-sm btn-outline-success">اعتماد</button>
-                                <button type="submit" name="action" value="reject" class="btn btn-sm btn-outline-warning">رفض</button>
+                                {% if vendor.status != 'نشط' %}
+                                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">تفعيل</button>
+                                {% endif %}
                                 <button type="submit" name="action" value="block" class="btn btn-sm btn-outline-danger">حظر</button>
                             </form>
                         </td>
@@ -45,11 +44,53 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted">لا توجد طلبات اعتماد معلقة حالياً.</td>
+                        <td colspan="5" class="text-center text-muted py-4">لا توجد بيانات مسجلة حالياً.</td>
                     </tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="addVendorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">📝 تسجيل مورد جديد في النظام</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_add_vendor_post') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم العلامة التجارية  (Brand)</label>
+                        <input type="text" name="brand_name" class="form-control bg-secondary text-white border-0" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">اسم المستخدم</label>
+                            <input type="text" name="username" class="form-control bg-secondary text-white border-0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">كلمة المرور</label>
+                            <input type="password" name="password" class="form-control bg-secondary text-white border-0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">رقم الهاتف</label>
+                        <input type="text" name="phone" class="form-control bg-secondary text-white border-0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">رقم الهوية الرسمية</label>
+                        <input type="text" name="official_id" class="form-control bg-secondary text-white border-0">
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ البيانات وتفعيل المحفظة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
