@@ -3,147 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}برج المراقبة{% endblock %}</title>
+    <title>محجوب أونلاين | برج المراقبة</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --sidebar-width: 260px;
-            --sidebar-collapsed-width: 80px;
-            --p-color: #1a0033;
-            --gold: #FFD700;
+            --primary-bg: #0f0f12;
+            --sidebar-bg: #16161a;
+            --accent-color: #f39c12; /* لون ذهبي للمحفظة والسيادة */
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
         }
 
         body {
             font-family: 'Cairo', sans-serif;
-            background: #0b0b0b;
-            color: white;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
             margin: 0;
-            display: flex;
+            overflow-x: hidden;
         }
 
-        /* القائمة الجانبية الذكية */
+        /* القائمة الجانبية (Sidebar) */
         .sidebar {
-            width: var(--sidebar-width);
-            background: var(--p-color);
+            width: 260px;
             height: 100vh;
+            background: var(--sidebar-bg);
             position: fixed;
             right: 0;
             top: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1050;
-            border-left: 1px solid rgba(255, 215, 0, 0.1);
-            overflow: hidden;
+            border-left: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .sidebar-header h4 {
+            color: var(--accent-color);
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .nav-link {
+            color: var(--text-muted);
+            padding: 15px 25px;
             display: flex;
             align-items: center;
-            padding: 15px 25px;
-            color: rgba(255, 255, 255, 0.6);
+            transition: 0.3s;
             text-decoration: none;
-            margin: 5px 10px;
-            border-radius: 12px;
-            white-space: nowrap; /* منع النص من النزول لسطر جديد */
+            border-right: 4px solid transparent;
         }
 
         .nav-link i {
-            min-width: 30px;
-            font-size: 20px;
-            text-align: center;
             margin-left: 15px;
+            font-size: 1.1rem;
+            width: 25px;
         }
 
-        .nav-link span {
-            transition: opacity 0.3s;
+        .nav-link:hover, .nav-link.active {
+            color: var(--accent-color);
+            background: rgba(243, 156, 18, 0.05);
+            border-right: 4px solid var(--accent-color);
         }
 
-        /* --- استجابة الشاشات المتوسطة (التابلت) --- */
-        @media (max-width: 1200px) and (min-width: 992px) {
-            .sidebar { width: var(--sidebar-collapsed-width); }
-            .sidebar .nav-link span, .sidebar h5 { display: none; }
-            .sidebar .logo-img { width: 40px; }
-            .main-wrapper { margin-right: var(--sidebar-collapsed-width) !important; }
-            .nav-link { justify-content: center; padding: 15px; }
-            .nav-link i { margin-left: 0; }
-        }
-
-        /* --- استجابة الشاشات الصغيرة (الجوال) --- */
-        @media (max-width: 991px) {
-            .sidebar { right: -280px; } /* تختفي تماماً */
-            .sidebar.active { right: 0; width: var(--sidebar-width); }
-            .sidebar.active .nav-link span { display: inline; }
-            .main-wrapper { margin-right: 0 !important; }
-            .mobile-btn { display: block !important; }
-        }
-
-        .main-wrapper {
-            margin-right: var(--sidebar-width);
-            flex: 1;
+        /* المحتوى الرئيسي */
+        .main-content {
+            margin-right: 260px;
+            padding: 40px;
             transition: all 0.3s ease;
         }
 
-        .top-bar {
-            height: 70px;
-            background: #121212;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid #222;
+        /* التجاوب مع الجوال */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-right: 0;
+            }
         }
 
-        .nav-link.active, .nav-link:hover {
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--gold);
+        .top-bar {
+            background: var(--sidebar-bg);
+            padding: 15px 30px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #2a2a2a;
+        }
+
+        .btn-custom {
+            background: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 8px 20px;
         }
     </style>
 </head>
 <body>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="p-4 text-center border-bottom border-secondary mb-3">
-            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo-img" width="70" style="filter: brightness(0) invert(1);">
-            <h5 class="mt-2 text-gold" style="font-size: 12px; color: var(--gold);">برج المراقبة</h5>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4>MAHJOUB</h4>
+            <small class="text-muted">Smart Market</small>
         </div>
-        
-        <nav>
-            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
-                <i class="fas fa-chart-pie"></i> <span>الإحصائيات</span>
+        <nav class="mt-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link active">
+                <i class="fas fa-chart-line"></i> <span>الإحصائيات</span>
             </a>
-            <a href="{{ url_for('vendors_accreditation') }}" class="nav-link {% if request.endpoint == 'vendors_accreditation' %}active{% endif %}">
-                <i class="fas fa-users-shield"></i> <span>الموردين</span>
+            <a href="{{ url_for('vendors_accreditation') }}" class="nav-link">
+                <i class="fas fa-users-cog"></i> <span>إدارة الموردين</span>
             </a>
             <a href="#" class="nav-link">
-                <i class="fas fa-vault"></i> <span>الرقابة المالية</span>
+                <i class="fas fa-wallet"></i> <span>المحفظة المركزية</span>
             </a>
-            <a href="{{ url_for('logout') }}" class="nav-link text-danger mt-4">
-                <i class="fas fa-power-off"></i> <span>خروج</span>
+            <a href="#" class="nav-link">
+                <i class="fas fa-box-open"></i> <span>المنتجات</span>
+            </a>
+            <hr class="mx-3" style="border-color: #2a2a2a;">
+            <a href="{{ url_for('logout') }}" class="nav-link text-danger">
+                <i class="fas fa-sign-out-alt"></i> <span>تسجيل الخروج</span>
             </a>
         </nav>
-    </aside>
-
-    <div class="main-wrapper">
-        <header class="top-bar">
-            <button class="btn text-white mobile-btn d-none" onclick="document.getElementById('sidebar').classList.toggle('active')">
-                <i class="fas fa-bars fa-lg"></i>
-            </button>
-            
-            <div class="ms-3 fw-bold text-gold">محجوب أونلاين <span class="text-white small ms-2 d-none d-sm-inline">● النظام المركزي</span></div>
-            
-            <div class="ms-auto d-flex align-items-center bg-dark px-3 py-1 rounded-pill border border-secondary">
-                <small class="me-2 d-none d-md-inline">{{ session['username'] if session['username'] else 'علي محجوب' }}</small>
-                <i class="fas fa-crown text-gold"></i>
-            </div>
-        </header>
-
-        <main class="p-4">
-            {% block content %}{% endblock %}
-        </main>
     </div>
 
+    <div class="main-content">
+        <div class="top-bar">
+            <div>
+                <h5 class="m-0">أهلاً، {{ session.get('username') }}</h5>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="badge bg-dark text-warning p-2 me-3 border border-warning">
+                    <i class="fas fa-clock me-1"></i> 2026-04-05
+                </span>
+                <button class="btn btn-sm btn-outline-warning d-lg-none" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show bg-dark text-white border-{{ category }}">
+                {{ message }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
