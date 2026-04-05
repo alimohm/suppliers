@@ -1,36 +1,100 @@
-{% extends "layout.html" %}
+{% extends "admin_layout.html" %}
 
-{% block title %}إدارة الحسابات | محجوب أونلاين{% endblock %}
+{% block title %}إدارة الحسابات والاعتماد | محجوب أونلاين{% endblock %}
 
 {% block content %}
 <style>
-    .admin-container { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
-    .card-royal { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #eee; }
-    .form-group { margin-bottom: 15px; }
-    .input-royal { width: 100%; padding: 12px; border: 1.5px solid #edf2f7; border-radius: 12px; font-family: 'Cairo'; }
-    .btn-create { background: var(--royal-p); color: white; border: none; padding: 12px; width: 100%; border-radius: 12px; font-weight: 800; cursor: pointer; }
+    /* تحسين الهيكل ليكون متجاوباً وسيادياً */
+    .admin-container { 
+        display: grid; 
+        grid-template-columns: 1fr 2fr; 
+        gap: 25px; 
+        align-items: start;
+    }
+
+    .card-royal { 
+        background: white; 
+        border-radius: 20px; 
+        padding: 25px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+        border: 1px solid #eee; 
+        position: relative;
+    }
+
+    .form-group { margin-bottom: 18px; }
     
+    .input-royal { 
+        width: 100%; padding: 12px; 
+        border: 1.5px solid #edf2f7; 
+        border-radius: 12px; 
+        font-family: 'Segoe UI', sans-serif;
+        box-sizing: border-box;
+        transition: 0.3s;
+    }
+    
+    .input-royal:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1); }
+
+    .btn-create { 
+        background: var(--admin-p); 
+        color: var(--gold); 
+        border: 2px solid var(--gold); 
+        padding: 14px; 
+        width: 100%; 
+        border-radius: 12px; 
+        font-weight: 800; 
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    
+    .btn-create:hover { background: var(--gold); color: var(--admin-p); }
+
     .v-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .v-table th { text-align: right; color: #888; padding: 15px; font-size: 13px; border-bottom: 2px solid #f4f7f6; }
-    .v-table td { padding: 15px; border-bottom: 1px solid #f4f7f6; font-weight: 600; }
-    .wallet-badge { background: #fff9e6; color: #b8860b; padding: 4px 10px; border-radius: 8px; font-size: 11px; border: 1px solid #ffeeba; }
+    .v-table td { padding: 15px; border-bottom: 1px solid #f4f7f6; font-weight: 600; color: var(--admin-p); }
+    
+    .wallet-badge { 
+        background: #fff9e6; 
+        color: #b8860b; 
+        padding: 6px 12px; 
+        border-radius: 8px; 
+        font-size: 12px; 
+        border: 1px solid #ffeeba; 
+        font-family: monospace;
+        font-weight: 800;
+    }
+
+    .status-pill {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+    .status-active { background: #e6fffa; color: #27ae60; }
+    .status-pending { background: #fff5f5; color: #e53e3e; }
+
+    @media (max-width: 992px) {
+        .admin-container { grid-template-columns: 1fr; }
+    }
 </style>
 
 <div class="admin-container" dir="rtl">
     <div class="card-royal">
-        <h3 style="color: var(--royal-p); margin-top: 0;"><i class="fas fa-user-plus"></i> اعتماد مورد جديد</h3>
-        <p style="font-size: 12px; color: #666;">سيتم توليد محفظة رقمية تلقائياً فور الاعتماد.</p>
+        <h3 style="color: var(--admin-p); margin-top: 0;"><i class="fas fa-user-shield"></i> اعتماد مورد جديد</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 20px;">
+            بمجرد النقر، سيتم تفعيل "السيادة المالية" ومنح رقم محفظة <strong>MAH</strong> فريد.
+        </p>
         
-        <form action="#" method="POST"> <div class="form-group">
-                <label style="font-weight: 700;">اسم المستخدم (الدخول)</label>
+        <form action="{{ url_for('create_vendor_route') }}" method="POST">
+            <div class="form-group">
+                <label style="font-weight: 700; display: block; margin-bottom: 8px;">اسم المستخدم (الدخول)</label>
                 <input type="text" name="username" class="input-royal" placeholder="مثلاً: ali_2026" required>
             </div>
             <div class="form-group">
-                <label style="font-weight: 700;">اسم العلامة التجارية</label>
+                <label style="font-weight: 700; display: block; margin-bottom: 8px;">اسم العلامة التجارية</label>
                 <input type="text" name="brand_name" class="input-royal" placeholder="مثلاً: شركة الثقة" required>
             </div>
             <div class="form-group">
-                <label style="font-weight: 700;">كلمة المرور</label>
+                <label style="font-weight: 700; display: block; margin-bottom: 8px;">كلمة المرور</label>
                 <input type="password" name="password" class="input-royal" placeholder="••••••••" required>
             </div>
             <button type="submit" class="btn-create">تفعيل الحساب والسيادة ✨</button>
@@ -38,25 +102,46 @@
     </div>
 
     <div class="card-royal">
-        <h3 style="color: var(--royal-p); margin-top: 0;"><i class="fas fa-users"></i> الموردون المعتمدون في النظام</h3>
-        <table class="v-table">
-            <thead>
-                <tr>
-                    <th>المورد</th>
-                    <th>العلامة التجارية</th>
-                    <th>رقم المحفظة</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>علي محجوب</td>
-                    <td>المركز الرئيسي</td>
-                    <td><span class="wallet-badge">MAH-77022XXXX</span></td>
-                    <td style="color: #27ae60;"><i class="fas fa-check-circle"></i> نشط</td>
-                </tr>
-            </tbody>
-        </table>
+        <h3 style="color: var(--admin-p); margin-top: 0;"><i class="fas fa-users"></i> الموردون المعتمدون في النظام</h3>
+        <div style="overflow-x: auto;">
+            <table class="v-table">
+                <thead>
+                    <tr>
+                        <th>المورد</th>
+                        <th>العلامة التجارية</th>
+                        <th>المحفظة السيادية</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vendor in vendors %}
+                    <tr>
+                        <td>{{ vendor.username }}</td>
+                        <td>{{ vendor.brand_name }}</td>
+                        <td>
+                            {% if vendor.wallet %}
+                                <span class="wallet-badge">{{ vendor.wallet.wallet_number }}</span>
+                            {% else %}
+                                <span style="color: #ccc; font-size: 11px;">قيد التوليد...</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-pill {{ 'status-active' if vendor.is_active else 'status-pending' }}">
+                                <i class="fas {{ 'fa-check-circle' if vendor.is_active else 'fa-clock' }}"></i> 
+                                {{ vendor.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #999; padding: 30px;">
+                            <i class="fas fa-info-circle"></i> لا يوجد موردون معتمدون حالياً.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
