@@ -1,3 +1,4 @@
+import os, random
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from config import Config
 from database import db, init_db, User, Wallet, Product
@@ -20,7 +21,8 @@ def login():
         if user:
             session.update({'user_id': user.id, 'username': u, 'role': user.role})
             return redirect(url_for('index'))
-        flash("بيانات الدخول غير صحيحة"، "danger")
+        # التصحيح هنا: استخدام الفاصلة الإنجليزية , 
+        flash("بيانات الدخول غير صحيحة", "danger")
     return render_template('login.html')
 
 @app.route('/admin/dashboard')
@@ -28,13 +30,13 @@ def admin_dashboard():
     if session.get('role') != 'admin': return redirect(url_for('login'))
     vendors = User.query.filter_by(role='vendor').all()
     total_mah = db.session.query(db.func.sum(Wallet.balance)).scalar() or 0
-    return render_template('admin.html', vendors=vendors, total_mah=total_mah)
+    return render_template('admin_dashboard.html', vendors=vendors, total_mah=total_mah)
 
 @app.route('/vendor/dashboard')
 def vendor_dashboard():
     if session.get('role') != 'vendor': return redirect(url_for('login'))
     user = User.query.get(session['user_id'])
-    return render_template('vendor.html', wallet=user.wallet, products=user.products)
+    return render_template('vendor_dashboard.html', wallet=user.wallet, products=user.products)
 
 @app.route('/action/add-vendor', methods=['POST'])
 def add_vendor():
