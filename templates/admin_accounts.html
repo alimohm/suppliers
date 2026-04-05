@@ -3,75 +3,91 @@
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="text-primary"><i class="fas fa-users-cog"></i> إدارة واعتماد الموردين</h2>
-        <span class="badge bg-info p-2">إجمالي الطلبات: {{ vendors|length }}</span>
+        <span class="badge bg-info p-2">إجمالي المسجلين: {{ vendors|length }}</span>
     </div>
 
     <div class="row mb-4">
         <div class="col-md-4">
-            <div class="card bg-warning text-dark shadow-sm">
+            <div class="card bg-warning text-dark shadow-sm border-0">
                 <div class="card-body">
-                    <h5>طلبات معلقة</h5>
-                    <h3 class="fw-bold">{{ pending_count }}</h3>
+                    <h5 class="card-title text-uppercase small fw-bold">طلبات قيد الانتظار</h5>
+                    <h3 class="fw-bold mb-0">{{ pending_count }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow">
-        <div class="card-header bg-dark text-white">
-            <i class="fas fa-list"></i> قائمة الموردين والشركاء
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list me-2"></i> سجل الموردين والشركاء</span>
+            <div class="btn-group btn-group-sm">
+                <a href="{{ url_for('vendors_accreditation') }}" class="btn btn-outline-light">الكل</a>
+                <a href="{{ url_for('vendors_accreditation', filter='pending') }}" class="btn btn-outline-light">المعلقة</a>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>ID</th>
+                            <th class="ps-3">ID</th>
                             <th>المورد / العلامة التجارية</th>
                             <th>رقم المحفظة (MAH)</th>
                             <th>الحالة</th>
                             <th>الرصيد الحالي</th>
-                            <th>الإجراءات السيادية</th>
+                            <th class="text-center">الإجراءات السيادية</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for vendor in vendors %}
                         <tr>
-                            <td>#{{ vendor.id }}</td>
+                            <td class="ps-3 text-muted">#{{ vendor.id }}</td>
                             <td>
-                                <strong>{{ vendor.brand_name }}</strong><br>
-                                <small class="text-muted">@{{ vendor.username }}</small>
+                                <div class="d-flex align-items-center">
+                                    <div class="ms-2">
+                                        <div class="fw-bold text-dark">{{ vendor.brand_name }}</div>
+                                        <div class="small text-muted">@{{ vendor.username }}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td>
                                 {% if vendor.wallet %}
-                                <code class="text-primary fw-bold">{{ vendor.wallet.wallet_number }}</code>
+                                <span class="badge bg-light text-primary border border-primary">
+                                    <i class="fas fa-wallet me-1"></i> {{ vendor.wallet.wallet_number }}
+                                </span>
                                 {% else %}
-                                <span class="badge bg-secondary">لم تنشأ بعد</span>
+                                <span class="text-danger small"><i class="fas fa-exclamation-triangle"></i> بانتظار التفعيل</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if vendor.is_active %}
-                                <span class="badge bg-success"><i class="fas fa-check-circle"></i> نشط</span>
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success">
+                                    <i class="fas fa-check-circle me-1"></i> نشط
+                                </span>
                                 {% else %}
-                                <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> قيد الانتظار</span>
+                                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning">
+                                    <i class="fas fa-hourglass-half me-1"></i> قيد المراجعة
+                                </span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td class="fw-bold">
                                 {% if vendor.wallet %}
-                                <span class="fw-bold">{{ "{:,.2f}".format(vendor.wallet.balance) }} ريال</span>
+                                    {{ "{:,.2f}".format(vendor.wallet.balance) }} <small>ريال</small>
                                 {% else %}
-                                0.00
+                                    <span class="text-muted small">0.00</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{{ url_for('view_vendor_profile', vendor_id=vendor.id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i> عرض
+                            <td class="text-center">
+                                <div class="btn-group shadow-sm">
+                                    <a href="{{ url_for('view_vendor_profile', vendor_id=vendor.id) if 'view_vendor_profile' in url_for.__globals__ else '#' }}" 
+                                       class="btn btn-sm btn-white border" title="عرض الملف">
+                                        <i class="fas fa-eye text-primary"></i>
                                     </a>
+                                    
                                     {% if not vendor.is_active %}
-                                    <form action="{{ url_for('approve_vendor', vendor_id=vendor.id) }}" method="POST" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            <i class="fas fa-user-check"></i> تفعيل التردد
+                                    <form action="{{ url_for('approve_vendor', vendor_id=vendor.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('تأكيد منح التردد السيادي لهذا المورد؟')">
+                                            <i class="fas fa-user-check"></i> تفعيل
                                         </button>
                                     </form>
                                     {% endif %}
@@ -80,9 +96,11 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" class="text-center p-5 text-muted">
-                                <i class="fas fa-info-circle fa-3x mb-3"></i><br>
-                                لا توجد طلبات موردين حالياً.
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-folder-open fa-3x mb-3"></i>
+                                    <p class="mb-0">لا يوجد موردين في هذه القائمة حالياً.</p>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -92,4 +110,12 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* لمسة جمالية تتناسب مع هوية محجوب أونلاين */
+    .bg-success-subtle { background-color: #d1e7dd; }
+    .bg-warning-subtle { background-color: #fff3cd; }
+    .btn-white { background: #fff; }
+    .btn-white:hover { background: #f8f9fa; }
+</style>
 {% endblock %}
