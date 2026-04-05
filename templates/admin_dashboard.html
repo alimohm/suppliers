@@ -1,56 +1,23 @@
-{% extends "admin_layout.html" %}
+{% extends "layout.html" %}
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card bg-dark border-secondary shadow-sm">
-                <div class="card-body p-4 text-center">
-                    <i class="fas fa-store fa-3x text-warning mb-3"></i>
-                    <h6 class="text-muted small uppercase">إجمالي الموردين</h6>
-                    <h2 class="fw-bold text-white">{{ vendors|length }}</h2>
-                </div>
-            </div>
+<div class="admin-container" style="padding: 20px; color: white; direction: rtl;">
+    <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #FFD700; padding-bottom: 15px;">
+        <h2><i class="fas fa-tower-observation"></i> بوابة الإدارة المركزية</h2>
+        <div class="admin-badge" style="background: #FFD700; color: #1a0033; padding: 5px 15px; border-radius: 50px; font-weight: bold;">
+            أهلاً، سيد علي
         </div>
-        <div class="col-md-8">
-            <div class="card bg-dark border-warning shadow-sm">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted small uppercase">السيولة النقدية المتداولة</h6>
-                            <h1 class="fw-bold text-warning mb-0">{{ "{:,.2f}".format(total_mah) }} <small>MAH</small></h1>
-                        </div>
-                        <i class="fas fa-coins fa-4x text-warning opacity-25"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    </header>
 
-    <div class="card bg-dark border-secondary">
-        <div class="card-header bg-transparent border-secondary py-3">
-            <h5 class="mb-0 text-white"><i class="fas fa-list-ul me-2"></i>قائمة الشركاء النشطين</h5>
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px;">
+        <div class="stat-card" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center;">
+            <i class="fas fa-users-viewfinder" style="font-size: 30px; color: #FFD700;"></i>
+            <h3>الموردين النشطين</h3>
+            <p style="font-size: 24px; font-weight: bold;">{{ vendor_count }}</p>
         </div>
-        <div class="table-responsive">
-            <table class="table table-dark table-hover mb-0">
-                <thead class="table-light text-dark">
-                    <tr>
-                        <th>المتجر</th>
-                        <th>المحفظة</th>
-                        <th>الرصيد المتاح</th>
-                        <th>الحالة</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for v in vendors %}
-                    <tr>
-                        <td class="fw-bold">{{ v.brand_name }}</td>
-                        <td class="text-info">{{ v.wallet.wallet_number }}</td>
-                        <td class="text-success fw-bold">{{ v.wallet.balance }} MAH</td>
-                        <td><span class="badge bg-success">نشط</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="stat-card" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center;">
+            <i class="fas fa-server" style="font-size: 30px; color: #00ff88;"></i>
+            <h3>حالة السيرفر</h3>
+            <p>مستقر (سيادي)</p>
         </div>
     </div>
 </div>
