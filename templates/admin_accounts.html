@@ -1,207 +1,95 @@
-{% extends "admin_layout.html" %}
-
-{% block title %}إدارة الاعتمادات السيادية | محجوب أونلاين{% endblock %}
-
+{% extends "admin_base.html" %}
 {% block content %}
-<style>
-    /* التنسيقات الملكية - روح محجوب أونلاين */
-    :root {
-        --royal-purple: #1a0033;
-        --gold-glow: #d4af37;
-        --soft-bg: #f4f7f6;
-    }
-
-    .admin-grid {
-        display: grid;
-        grid-template-columns: 1fr 2.5fr;
-        gap: 25px;
-        padding: 20px;
-        animation: fadeIn 0.8s ease;
-    }
-
-    .card-sovereign {
-        background: white;
-        border-radius: 30px;
-        padding: 30px;
-        box-shadow: 0 15px 35px rgba(26, 0, 51, 0.05);
-        border: 1px solid rgba(212, 175, 55, 0.1);
-    }
-
-    /* الجدول الاحترافي المؤندكس */
-    .v-table { width: 100%; border-collapse: separate; border-spacing: 0 15px; }
-    .v-table th { color: #999; font-size: 12px; padding: 0 20px; text-align: right; }
-    
-    .v-table tbody tr { 
-        background: white; 
-        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
-    }
-
-    .v-table tbody tr:hover { 
-        transform: scale(1.01) translateX(-5px); 
-        box-shadow: 0 10px 25px rgba(26, 0, 51, 0.1);
-        border-right: 5px solid var(--gold-glow);
-    }
-
-    .v-table td { padding: 20px; vertical-align: middle; }
-    .v-table td:first-child { border-radius: 0 20px 20px 0; }
-    .v-table td:last-child { border-radius: 20px 0 0 20px; }
-
-    /* أوسمة الحالة والسيادة */
-    .status-pill { padding: 6px 15px; border-radius: 50px; font-size: 11px; font-weight: bold; }
-    .status-active { background: #e6fffa; color: #38b2ac; }
-    .status-pending { background: #fff5f5; color: #e53e3e; }
-    .wallet-badge { background: #f0edff; color: #6366f1; padding: 5px 10px; border-radius: 10px; font-family: monospace; }
-
-    /* النافذة المنبثقة (Modal) */
-    .modal-overlay {
-        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(26, 0, 51, 0.8); backdrop-filter: blur(10px);
-        z-index: 9999; align-items: center; justify-content: center;
-    }
-
-    .modal-card {
-        background: white; width: 90%; max-width: 400px; border-radius: 35px;
-        padding: 40px; text-align: center; position: relative;
-    }
-
-    .sov-action-item {
-        display: flex; align-items: center; padding: 18px; background: #f8f9fa;
-        border-radius: 20px; margin-bottom: 12px; transition: 0.3s;
-        text-decoration: none; color: #333; border: 1px solid transparent;
-    }
-
-    .sov-action-item:hover { border-color: var(--gold-glow); background: white; transform: translateY(-3px); }
-
-    .icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-left: 15px; }
-    .bg-purple { background: #eeeaff; color: #6366f1; }
-    .bg-gold { background: #fff9e6; color: #d4af37; }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-</style>
-
-<div class="admin-grid" dir="rtl">
-    
-    <div class="card-sovereign">
-        <h3 style="color: var(--royal-purple);"><i class="fas fa-plus-circle" style="color: var(--gold-glow);"></i> إضافة مورد سيادي</h3>
-        <p style="font-size: 12px; color: #777; margin-bottom: 20px;">قم بإنشاء حساب جديد وتفعيل محفظة MAH تلقائياً.</p>
-        
-        <form action="{{ url_for('create_vendor_route') }}" method="POST">
-            <div style="margin-bottom: 15px;">
-                <label style="font-size: 13px; display: block; margin-bottom: 5px;">اسم المستخدم (Login)</label>
-                <input type="text" name="username" class="input-royal" placeholder="مثلاً: ali_2026" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #eee;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-size: 13px; display: block; margin-bottom: 5px;">اسم العلامة التجارية</label>
-                <input type="text" name="brand_name" class="input-royal" placeholder="مثلاً: شركة المحجوب" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #eee;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-size: 13px; display: block; margin-bottom: 5px;">كلمة المرور</label>
-                <input type="password" name="password" class="input-royal" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #eee;">
-            </div>
-            <button type="submit" class="btn-create" style="width: 100%; padding: 15px; background: var(--royal-purple); color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold;">تفعيل التردد السيادي ✨</button>
-        </form>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary"><i class="fas fa-users-cog"></i> إدارة واعتماد الموردين</h2>
+        <span class="badge bg-info p-2">إجمالي الطلبات: {{ vendors|length }}</span>
     </div>
 
-    <div class="card-sovereign">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="color: var(--royal-purple); margin: 0;">برج المراقبة: الموردون</h3>
-            <span style="font-size: 12px; background: #eee; padding: 5px 12px; border-radius: 10px;">إجمالي: {{ vendors|length }}</span>
-        </div>
-
-        <table class="v-table">
-            <thead>
-                <tr>
-                    <th>المورد والبراند</th>
-                    <th>رقم المحفظة السيادية</th>
-                    <th>الحالة</th>
-                    <th>تاريخ الانضمام</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for vendor in vendors %}
-                <tr onclick="openSovereignModal('{{ vendor.id }}', '{{ vendor.brand_name }}')">
-                    <td>
-                        <div style="display: flex; align-items: center;">
-                            <div style="width: 40px; height: 40px; background: var(--soft-bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-left: 10px; color: var(--gold-glow);">
-                                <i class="fas fa-store"></i>
-                            </div>
-                            <div>
-                                <strong>{{ vendor.brand_name }}</strong><br>
-                                <small style="color: #999;">@{{ vendor.username }}</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        {% if vendor.wallet %}
-                            <span class="wallet-badge">{{ vendor.wallet.wallet_number }}</span>
-                        {% else %}
-                            <span style="color: #ccc; font-size: 12px;">بانتظار التفعيل</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="status-pill {{ 'status-active' if vendor.is_active else 'status-pending' }}">
-                            {{ 'نشط' if vendor.is_active else 'معلق' }}
-                        </span>
-                    </td>
-                    <td><small style="color: #777;">{{ vendor.joined_at.strftime('%Y-%m-%d') }}</small></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div id="sovModal" class="modal-overlay" onclick="if(event.target == this) closeSovereignModal()">
-    <div class="modal-card">
-        <div style="font-size: 40px; color: var(--gold-glow); margin-bottom: 15px;"><i class="fas fa-shield-check"></i></div>
-        <h2 id="mTitle" style="color: var(--royal-purple); margin-bottom: 5px;">اسم المورد</h2>
-        <p id="mVendorId" style="font-size: 12px; color: #999; margin-bottom: 30px;">ID: #000</p>
-        
-        <a id="mProfileLink" href="#" class="sov-action-item">
-            <div class="icon-box bg-purple"><i class="fas fa-id-card"></i></div>
-            <div style="text-align: right; flex-grow: 1;">
-                <strong>فتح حساب</strong>
-                <small style="display: block; font-size: 10px; color: #999;">عرض الهوية والسجل التجاري</small>
-            </div>
-            <i class="fas fa-chevron-left" style="font-size: 12px; color: #ddd;"></i>
-        </a>
-
-        <form id="mActivateForm" method="POST" style="width: 100%;">
-            <button type="submit" style="background: none; border: none; padding: 0; width: 100%; cursor: pointer;">
-                <div class="sov-action-item">
-                    <div class="icon-box bg-gold"><i class="fas fa-bolt"></i></div>
-                    <div style="text-align: right; flex-grow: 1;">
-                        <strong>طلب تفعيل</strong>
-                        <small style="display: block; font-size: 10px; color: #999;">منح رخصة البيع وتوليد المحفظة</small>
-                    </div>
-                    <i class="fas fa-chevron-left" style="font-size: 12px; color: #ddd;"></i>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark shadow-sm">
+                <div class="card-body">
+                    <h5>طلبات معلقة</h5>
+                    <h3 class="fw-bold">{{ pending_count }}</h3>
                 </div>
-            </button>
-        </form>
-        
-        <button onclick="closeSovereignModal()" style="margin-top: 20px; background: none; border: none; color: #ff4d4d; font-weight: bold; cursor: pointer;">إلغاء الإجراء</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            <i class="fas fa-list"></i> قائمة الموردين والشركاء
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>المورد / العلامة التجارية</th>
+                            <th>رقم المحفظة (MAH)</th>
+                            <th>الحالة</th>
+                            <th>الرصيد الحالي</th>
+                            <th>الإجراءات السيادية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vendor in vendors %}
+                        <tr>
+                            <td>#{{ vendor.id }}</td>
+                            <td>
+                                <strong>{{ vendor.brand_name }}</strong><br>
+                                <small class="text-muted">@{{ vendor.username }}</small>
+                            </td>
+                            <td>
+                                {% if vendor.wallet %}
+                                <code class="text-primary fw-bold">{{ vendor.wallet.wallet_number }}</code>
+                                {% else %}
+                                <span class="badge bg-secondary">لم تنشأ بعد</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if vendor.is_active %}
+                                <span class="badge bg-success"><i class="fas fa-check-circle"></i> نشط</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> قيد الانتظار</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if vendor.wallet %}
+                                <span class="fw-bold">{{ "{:,.2f}".format(vendor.wallet.balance) }} ريال</span>
+                                {% else %}
+                                0.00
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('view_vendor_profile', vendor_id=vendor.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> عرض
+                                    </a>
+                                    {% if not vendor.is_active %}
+                                    <form action="{{ url_for('approve_vendor', vendor_id=vendor.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-user-check"></i> تفعيل التردد
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center p-5 text-muted">
+                                <i class="fas fa-info-circle fa-3x mb-3"></i><br>
+                                لا توجد طلبات موردين حالياً.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
-
-<script>
-    function openSovereignModal(id, name) {
-        // تحديث محتوى النافذة بالبيانات الحقيقية
-        document.getElementById('mTitle').innerText = name;
-        document.getElementById('mVendorId').innerText = "ID: #" + id;
-        
-        // ربط الروابط بالمسارات المفهرسة في app.py
-        document.getElementById('mProfileLink').href = "/admin/vendor-profile/" + id;
-        document.getElementById('mActivateForm').action = "/admin/activate-vendor/" + id;
-        
-        // إظهار النافذة بحركة انسيابية
-        document.getElementById('sovModal').style.display = 'flex';
-    }
-
-    function closeSovereignModal() {
-        document.getElementById('sovModal').style.display = 'none';
-    }
-</script>
-
 {% endblock %}
