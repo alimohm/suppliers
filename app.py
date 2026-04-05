@@ -130,3 +130,38 @@ if __name__ == '__main__':
     # ضمان العمل على منصة Railway باستخدام المنفذ الديناميكي
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
+
+
+
+# --- [ بوابة الموردين - الدخول واللوحة ] ---
+
+@app.route('/vendor/login', methods=['GET', 'POST'])
+def vendor_login():
+    if request.method == 'POST':
+        u = request.form.get('username')
+        p = request.form.get('password')
+        
+        # البحث عن المورد في قاعدة البيانات وتأكد من أنه معتمد
+        vendor = models.Vendor.query.filter_by(username=u, password=p).first()
+        
+        if vendor:
+            if vendor.is_active:
+                session['vendor_id'] = vendor.id
+                session['username'] = vendor.username
+                session['role'] = 'vendor'
+                return redirect(url_for('vendor_dashboard'))
+            else:
+                flash("حسابك قيد المراجعة، يرجى انتظار تفعيل الإدارة العليا.", "warning")
+        else:
+            flash("اسم المستخدم أو كلمة المرور غير صحيحة.", "danger")
+            
+    return render_template('login_vendor.html')
+
+@app.route('/vendor/dashboard')
+def vendor_dashboard():
+    # منع الدخول إلا للموردين المسجلين
+    if session.get('role') != 'vendor':
+        return redirect(url_for('vendor_login'))
+    
+    vendor = models.Vendor.query.get(session.get('vendor_id'))
+    return render_template('vendor_dashboard.html', vendor=vendor)
