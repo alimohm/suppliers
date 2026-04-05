@@ -1,0 +1,21 @@
+{% extends "admin_layout.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h4 class="text-danger mb-4"><i class="fas fa-user-shield me-2"></i>إدارة صلاحيات النظام</h4>
+    <div class="alert alert-dark border-danger text-danger small">
+        <i class="fas fa-exclamation-triangle me-2"></i>تحذير: تعديل الصلاحيات يؤثر على أمن "محجوب أونلاين".
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary p-4 text-center">
+                <i class="fas fa-id-card-alt fa-3x text-warning mb-3"></i>
+                <h5>صلاحيات المسؤول (Admin)</h5>
+                <p class="text-muted small">وصول كامل للقواعد، المحافظ، والاعتمادات.</p>
+                <hr class="border-secondary">
+                <span class="text-warning fw-bold">علي محجوب</span>
+            </div>
+        </div>
+        </div>
+</div>
+{% endblock %}
