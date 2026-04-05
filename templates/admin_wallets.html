@@ -1,0 +1,36 @@
+{% extends "admin_layout.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h4 class="text-info mb-4"><i class="fas fa-wallet me-2"></i>مركز الرقابة المالية (MAH)</h4>
+    
+    <div class="card bg-dark border-secondary">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped mb-0">
+                <thead>
+                    <tr class="text-muted small">
+                        <th>المورد</th>
+                        <th>رقم المحفظة السيادي</th>
+                        <th>الرصيد الحالي</th>
+                        <th>الحالة المادية</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vendors %}
+                    <tr>
+                        <td class="fw-bold">{{ v.brand_name }}</td>
+                        <td class="text-info font-monospace">{{ v.wallet.wallet_number }}</td>
+                        <td class="text-success fw-bold">{{ v.wallet.balance }} MAH</td>
+                        <td><span class="badge bg-success">مستقر</span></td>
+                        <td>
+                            <button class="btn btn-outline-info btn-sm">شحن</button>
+                            <button class="btn btn-outline-danger btn-sm">تجميد</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
