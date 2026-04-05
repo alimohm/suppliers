@@ -102,3 +102,29 @@ class Transaction(db.Model):
     new_balance = db.Column(db.Float)
     details = db.Column(db.String(255)) # مثلاً: "بيع منتج: آيفون 15"
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+def seed_initial_data():
+    """
+    تأمين البيانات الأولية: إنشاء حساب الإدارة العليا (علي محجوب)
+    إذا لم يكن موجوداً مسبقاً في قاعدة البيانات.
+    """
+    from database import db
+    
+    # 1. التأكد من وجود حساب علي محجوب (Super Admin)
+    # ملاحظة: قم بتغيير كلمة المرور هنا لأول مرة ثم احفظها
+    admin_exists = SuperAdmin.query.filter_by(username='علي محجوب').first()
+    
+    if not admin_exists:
+        new_admin = SuperAdmin(
+            username='علي محجوب',
+            password='ali_password_2026',  # ضع كلمة مرورك القوية هنا
+            full_name='علي محجوب'
+        )
+        db.session.add(new_admin)
+        print("✅ تم إنشاء حساب الإدارة العليا بنجاح.")
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"⚠️ خطأ أثناء زرع البيانات: {e}")
