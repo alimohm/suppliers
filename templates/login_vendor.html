@@ -2,122 +2,89 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول | محجوب أونلاين - 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>دخول الشركاء | محجوب أونلاين</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --p-color: #1a0033;
-            --gold: #FFD700;
-            --white: #ffffff;
-            --soft-white: rgba(255, 255, 255, 0.08);
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f0f12;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; display: flex; height: 100vh; font-family: 'Cairo', sans-serif; background: var(--p-color); overflow: hidden; }
-        
-        .brand-section { flex: 1.2; background: var(--white); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #333; padding: 40px; order: 2; position: relative; }
-        .login-section { flex: 1; background: var(--p-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; color: white; order: 1; border-left: 1px solid rgba(255,215,0,0.1); }
-        
-        .login-card { width: 100%; max-width: 380px; text-align: center; }
-        .login-card h2 { font-size: 32px; color: white; margin-bottom: 5px; font-weight: 800; }
-        .login-card p.intro { font-size: 14px; opacity: 0.8; margin-bottom: 25px; color: var(--gold); }
-        
-        .alert { 
-            padding: 12px 15px; border-radius: 12px; margin-bottom: 20px; 
-            font-size: 14px; text-align: right; display: flex; align-items: center; 
-            animation: slideIn 0.4s ease-out; font-weight: 600;
+        .login-card {
+            background: #16161a;
+            border: 1px solid #2a2a2a;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .alert i { margin-left: 12px; font-size: 18px; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .input-group { position: relative; margin-bottom: 18px; }
-        .input-group input { 
-            width: 100%; padding: 18px 50px 18px 15px; border: 1.5px solid rgba(255,255,255,0.15); 
-            border-radius: 15px; background: var(--soft-white); color: white; font-size: 16px; 
-            font-family: 'Cairo'; transition: 0.3s;
+        .brand-logo {
+            color: #f39c12;
+            font-weight: bold;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 30px;
         }
-        .input-group input:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,0.12); box-shadow: 0 0 15px rgba(255,215,0,0.1); }
-        .input-group i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 18px; }
-        
-        .btn-login { 
-            width: 100%; padding: 18px; background: var(--gold); color: var(--p-color); 
-            border: none; border-radius: 15px; font-weight: 800; font-size: 18px; 
-            cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        .form-control {
+            background: #0f0f12;
+            border: 1px solid #2a2a2a;
+            color: white;
+            padding: 12px;
         }
-        .btn-login:hover { background: var(--white); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        
-        .logo { width: 140px; margin-bottom: 20px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.05)); }
-        .brand-section h1 { font-size: 38px; color: var(--p-color); margin: 0; font-weight: 800; }
-        .brand-section .slogan { font-size: 17px; color: #777; margin-bottom: 40px; font-weight: 600; }
-        
-        .feature-item { 
-            background: #fdfdfd; padding: 16px; margin: 8px; border-radius: 15px; 
-            width: 90%; display: flex; align-items: center; border: 1px solid #f0f0f0; 
-            transition: 0.3s;
+        .form-control:focus {
+            background: #0f0f12;
+            border-color: #f39c12;
+            color: white;
+            box-shadow: none;
         }
-        .feature-item i { color: var(--p-color); margin-left: 15px; font-size: 20px; }
-        .feature-item span { color: #555; font-weight: 600; font-size: 14px; text-align: right; }
-
-        @media (max-width: 850px) {
-            body { flex-direction: column; overflow-y: auto; }
-            .brand-section { order: 1; width: 100%; padding: 40px 20px; }
-            .login-section { order: 2; width: 100%; padding: 40px 20px; border-left: none; border-top: 5px solid var(--gold); height: auto; }
+        .btn-vendor {
+            background: #f39c12;
+            color: black;
+            font-weight: bold;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="brand-section">
-        <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" class="logo" alt="محجوب أونلاين">
-        <h1>محجوب أونلاين</h1>
-        <p class="slogan">سوقك الذكي | المنصة السيادية الموحدة</p>
+    <div class="login-card">
+        <div class="brand-logo">
+            MAHJOUB <br>
+            <small class="text-muted" style="font-size: 0.8rem;">بوابة الموردين والشركاء</small>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-danger small py-2">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('vendor_login') }}" method="POST">
+            <div class="mb-3">
+                <label class="text-muted small mb-2">اسم المستخدم</label>
+                <input type="text" name="username" class="form-control" placeholder="أدخل اسم الحساب" required>
+            </div>
+            <div class="mb-4">
+                <label class="text-muted small mb-2">كلمة المرور</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-vendor">دخول المنصة</button>
+        </form>
         
-        <div class="feature-item"><i class="fas fa-crown"></i> <span>إدارة سيادية متكاملة بنظام الحوكمة الرقمية</span></div>
-        <div class="feature-item"><i class="fas fa-bolt"></i> <span>ربط تلقائي وسريع لسلاسل الإمداد الذكية</span></div>
-        <div class="feature-item"><i class="fas fa-gem"></i> <span>واجهة مستخدم ملكية تليق بشركاء النجاح</span></div>
-    </div>
-
-    <div class="login-section">
-        <div class="login-card">
-            <h2>تسجيل الدخول</h2>
-            <p class="intro">مرحباً بك في نظامك الإداري الملكي</p>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="alert" style="background: {% if category == 'success' %}rgba(46, 204, 113, 0.2){% else %}rgba(255, 77, 77, 0.2){% endif %}; border-right: 4px solid {% if category == 'success' %}#2ecc71{% else %}#ff4d4d{% endif %}; color: white;">
-                      <i class="fas {% if category == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i> 
-                      {{ message }}
-                  </div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-
-            <form method="POST" action="{{ url_for('vendor_login') }}">
-                <div class="input-group">
-                    <input type="text" name="username" placeholder="اسم المستخدم" required autocomplete="username">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="input-group">
-                    <input type="password" name="password" placeholder="كلمة المرور" required autocomplete="current-password">
-                    <i class="fas fa-lock"></i>
-                </div>
-                <button type="submit" class="btn-login" id="submitBtn">دخول للمنصة السيادية 🚀</button>
-            </form>
-
-            <p style="font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 50px; letter-spacing: 1px;">© 2026 محجوب أونلاين - سوقك الذكي</p>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('admin_login') }}" class="text-muted small text-decoration-none">دخول الإدارة العليا</a>
         </div>
     </div>
 
-    <script>
-        // تغيير نص الزر عند الضغط لمنع تكرار الإرسال وإعطاء إيحاء بالسرعة
-        document.querySelector('form').onsubmit = function() {
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
-            btn.style.opacity = '0.7';
-            btn.style.pointerEvents = 'none';
-        };
-    </script>
 </body>
 </html>
