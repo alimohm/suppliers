@@ -1,116 +1,40 @@
-import os
-from flask import session, request
-from models import AdminUser, Vendor, Wallet, db
-from werkzeug.utils import secure_filename
+from database import db
+from datetime import datetime
 
-# إعدادات رفع الملفات
-UPLOAD_FOLDER = 'static/uploads'
+class AdminUser(db.Model):
+    id = db.Column(db.Column(db.Integer, primary_key=True))
+    # أندكس لسرعة دخول الآدمن
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True) 
+    password = db.Column(db.String(120), nullable=False)
 
-def verify_admin_credentials(u, p):
-    """تحقق منطقي ذكي لدخول المسؤول - مستفيد من Index اليوزر"""
-    clean_username = u.strip() if u else ""
-    if not clean_username or not p:
-        return False, "يرجى إدخال بيانات الدخول كاملة."
+class Vendor(db.Model):
+    id = db.Column(db.Integer, primary_key=True) # مؤندكس تلقائياً لأنه Primary Key
+    # أندكس لسرعة دخول الموردين
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    # أندكس لسرعة البحث عن البراند في برج المراقبة
+    brand_name = db.Column(db.String(120), nullable=False, index=True)
+    password = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20))
+    id_card_image = db.Column(db.String(255))
+    commercial_registry_image = db.Column(db.String(255))
+    # أندكس لسرعة الفلترة (نشط/معلق)
+    status = db.Column(db.String(20), default="معلق", index=True)
+    is_active = db.Column(db.Boolean, default=False, index=True)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
-    # استعلام سريع جداً بفضل الفهرسة
-    admin = AdminUser.query.filter(AdminUser.username == clean_username).first()
-    
-    if not admin:
-        return False, "هذا الاسم غير مسجل في المنصة اللامركزية."
+    # علاقة المحفظة
+    wallet = db.relationship('Wallet', backref='vendor', uselist=False)
 
-    if admin.password != p:
-        return False, "كلمة المرور غير صحيحة."
+class Wallet(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # أندكس لسرعة العمليات المالية والبحث برقم المحفظة
+    wallet_number = db.Column(db.String(50), unique=True, index=True)
+    balance = db.Column(db.Float, default=0.0)
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'), index=True)
 
-    session.clear()
-    session['admin_id'] = admin.id
-    session['role'] = 'super_admin'
-    session['username'] = admin.username
-    
-    return True, "تم التحقق بنجاح. مرحباً بك في مركز القيادة."
-
-def get_admin_stats():
-    """دالة الإحصائيات - سريعة بفضل استخدام count المباشر على الإنديكس"""
-    try:
-        total_v = db.session.query(Vendor).count()
-        total_w = db.session.query(Wallet).count()
-        return {'total_vendors': total_v, 'active_wallets': total_w}
-    except Exception as e:
-        print(f"⚠️ خطأ في جلب الإحصائيات: {e}")
-        return {'total_vendors': 0, 'active_wallets': 0}
-
-def manage_accounts_logic():
-    """
-    (الدالة المفقودة التي سببت الخطأ)
-    جلب كافة الموردين مرتبين حسب الـ ID (فهرس تلقائي)
-    """
-    try:
-        # ترتيب تنازلي لظهور أحدث الموردين أولاً - أداء عالي جداً
-        return Vendor.query.order_by(Vendor.id.desc()).all()
-    except Exception as e:
-        print(f"⚠️ خطأ في جلب الموردين: {e}")
-        return []
-
-def create_vendor_logic():
-    """إنشاء مورد جديد مع دعم الصور وتفعيل محفظة MAH"""
-    if request.method == 'POST':
-        u = request.form.get('username', '').strip()
-        bn = request.form.get('brand_name', '').strip()
-        p = request.form.get('password', '').strip()
-        ph = request.form.get('phone', '').strip()
-
-        if not u or not p:
-            return False, "اسم المستخدم وكلمة المرور متطلبات أساسية."
-
-        # فحص التكرار باستخدام الإنديكس
-        if Vendor.query.filter_by(username=u).first():
-            return False, "اسم المستخدم هذا محجوز مسبقاً."
-
-        try:
-            id_path = None
-            if 'id_card' in request.files:
-                file = request.files['id_card']
-                if file and file.filename != '':
-                    filename = secure_filename(f"id_{u}_{file.filename}")
-                    id_path = os.path.join('uploads/ids', filename)
-                    # تأكد من وجود المجلد static/uploads/ids
-                    file.save(os.path.join('static', id_path))
-
-            new_vendor = Vendor(
-                username=u, brand_name=bn, password=p, 
-                phone=ph, id_card_image=id_path,
-                status="نشط", is_active=True
-            )
-            db.session.add(new_vendor)
-            db.session.flush() 
-
-            new_wallet = Wallet(vendor_id=new_vendor.id)
-            db.session.add(new_wallet)
-            
-            db.session.commit()
-            return True, f"✅ تم اعتماد {bn} بنجاح."
-            
-        except Exception as e:
-            db.session.rollback()
-            return False, f"❌ خطأ تقني: {str(e)}"
-    return False, "طلب غير صالح."
-
-def activate_existing_vendor(vendor_id):
-    """تفعيل مورد من قائمة الانتظار - بحث سريع بالـ Primary Key"""
-    try:
-        # البحث عن طريق ID مفهرس تلقائياً
-        vendor = Vendor.query.get(vendor_id)
-        if not vendor:
-            return False, "المورد غير موجود."
-
-        vendor.is_active = True
-        vendor.status = "نشط"
-
-        if not vendor.wallet:
-            new_wallet = Wallet(vendor_id=vendor.id)
-            db.session.add(new_wallet)
-
-        db.session.commit()
-        return True, f"🚀 تم منح السيادة الكاملة لـ {vendor.brand_name}"
-    except Exception as e:
-        db.session.rollback()
-        return False, f"❌ فشل التنشيط: {str(e)}"
+    def __init__(self, **kwargs):
+        super(Wallet, self).__init__(**kwargs)
+        if not self.wallet_number:
+            # توليد رقم المحفظة السيادي
+            import random
+            self.wallet_number = f"MAH-{random.randint(100000, 999999)}"
