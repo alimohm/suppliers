@@ -4,7 +4,7 @@ from config import Config
 from database import db, init_db
 import models
 
-# استدعاء المنطق البرمجي من الملفات المساعدة
+# استدعاء المنطق البرمجي (المعزز بالأداء العالي)
 from vendor_logic import login_vendor 
 from admin_logic import (
     verify_admin_credentials, 
@@ -16,7 +16,7 @@ from admin_logic import (
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# تهيئة قاعدة البيانات وربطها بالتطبيق
+# تهيئة قاعدة البيانات - هنا تبدأ السيادة التقنية
 init_db(app)
 
 with app.app_context():
@@ -49,6 +49,7 @@ def admin_login():
         u = request.form.get('username', '').strip()
         p = request.form.get('password', '').strip()
         
+        # استعلام مؤندكس (Indexed Query) سريع جداً
         success, msg = verify_admin_credentials(u, p)
         if success:
             session.permanent = True
@@ -64,6 +65,7 @@ def admin_dashboard():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
+    # جلب الإحصائيات باستخدام Count سريع بفضل الـ Index
     stats = get_admin_stats()
     return render_template('admin_main.html', 
                            username=session.get('username'), 
@@ -74,6 +76,7 @@ def vendors_accreditation():
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
+    # جلب الموردين مرتبين حسب الـ ID المفهرس
     all_vendors = manage_accounts_logic() 
     return render_template('admin_accounts.html', 
                            username=session.get('username'), 
@@ -88,35 +91,34 @@ def create_vendor_route():
     flash(msg, "success" if success else "danger")
     return redirect(url_for('vendors_accreditation'))
 
-# --- [ الدوال الجديدة التي تمنع الانهيار عند النقر ] ---
+# --- [ دوال الاعتماد السيادي - تمنع الانهيار ] ---
 
 @app.route('/admin/activate-vendor/<int:vendor_id>', methods=['POST'])
 def activate_vendor(vendor_id):
-    """الدالة المسؤولة عن تفعيل حساب المورد من النافذة المنبثقة"""
+    """تفعيل الحساب ومنح رقم محفظة MAH بشكل فوري"""
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
+    # استخدام Get بـ Index (أسرع أنواع البحث)
     vendor = models.Vendor.query.get_or_404(vendor_id)
     vendor.is_active = True
     vendor.status = "نشط"
     
-    # التأكد من وجود محفظة عند التفعيل (إذا لم تكن موجودة)
     if not vendor.wallet:
         new_wallet = models.Wallet(vendor_id=vendor.id)
         db.session.add(new_wallet)
     
     db.session.commit()
-    flash(f"تم تفعيل سيادة المورد {vendor.brand_name} بنجاح ✨", "success")
+    flash(f"تم تفعيل سيادة المورد {vendor.brand_name} ومنحه محفظة MAH بنجاح ✨", "success")
     return redirect(url_for('vendors_accreditation'))
 
 @app.route('/admin/vendor-profile/<int:vendor_id>')
 def view_vendor_profile(vendor_id):
-    """الدالة المسؤولة عن 'فتح حساب' المورد وعرض تفاصيله"""
+    """عرض تفاصيل المورد والوثائق (الهوية والسجل)"""
     if session.get('role') != 'super_admin':
         return redirect(url_for('admin_login'))
     
     vendor = models.Vendor.query.get_or_404(vendor_id)
-    # ملاحظة: ستحتاج لملف template باسم vendor_profile.html لعرض التفاصيل
     return render_template('vendor_profile.html', vendor=vendor)
 
 # --- [ بوابة الموردين - Vendors ] ---
@@ -149,6 +151,7 @@ def vendor_dashboard():
     if role not in ['vendor_owner', 'vendor_staff']:
         return redirect(url_for('vendor_login'))
     
+    # استعلام مستفيد من الـ Index لسرعة جلب بيانات المورد
     vendor_data = models.Vendor.query.filter_by(username=username).first() if role == 'vendor_owner' else None
     if not vendor_data and role == 'vendor_staff':
         staff = models.VendorStaff.query.filter_by(username=username).first()
