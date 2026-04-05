@@ -3,218 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}برج المراقبة | محجوب أونلاين{% endblock %}</title>
-    
+    <title>{% block title %}برج المراقبة{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --p-color: #1a0033; /* البنفسجي الملكي */
-            --gold: #FFD700;    /* الذهب */
-            --white: #ffffff;
-            --soft-bg: #0f0f0f; /* جعل الخلفية داكنة لتناسب الهوية السيادية */
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        body {
-            font-family: 'Cairo', sans-serif;
-            margin: 0;
-            background: var(--soft-bg);
-            display: flex;
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: white;
-        }
-
-        /* Sidebar - القائمة الجانبية السيادية */
-        .sidebar {
-            width: 260px;
-            background: var(--p-color);
-            color: white;
-            position: fixed;
-            height: 100vh;
-            right: 0;
-            z-index: 1050; /* أعلى من الـ Modals قليلاً */
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-            border-left: 1px solid rgba(255, 215, 0, 0.1);
-        }
-
-        .sidebar-header {
-            padding: 30px 15px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .logo-img {
-            width: 80px;
-            height: auto;
-            filter: brightness(0) invert(1); 
-            margin-bottom: 10px;
-        }
-
-        .nav-links { flex: 1; padding: 20px 0; }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 14px 25px;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: 0.3s;
-            margin: 4px 15px;
-            border-radius: 12px;
-            font-size: 14px;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--gold);
-        }
-
-        .nav-link i { margin-left: 15px; font-size: 18px; width: 25px; text-align: center; }
-
-        /* Main Content Wrapper */
-        .main-wrapper {
-            margin-right: 260px; /* مسافة عرض القائمة الجانبية */
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0; 
-            transition: var(--transition);
-        }
-
-        .top-bar {
-            height: 70px;
-            background: #151515;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            border-bottom: 1px solid #222;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-        }
-
-        .content-area {
-            padding: 30px;
-            flex: 1;
-        }
-
-        /* User Identity Badge */
-        .user-badge {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #222;
-            padding: 6px 15px;
-            border-radius: 12px;
-            border: 1px solid #333;
-        }
-
-        .logout-section {
-            padding: 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .logout-link {
-            color: #ff6b6b;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            font-weight: 700;
-            padding: 12px 25px;
-            border-radius: 10px;
-            transition: 0.3s;
-        }
-
-        /* تعديلات Bootstrap لتناسب الثيم الداكن */
-        .modal-content { background-color: #1a1a1a; color: white; border: 1px solid var(--gold); }
-        .table { color: white; }
-        .alert { border: none; }
-
-        @media (max-width: 992px) {
-            .sidebar { width: 80px; }
-            .sidebar span, .sidebar-header h3 { display: none; }
-            .main-wrapper { margin-right: 80px; }
-            .nav-link i { margin-left: 0; }
-        }
+        :root { --p-color: #1a0033; --gold: #FFD700; --dark-bg: #0b0b0b; }
+        body { font-family: 'Cairo', sans-serif; background: var(--dark-bg); color: white; display: flex; min-height: 100vh; margin: 0; }
+        .sidebar { width: 280px; background: var(--p-color); position: fixed; height: 100vh; right: 0; border-left: 1px solid rgba(255,215,0,0.1); z-index: 1000; }
+        .main-wrapper { margin-right: 280px; flex: 1; display: flex; flex-direction: column; }
+        .top-bar { height: 70px; background: #121212; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; border-bottom: 1px solid #222; }
+        .nav-link { color: rgba(255,255,255,0.6); padding: 15px 25px; border-radius: 12px; margin: 5px 15px; text-decoration: none; display: flex; align-items: center; }
+        .nav-link.active { background: rgba(255,215,0,0.15); color: var(--gold); font-weight: 700; }
+        .content-area { padding: 30px; }
+        @media (max-width: 992px) { .sidebar { right: -280px; } .main-wrapper { margin-right: 0; } }
     </style>
 </head>
 <body>
-
     <aside class="sidebar">
-        <div class="sidebar-header">
-            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" 
-                 class="logo-img" alt="محجوب أونلاين">
-            <h3 style="font-size: 11px; color: var(--gold); margin: 5px 0 0; text-transform: uppercase; letter-spacing: 1px;">برج المراقبة السيادي</h3>
+        <div class="p-4 text-center border-bottom border-secondary">
+            <img src="https://cdn.qumra.cloud/media/67f7f6d5f0b82f44a47bf845/1770229315912-117966978.webp" width="80" style="filter: brightness(0) invert(1);">
+            <div class="mt-2 text-gold" style="color: var(--gold); font-size: 11px;">محجوب أونلاين</div>
         </div>
-
-        <nav class="nav-links">
-            <a href="{{ url_for('admin_dashboard') }}" 
-               class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
-                <i class="fas fa-chart-line"></i> 
-                <span>الإحصائيات العامة</span>
-            </a>
-
-            <a href="{{ url_for('vendors_accreditation') }}" 
-               class="nav-link {% if request.endpoint == 'vendors_accreditation' %}active{% endif %}">
-                <i class="fas fa-user-shield"></i> 
-                <span>اعتماد الموردين</span>
-            </a>
-
-            <a href="#" class="nav-link">
-                <i class="fas fa-exchange-alt"></i> 
-                <span>الرقابة المالية</span>
-            </a>
+        <nav class="mt-3">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}"><i class="fas fa-th-large me-2"></i> الإحصائيات</a>
+            <a href="{{ url_for('vendors_accreditation') }}" class="nav-link {% if request.endpoint == 'vendors_accreditation' %}active{% endif %}"><i class="fas fa-user-shield me-2"></i> الموردين</a>
+            <a href="#" class="nav-link"><i class="fas fa-wallet me-2"></i> الرقابة المالية</a>
         </nav>
-
-        <div class="logout-section">
-            <a href="{{ url_for('logout') }}" class="logout-link">
-                <i class="fas fa-power-off" style="margin-left: 10px;"></i> 
-                <span>خروج آمن</span>
-            </a>
-        </div>
     </aside>
-
     <div class="main-wrapper">
         <header class="top-bar">
-            <div style="font-weight: 800; color: var(--gold); font-size: 16px;">
-                <i class="fas fa-bars me-3 d-lg-none"></i>
-                <span class="d-none d-sm-inline">نظام الإدارة المركزي <span style="color: var(--white);">●</span> محجوب أونلاين</span>
-            </div>
-            
-            <div class="user-badge">
-                <div style="text-align: left; line-height: 1.1;">
-                    <div style="font-weight: 800; font-size: 13px; color: white;">{{ session['username'] if session['username'] else 'علي محجوب' }}</div>
-                    <span style="font-size: 9px; color: var(--gold); font-weight: bold;">مدير النظام</span>
-                </div>
-                <div style="width: 32px; height: 32px; background: var(--p-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gold);">
-                    <i class="fas fa-crown" style="font-size: 12px;"></i>
-                </div>
+            <div class="text-gold">نظام الإدارة المركزي</div>
+            <div class="bg-dark px-3 py-1 rounded-pill border border-secondary">
+                <small>{{ session['username'] if session['username'] else 'علي محجوب' }}</small> <i class="fas fa-crown text-gold"></i>
             </div>
         </header>
-        
-        <main class="content-area">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 12px;">
-                    <strong>{{ 'تمت العملية' if category == 'success' else 'تنبيه' }}:</strong> {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-
-            {% block content %}{% endblock %}
-        </main>
+        <main class="content-area">{% block content %}{% endblock %}</main>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
