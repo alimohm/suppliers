@@ -64,25 +64,26 @@
     .welcome-note { margin-top: 30px; color: #555; font-weight: 700; }
 </style>
 
-<div class="wallet-container">
-    <div class="balance-label">رصيد محفظة السيادة الرقمية (MAH)</div>
-    <div class="balance-value">
-        <span class="balance-currency">MAH</span>
-        {{ "{:,.2f}".format(balance) }}
+<div class="dashboard-content" style="padding: 20px;">
+    <div class="wallet-container">
+        <div class="balance-label">رصيد محفظة السيادة الرقمية (MAH)</div>
+        <div class="balance-value">
+            <span class="balance-currency">MAH</span>
+            {{ "{:,.2f}".format(balance if balance else 0.0) }}
+        </div>
+
+        <div class="wallet-id-code">ID: {{ wallet_no if wallet_no else 'N/A' }}</div>
+
+        <div class="action-box">
+            <button class="finger-trigger" onclick="alert('شريكنا العزيز {{ username }}، طلب السحب قيد المعالجة حالياً لضمان أقصى درجات الأمان.')">
+                <i class="fas fa-fingerprint"></i>
+            </button>
+            <span class="withdraw-btn-label">طلب سحب فوري</span>
+        </div>
     </div>
 
-    <div class="wallet-id-code">ID: {{ wallet_no }}</div>
-
-    <div class="action-box">
-        <button class="finger-trigger" onclick="alert('شريكنا العزيز {{ username }}، طلب السحب قيد المعالجة حالياً...')">
-            <i class="fas fa-fingerprint"></i>
-        </button>
-        <span class="withdraw-btn-label">طلب سحب فوري</span>
+    <div class="welcome-note" style="text-align: center;">
+        <p>مرحباً بك في برج إدارة الموردين، نحن هنا لدعم نمو أعمالك.</p>
     </div>
 </div>
-
-<div class="welcome-note" style="text-align: center;">
-    <p>مرحباً بك في برج إدارة الموردين، نحن هنا لدعم نمو أعمالك.</p>
-</div>
-
 {% endblock %}
